@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>大久保の館</title>
+  <link rel="stylesheet" href="Style/sanitize.css">
+  <link rel="stylesheet" href="Style/header.css">
+  <link rel="stylesheet" href="Style/login-main.css">
+
+</head>
+<body>
+
+  <main class="login-page">
+
+    <section class="login-box">
+
+        <div class="site-title">
+            <h1>Okubo Gallery</h1>
+        </div>
+        
+        <h2 class="box-title">ログイン</h2>
+        
+        <form action="garally-main.html" method="post">
+          <div>
+              <label for="login-id">ID</label>
+              <input id="login-id" name="login-id" type="email" autocomplete="user-name" placeholder="メールアドレス"
+              spellcheck="false" required>
+          </div>
+
+            <div class="form-row">
+              <label for="login-pw">パスワード</label>
+              <input id="login-pw" name="login-pw" type="password" autocomplete="current-password" placeholder="ご自身で設定したパスワード">
+            </div>
+            
+            <div>
+              <button type="submit">ログイン</button>
+            </div>
+          </form>
+      
+          <p class="login-navigation">
+            <a href="#">パスワードをお忘れの場合</a> /
+            <a href="#">新規登録</a>
+          </p>
+
+    </section>
+  </main>
+  
+</body>
+</html>
