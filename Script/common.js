@@ -1,15 +1,15 @@
-// === ヘッダー生成 ===
+// ヘッダー生成
 
 const header = document.getElementById("site-header");
 if (header) {
   document.getElementById("site-header").innerHTML = `
     <div class="header-inner">
-      <h1 class="site-title"><a href="garally-main.html">Okubo Gallery</a></h1>
+      <h1 class="site-title"><a href="gallery-list.html">Okubo Gallery</a></h1>
       <nav class="header-menu">
         <img src="https://placehold.jp/100x100.png" alt="作者アイコン" class="icon">
         <ul class="header-nav">
           <li><a class="header-a" href="login.html">Login</a></li>
-          <li><a class="header-a" href="garally-main.html">Gallery</a></li>
+          <li><a class="header-a" href="gallery-list.html">Gallery</a></li>
           <li><a class="header-a" href="form.html">Contact</a></li>
           <li><a class="header-a" href="policy.html">Privacy Policy</a></li>
         </ul>
@@ -17,7 +17,7 @@ if (header) {
     </div>
   `;
 }
-// === フッター生成 ===
+// フッター生成
 const footer = document.getElementById("site-footer");
 if (footer) {
   document.getElementById("site-footer").innerHTML = `
@@ -30,7 +30,7 @@ if (footer) {
     <nav class="footer-nav">
       <ul>
         <li><a class="footer-a" href="login.html">Login</a></li>
-        <li><a class="footer-a" href="garally-main.html">Gallery</a></li>
+        <li><a class="footer-a" href="gallery-list.html">Gallery</a></li>
         <li><a class="footer-a" href="form.html">Contact</a></li>
         <li><a class="footer-a" href="policy.html">Privacy Policy</a></li>
       </ul>

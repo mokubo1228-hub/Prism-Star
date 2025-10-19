@@ -1,4 +1,4 @@
-window.garallyData = [
+window.galleryData = [
     { 
       id: 1, 
       src: "https://placehold.jp/300x200.png", 

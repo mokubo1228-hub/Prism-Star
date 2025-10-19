@@ -1,6 +1,6 @@
 
 
-.detail-garally-page {
+.gallery-detail-page {
     background:#f5f7fa; 
     display:flex;
     justify-content: center;
@@ -16,7 +16,7 @@
     margin-top: 10px;
 }
 
-.garally-title {
+.gallery-title {
     text-align:center;
     margin:30px 0;
     font-size:2.0rem; 

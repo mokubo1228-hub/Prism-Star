@@ -1,26 +1,18 @@
-/* ------------------------
- ① URLパラメータからID取得
------------------------- */
+// URLパラメータからID取得
 const params = new URLSearchParams(window.location.search);
-const id = Number(params.get("id")); // 例: garally-detail.html?id=5 → 5
+const id = Number(params.get("id"));
 
-/* ------------------------
- ② データの中から一致する作品を探す
------------------------- */
-const work = garallyData.find(item => item.id === id);
+// データの中から一致する作品を探す
+const work = galleryData.find(item => item.id === id);
 
-/* ------------------------
- ③ 表示領域を取得
------------------------- */
+// 表示領域を取得
 const container = document.getElementById("work-detail");
 
-/* ------------------------
- ④ DOMを組み立てて差し込む
------------------------- */
+// DOMを組み立てて差し込む
 if (work) {
   // タイトル
   const h1 = document.createElement("h1");
-  h1.className = "garally-title";
+  h1.className = "gallery-title";
   h1.textContent = work.title;
 
   // 画像とキャプション
@@ -50,7 +42,7 @@ if (work) {
   backDiv.className = "back-menu-btn";
 
   const backA = document.createElement("a");
-  backA.href = "garally-main.html";
+  backA.href = "gallery-list.html";
   backA.className = "back-menu";
   backA.textContent = "戻る";
 
@@ -61,7 +53,7 @@ if (work) {
 } else {
   // IDが存在しない場合の処理
   container.innerHTML = `<p>指定された作品が見つかりません。</p>
-  <div class="back-menu-btn"><a class="back-menu" href="garally-main.html">ギャラリーへ戻る</a></div>`;
+  <div class="back-menu-btn"><a class="back-menu" href="gallery-list.html">ギャラリーへ戻る</a></div>`;
 }
 
 console.log("詳細ページ生成完了！");

@@ -1,17 +1,17 @@
 :root {
-  --garally-icon-w: 160px;   
-  --garally-icon-h: 120px;   
+  --gallery-icon-w: 160px;   
+  --gallery-icon-h: 120px;   
   --cols: 1;         
   --gap: 14px;
 }
 
-.garally-main {
+.gallery-list {
   background:#f5f7fa; 
   display: flex;
   justify-content: center;
 }
 
-.garally-back {
+.gallery-back {
   /* width: 95%; */
   align-items: center;
   background-color: #fff;
@@ -23,18 +23,18 @@
   margin-bottom: 30px;;
 }
 
-.garally-grid {
+.gallery-grid {
   display: grid;
-  grid-template-columns: repeat(var(--cols), var(--garally-icon-w));
+  grid-template-columns: repeat(var(--cols), var(--gallery-icon-w));
   gap: var(--gap);
   justify-items: center;
   align-items: center;
   padding: 20px;
 }
 
-.garally-item {
-  width: var(--garally-icon-w);
-  height: var(--garally-icon-h);
+.gallery-item {
+  width: var(--gallery-icon-w);
+  height: var(--gallery-icon-h);
   border: 1px solid #ccc;
   border-radius: 6px;
   overflow: hidden;
@@ -42,18 +42,18 @@
   position: relative;
 }
 
-.garally-item:hover {
+.gallery-item:hover {
    border: 5px solid #767575;
 }
 
-.garally-item img {
+.gallery-item img {
   width: 100%;
   height: 100%;
   object-fit: cover; 
   display: block;
 }
 
-.garally-item figcaption {
+.gallery-item figcaption {
   position: absolute;
   left: 0; right: 0; bottom: 0;
   color: black;
@@ -70,15 +70,15 @@
   text-overflow: ellipsis;
 }
 
-.garally-item:hover figcaption {
+.gallery-item:hover figcaption {
   background-color: #767575;
   color: #fff
 }
 
 @media (min-width: 600px) {
   :root {
-    --garally-icon-w: 180px;
-    --garally-icon-h: 130px;
+    --gallery-icon-w: 180px;
+    --gallery-icon-h: 130px;
     --cap-h: 32px;
     --cols: 2;
     --gap: 16px;
@@ -87,8 +87,8 @@
 
 @media (min-width: 900px) {
   :root {
-    --garally-icon-w: 200px;
-    --garally-icon-h: 140px;
+    --gallery-icon-w: 200px;
+    --gallery-icon-h: 140px;
     --cols: 3;
 
   }
@@ -96,16 +96,16 @@
 
 @media (min-width: 1100px) {
   :root {
-    --garally-icon-w: 200px;
-    --garally-icon-h: 150px;
+    --gallery-icon-w: 200px;
+    --gallery-icon-h: 150px;
     --cols: 4;
   }
 }
 
 @media (min-width: 1280px) {
   :root {
-    --garally-icon-w: 200px;
-    --garally-icon-h: 150px;
+    --gallery-icon-w: 200px;
+    --gallery-icon-h: 150px;
     --cols: 5;
   }
 }
