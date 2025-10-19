@@ -1,22 +1,21 @@
-  const gallery = document.getElementById("garally");
+  const gallery = document.getElementById("gallery");
 
-  // garally_Items ->  garallyData
-  garallyData.forEach(garally_Item => {
+  // galleryData
+  galleryData.forEach(galleryItem => {
     const div = document.createElement("div");
   
     const a = document.createElement("a");
-    // a.href = garally_Item.link;
-    a.href = `garally-detail.html?id=${garally_Item.id}`;
+    a.href = `gallery-detail.html?id=${galleryItem.id}`;
 
     const figure = document.createElement("figure");
-    figure.classList.add("garally-item");
+    figure.classList.add("gallery-item");
   
     const img = document.createElement("img");
-    img.src = garally_Item.src;
-    img.alt = garally_Item.title;
+    img.src = galleryItem.src;
+    img.alt = galleryItem.title;
   
     const caption = document.createElement("figcaption");
-    caption.textContent = garally_Item.title;
+    caption.textContent = galleryItem.title;
   
     figure.appendChild(img);
     figure.appendChild(caption);
