@@ -1,31 +1,23 @@
-  const gallery = document.getElementById("gallery");
+const template = document.getElementById("gallery-item-template");
+const gallery = document.getElementById("gallery");
 
-  // galleryData
-  galleryData.forEach(galleryItem => {
-    const div = document.createElement("div");
-  
-    const a = document.createElement("a");
-    a.href = `gallery-detail.html?id=${galleryItem.id}`;
-
-    const figure = document.createElement("figure");
-    figure.classList.add("gallery-item");
-  
-    const img = document.createElement("img");
-    img.src = galleryItem.src;
-    img.alt = galleryItem.title;
-  
-    const caption = document.createElement("figcaption");
-    caption.textContent = galleryItem.title;
-  
-    figure.appendChild(img);
-    figure.appendChild(caption);
-  
-    a.appendChild(figure);
-  
-    div.appendChild(a);
-  
-    gallery.appendChild(div);
+if (template && gallery) {
+  galleryData.forEach(item => {
+    const clone = template.content.cloneNode(true);
+    
+    const link = clone.querySelector("a");
+    link.href = `gallery-detail.html?id=${item.id}`;
+    
+    const img = clone.querySelector("img");
+    img.src = item.src;
+    img.alt = item.title;
+    
+    const figcaption = clone.querySelector("figcaption");
+    figcaption.textContent = item.title;
+    
+    gallery.appendChild(clone);
   });
   
   console.log("ギャラリー生成完了！");
+}
   
