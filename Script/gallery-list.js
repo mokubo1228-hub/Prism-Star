@@ -17,7 +17,6 @@ if (template && gallery) {
     
     gallery.appendChild(clone);
   });
-  
-  console.log("ギャラリー生成完了！");
+
 }
   

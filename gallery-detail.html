@@ -13,21 +13,29 @@
 </head>
 <body class="site-body">
 
-    <header id="site-header" class="site-header">
-      <div class="header-inner">
-        <h1 class="site-title"><a href="gallery-list.html">Okubo Gallery</a></h1>
-        <nav class="header-menu">
-          <img src="https://placehold.jp/100x100.png" alt="作者アイコン" class="icon">
-          <ul class="header-nav">
-            <template id="nav-item-template">
-              <li><a class="header-a" href="{HREF}">{LABEL}</a></li>
-            </template>
-          </ul>
-        </nav>
-      </div>
-    </header>
+  <header id="site-header" class="site-header">
+    <div class="header-inner">
+      <!-- ハンバーガーメニュー -->
+      <button id="hamburger" class="hamburger">
+        <span></span><span></span><span></span>
+      </button>
+ 
+      <h1 class="site-title"><a href="gallery-list.html">Okubo Gallery</a></h1>
+ 
+      <nav class="header-menu">
+        <ul class="header-nav">
+          <li class="nav-icon">
+            <img src="https://placehold.jp/100x100.png" alt="作者アイコン" class="icon">
+          </li>
+          
+          <template id="nav-item-template">
+            <li><a class="header-a" href="{HREF}">{LABEL}</a></li>
+          </template>
+        </ul>
+      </nav>
+    </div>
+  </header>
 
-    <!--- 作品詳細 -->
     <main class="gallery-detail-page">
         <article id="work-detail" class="detail-page">
           <template id="detail-template">
