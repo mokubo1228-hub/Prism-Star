@@ -1,4 +1,3 @@
-// ナビゲーション設定（一箇所で管理）
 const navItems = [
   { href: 'login.html', label: 'Login' },
   { href: 'gallery-list.html', label: 'Gallery' },
@@ -6,7 +5,6 @@ const navItems = [
   { href: 'policy.html', label: 'Privacy Policy' }
 ];
 
-// ナビゲーションを生成する関数
 function renderNavigation() {
   const templates = document.querySelectorAll('#nav-item-template');
   
@@ -25,5 +23,22 @@ function renderNavigation() {
   });
 }
 
-// ページロード時に実行
-document.addEventListener('DOMContentLoaded', renderNavigation);
+document.addEventListener('DOMContentLoaded', () => {
+  renderNavigation();
+
+  const hamburger = document.getElementById('hamburger');
+  const nav = document.querySelector('.header-nav');
+
+  const overlay = document.createElement('div');
+  overlay.classList.add('nav-overlay');
+  document.body.appendChild(overlay);
+ 
+  const toggleMenu = () => {
+    hamburger.classList.toggle('active');
+    nav.classList.toggle('active');
+    overlay.classList.toggle('active');
+  };
+ 
+  hamburger.addEventListener('click', toggleMenu);
+  overlay.addEventListener('click', toggleMenu);
+});
