@@ -9,13 +9,12 @@
   <link rel="stylesheet" href="Style/header.css">
   <link rel="stylesheet" href="Style/gallery-list.css">
   <link rel="stylesheet" href="Style/footer.css">
-
+  <link rel="stylesheet" href="Style/modal.css">
 </head>
 <body class="site-body">
   
   <header id="site-header" class="site-header">
     <div class="header-inner">
-      <!-- ハンバーガーメニュー -->
       <button id="hamburger" class="hamburger">
         <span></span><span></span><span></span>
       </button>
@@ -33,6 +32,10 @@
           </template>
         </ul>
       </nav>
+
+      <a href="gallery-post.html" class="add-post-btn" title="新規投稿">
+        <span>＋</span>
+      </a>
     </div>
   </header>
 
@@ -85,6 +88,28 @@
       </a>
     </div>
   </footer>
+
+  <div id="postModal" class="modal-overlay">
+    <div class="modal-dialog">
+      <button class="modal-close">&times;</button>
+      <h2>新規投稿</h2>
+      <form id="postForm">
+        <label>
+          タイトル：
+          <input type="text" id="postTitle" required>
+        </label>
+        <label>
+          画像URL：
+          <input type="url" id="postImage" required>
+        </label>
+        <label>
+          説明：
+          <textarea id="postDesc" rows="3" required></textarea>
+        </label>
+        <button type="submit" class="post-submit">投稿する</button>
+      </form>      
+    </div>
+  </div>
 
   <script src="Script/common.js"></script>
   <script src="Script/gallery-data.js"></script>
