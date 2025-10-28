@@ -133,6 +133,34 @@ a {
     display: block;
     opacity: 1;
   }
+
+  /* 新規投稿ボタン */
+.add-post-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 70%;                 /* ヘッダーの高さに対して70% */
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background-color: #333;
+  color: #fff;
+  font-size: 100%;
+  text-decoration: none;
+  transition: background 0.3s, transform 0.2s;
+  margin-right: 1%;
+}
+
+.add-post-btn:hover {
+  background-color: #555;
+  transform: scale(1.05);
+}
+
+.add-post-btn span {
+  font-size: 2.2em;            /* 👈 大きめ（前は1.5emくらい） */
+  font-weight: 300;
+  line-height: 1;
+  margin-top: -2%;
+}
   
   @media (max-width: 480px){
     .header-inner { 
