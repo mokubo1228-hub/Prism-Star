@@ -41,25 +41,33 @@ if (addBtn && postModal && closeBtn) {
 
 const postForm = document.getElementById("postForm");
 
+function isSafeUrl(url) {
+  try {
+    const parsed = new URL(url);
+    return ["http:", "https:"].includes(parsed.protocol);
+  } catch {
+    return false;
+  }
+}
+
 if (postForm) {
   postForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    // 入力値取得
     const title = document.getElementById("postTitle").value.trim();
     const src = document.getElementById("postImage").value.trim();
     const desc = document.getElementById("postDesc").value.trim();
 
-    if (!title || !src) return;
+    if (!title || !src || !desc) return;
+
+    if (!isSafeUrl(src)) {
+      alert("画像URLはhttp://またはhttps://で始まるURLを入力してください。");
+      return;
+    }
 
     const newId = galleryData.length ? galleryData[galleryData.length - 1].id + 1 : 1;
 
-    const newItem = {
-      id: newId,
-      src,
-      title,
-      desc
-    };
+    const newItem = { id: newId, src, title, desc };
 
     galleryData.push(newItem);
 
@@ -81,7 +89,6 @@ if (postForm) {
     gallery.appendChild(clone);
 
     postModal.style.display = "none";
-
     postForm.reset();
   });
 }
