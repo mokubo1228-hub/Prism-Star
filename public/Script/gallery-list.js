@@ -1,25 +1,33 @@
 const template = document.getElementById("gallery-item-template");
 const gallery = document.getElementById("gallery");
 
-if (template && gallery) {
-  galleryData.forEach(item => {
-    const clone = template.content.cloneNode(true);
-    
-    const link = clone.querySelector("a");
-    link.href = `gallery-detail.html?id=${item.id}`;
-    
-    const img = clone.querySelector("img");
-    img.src = item.src;
-    img.alt = item.title;
-    
-    const figcaption = clone.querySelector("figcaption");
-    figcaption.textContent = item.title;
-    
-    gallery.appendChild(clone);
-  });
+function renderItem(item) {
+  const clone = template.content.cloneNode(true);
 
+  const link = clone.querySelector("a");
+  link.href = `gallery-detail.html?id=${item.id}`;
+
+  const img = clone.querySelector("img");
+  img.src = item.src;
+  img.alt = item.title;
+
+  const figcaption = clone.querySelector("figcaption");
+  figcaption.textContent = item.title;
+
+  gallery.appendChild(clone);
 }
-  
+
+// APIから一覧を取得して描画
+if (template && gallery) {
+  fetch("/api/gallery.php")
+    .then(res => res.json())
+    .then(data => data.forEach(renderItem))
+    .catch(() => {
+      gallery.innerHTML = "<p>作品の読み込みに失敗しました。</p>";
+    });
+}
+
+// モーダル開閉
 const addBtn = document.querySelector(".add-post-btn");
 const postModal = document.getElementById("postModal");
 const closeBtn = document.querySelector(".modal-close");
@@ -39,6 +47,7 @@ if (addBtn && postModal && closeBtn) {
   });
 }
 
+// 投稿フォーム
 const postForm = document.getElementById("postForm");
 
 function isSafeUrl(url) {
@@ -65,30 +74,20 @@ if (postForm) {
       return;
     }
 
-    const newId = galleryData.length ? galleryData[galleryData.length - 1].id + 1 : 1;
-
-    const newItem = { id: newId, src, title, desc };
-
-    galleryData.push(newItem);
-
-    // DOMにも即反映
-    const template = document.getElementById("gallery-item-template");
-    const gallery = document.getElementById("gallery");
-    const clone = template.content.cloneNode(true);
-
-    const link = clone.querySelector("a");
-    link.href = `gallery-detail.html?id=${newItem.id}`;
-
-    const img = clone.querySelector("img");
-    img.src = newItem.src;
-    img.alt = newItem.title;
-
-    const caption = clone.querySelector("figcaption");
-    caption.textContent = newItem.title;
-
-    gallery.appendChild(clone);
-
-    postModal.style.display = "none";
-    postForm.reset();
+    fetch("/api/gallery.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, src, desc }),
+    })
+      .then(res => {
+        if (!res.ok) return res.json().then(d => { throw new Error(d.error); });
+        return res.json();
+      })
+      .then(newItem => {
+        renderItem(newItem);
+        postModal.style.display = "none";
+        postForm.reset();
+      })
+      .catch(err => alert(err.message));
   });
 }
