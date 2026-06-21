@@ -14,11 +14,7 @@ broad design / 方針検討には使わない。
 
 ## Repository Scope
 
-作業ルート：
-
-```text
-/Users/USER/Documents/20_開発・システム学習/prismstar
-```
+作業ルートはこのリポジトリ（`prismstar/`）のルート。
 
 - 作業ブランチは **`develop`**（`main` は古い。本体は develop）。
 - 主なディレクトリ：

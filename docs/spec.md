@@ -1,6 +1,6 @@
 # PrismStar — 技術仕様書（Specification）
 
-PrismStar（通称 **Prism**、リポジトリ `okubo-gallery`）の **技術仕様の単一の参照点**。
+PrismStar（通称 **Prism**、リポジトリ `prismstar`）の **技術仕様の単一の参照点**。
 タグライン：**"Shine in every color."**（あらゆる色で、輝け。）
 
 関連：

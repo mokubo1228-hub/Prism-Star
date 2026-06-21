@@ -1,6 +1,6 @@
 # PrismStar — AI 役割分担とワークフロー
 
-このファイルは PrismStar（リポジトリ `okubo-gallery`）開発における
+このファイルは PrismStar（リポジトリ `prismstar`）開発における
 **役割分担と開発フローの単一の正(single source of truth)** である。
 
 `AGENTS.md`（実装者 / Codex 向け）と `CLAUDE.md`（Claude Code 向け）は、
