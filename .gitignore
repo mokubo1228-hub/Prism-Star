@@ -1,2 +1,18 @@
+# OS
 .DS_Store
+Thumbs.db
+
+# DB volume（bind mount を使う場合）
 db_data/
+
+# secrets / 環境変数（GitHub token・DB認証情報を絶対にコミットしない）
+.env
+.env.*
+!.env.example
+
+# editor / IDE
+.vscode/
+.idea/
+
+# 将来: ユーザーアップロード（Phase 6 で有効化）
+# public/uploads/
