@@ -23,6 +23,17 @@
     
   }
 
+  .form-page .site-title h1 {
+    margin-bottom: 4px;
+  }
+
+  .form-page .card-tagline {
+    font-size: 0.85rem;
+    font-weight: 400;
+    margin: 0 0 12px;
+    opacity: 0.8;
+  }
+
   .form-page {
     background: #fff;
     padding: 25px;

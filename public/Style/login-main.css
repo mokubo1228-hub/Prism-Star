@@ -32,6 +32,17 @@
     
   }
 
+  .login-box .site-title h1 {
+    margin-bottom: 4px;
+  }
+
+  .login-box .card-tagline {
+    font-size: 0.85rem;
+    font-weight: 400;
+    margin: 0 0 12px;
+    opacity: 0.8;
+  }
+
 .box-title { 
     text-align:center;
     margin:40px 0 30px;

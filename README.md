@@ -1,4 +1,6 @@
-# Okubo Gallery
+# PrismStar
+
+Shine in every color.
 
 Pixivのようなイラスト投稿サイトを模したポートフォリオサイト。
 
