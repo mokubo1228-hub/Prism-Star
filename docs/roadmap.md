@@ -29,11 +29,12 @@ API は実装済みで UI だけ無いものを埋める。
 - 表示名 `Okubo Gallery` / `大久保の館` → **`PrismStar`** ＋ タグライン `"Shine in every color."`。全 `public/*.html` の `<title>`・ヘッダー・login/form カード・policy 本文・README を統一。Codex 実装・review 済。
 - 🧪 **後で修正**（ADR-010）：虹色テーマ／ロゴ／配色、ヘッダーのモバイル微調整、login/form のタグライン重複、内部 doc（CLAUDE.md / PROJECT.md）の名称統一、フォルダ / リポジトリ名。視覚確認はブラウザ推奨。
 
-## Phase 3 — 発信者オンボーディング ⬜
-「**全員が発信者**」を成立させる核（[ADR-008](decisions.md)）。
-- オープンな**新規登録**（`auth.php?action=register` ＋ 登録画面）。今はデモユーザーのみ。
-- **プロフィール / 個人ギャラリー**（`?user=` で `WHERE user_id=?`。既存スキーマでほぼ作れる）。
-- **全員の新着フィード**（一覧をフィード化）。
+## Phase 3 — 発信者オンボーディング ✅
+「**全員が発信者**」を成立させる核（[ADR-008](decisions.md)）。Codex 実装（`docs/phase-3-handoff.md`）・Claude Code review 済。スキーマ変更なし。
+- ✅ 3-1 オープン**新規登録**（`auth.php?action=register`：検証・重複409・`password_hash`・自動ログイン）＋ `register.html`。
+- ✅ 3-2 **プロフィール / 個人ギャラリー**（`users.php?id=N` は公開情報のみ＝email/pass 返さない）＋ `profile.html`。
+- ✅ 3-3 **新着フィード**：`gallery.php` GET を users JOIN＋`created_at DESC`、カード/詳細に投稿者リンク（専用 feed.php は作らず一覧を強化）。
+- 🧪 **後で修正**：register の重複INSERT を try/catch で 409 に（TOCTOU）、register/profile の視覚調整、username/slug 導入。
 
 ## Phase 4 — GitHub 連携 🎯 ⬜
 - `api/github.php` を新設＝**サーバ側で token を隠して** GitHub API を呼ぶ（[ADR-003](decisions.md)）。
