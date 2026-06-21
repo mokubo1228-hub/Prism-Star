@@ -22,9 +22,9 @@ $headers = [
     'Accept: application/vnd.github+json',
 ];
 
-$token = getenv('GITHUB' . '_TOKEN') ?: '';
+$token = getenv('GITHUB_TOKEN') ?: '';
 if ($token !== '') {
-    $headers[] = 'Authorization: ' . 'Bear' . 'er ' . $token;
+    $headers[] = 'Authorization: Bearer ' . $token;
 }
 
 $context = stream_context_create([

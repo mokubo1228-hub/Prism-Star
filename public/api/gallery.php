@@ -9,14 +9,26 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 // ---------- GET: 一覧 or 1件取得 ----------
 if ($method === 'GET') {
+    $currentUserId = (int)($_SESSION['user_id'] ?? 0);
+
     if (isset($_GET['id'])) {
         $stmt = $pdo->prepare("
-            SELECT g.id, g.user_id, u.name AS author, g.title, g.src, g.description AS `desc`
+            SELECT
+                g.id,
+                g.user_id,
+                u.name AS author,
+                g.title,
+                g.src,
+                g.description AS `desc`,
+                COUNT(s.id) AS star_count,
+                MAX(CASE WHEN s.user_id = ? THEN 1 ELSE 0 END) AS starred
             FROM gallery g
             INNER JOIN users u ON u.id = g.user_id
+            LEFT JOIN stars s ON s.gallery_id = g.id
             WHERE g.id = ?
+            GROUP BY g.id, g.user_id, u.name, g.title, g.src, g.description
         ");
-        $stmt->execute([(int)$_GET['id']]);
+        $stmt->execute([$currentUserId, (int)$_GET['id']]);
         $row = $stmt->fetch();
 
         if (!$row) {
@@ -24,14 +36,33 @@ if ($method === 'GET') {
             echo json_encode(['error' => '作品が見つかりません']);
             exit;
         }
+        $row['star_count'] = (int)$row['star_count'];
+        $row['starred'] = (bool)$row['starred'];
         echo json_encode($row);
     } else {
-        $rows = $pdo->query("
-            SELECT g.id, g.user_id, u.name AS author, g.title, g.src, g.description AS `desc`
+        $stmt = $pdo->prepare("
+            SELECT
+                g.id,
+                g.user_id,
+                u.name AS author,
+                g.title,
+                g.src,
+                g.description AS `desc`,
+                COUNT(s.id) AS star_count,
+                MAX(CASE WHEN s.user_id = ? THEN 1 ELSE 0 END) AS starred
             FROM gallery g
             INNER JOIN users u ON u.id = g.user_id
+            LEFT JOIN stars s ON s.gallery_id = g.id
+            GROUP BY g.id, g.user_id, u.name, g.title, g.src, g.description, g.created_at
             ORDER BY g.created_at DESC, g.id DESC
-        ")->fetchAll();
+        ");
+        $stmt->execute([$currentUserId]);
+        $rows = $stmt->fetchAll();
+        foreach ($rows as &$row) {
+            $row['star_count'] = (int)$row['star_count'];
+            $row['starred'] = (bool)$row['starred'];
+        }
+        unset($row);
         echo json_encode($rows);
     }
     exit;
@@ -74,6 +105,8 @@ if ($method === 'POST') {
         'title'   => $title,
         'src'     => $src,
         'desc'    => $desc,
+        'star_count' => 0,
+        'starred'    => false,
     ]);
     exit;
 }

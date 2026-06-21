@@ -41,6 +41,31 @@ async function deleteWork(errorEl) {
   }
 }
 
+function updateStarButton(button, starCount, starred) {
+  button.querySelector(".star-count").textContent = starCount;
+  button.classList.toggle("is-starred", starred);
+  button.setAttribute("aria-pressed", String(starred));
+  button.dataset.starred = String(starred);
+}
+
+function toggleStar(work, button) {
+  const starred = button.dataset.starred === "true";
+  const method = starred ? "DELETE" : "POST";
+
+  fetch(`/api/stars.php?gallery_id=${encodeURIComponent(work.id)}`, { method })
+    .then(res => {
+      if (res.status === 401) throw new Error("スターを付けるにはログインが必要です。");
+      if (!res.ok) return res.json().then(d => { throw new Error(d.error); });
+      return res.json();
+    })
+    .then(data => {
+      work.star_count = data.star_count;
+      work.starred = data.starred;
+      updateStarButton(button, data.star_count, data.starred);
+    })
+    .catch(err => alert(err.message));
+}
+
 if (!id || !template) {
   showError();
 } else {
@@ -67,6 +92,12 @@ if (!id || !template) {
       if (authorLink) {
         authorLink.href = `profile.html?id=${work.user_id}`;
         authorLink.textContent = work.author || "Unknown";
+      }
+
+      const starButton = clone.querySelector(".star-button");
+      if (starButton) {
+        updateStarButton(starButton, work.star_count || 0, Boolean(work.starred));
+        starButton.addEventListener("click", () => toggleStar(work, starButton));
       }
 
       const deleteBtn = clone.querySelector(".delete-work-btn");

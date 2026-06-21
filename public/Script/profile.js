@@ -1,6 +1,7 @@
 const profileParams = new URLSearchParams(window.location.search);
 const profileId = profileParams.get("id");
 const profileName = document.getElementById("profileName");
+const profileStars = document.getElementById("profileStars");
 const profileWorks = document.getElementById("profileWorks");
 const profileTemplate = document.getElementById("profile-item-template");
 const githubSettingsForm = document.getElementById("githubSettingsForm");
@@ -128,6 +129,9 @@ if (!profileId || !profileTemplate || !profileWorks) {
     .then(([user, status]) => {
       currentUser = status;
       profileName.textContent = `${user.name} の作品`;
+      if (profileStars) {
+        profileStars.textContent = `獲得スター ${user.total_stars || 0}`;
+      }
       applyGitHubSettings(user);
 
       if (user.works.length === 0) {

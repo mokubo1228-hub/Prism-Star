@@ -68,9 +68,19 @@ $stmt = $pdo->prepare("
 $stmt->execute([$id]);
 $works = $stmt->fetchAll();
 
+$stmt = $pdo->prepare("
+    SELECT COUNT(*)
+    FROM stars s
+    INNER JOIN gallery g ON g.id = s.gallery_id
+    WHERE g.user_id = ?
+");
+$stmt->execute([$id]);
+$totalStars = (int)$stmt->fetchColumn();
+
 echo json_encode([
     'id'              => (int)$user['id'],
     'name'            => $user['name'],
     'github_username' => $user['github_username'],
+    'total_stars'     => $totalStars,
     'works'           => $works,
 ]);
