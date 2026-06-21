@@ -10,7 +10,12 @@ $method = $_SERVER['REQUEST_METHOD'];
 // ---------- GET: 一覧 or 1件取得 ----------
 if ($method === 'GET') {
     if (isset($_GET['id'])) {
-        $stmt = $pdo->prepare("SELECT id, user_id, title, src, description AS `desc` FROM gallery WHERE id = ?");
+        $stmt = $pdo->prepare("
+            SELECT g.id, g.user_id, u.name AS author, g.title, g.src, g.description AS `desc`
+            FROM gallery g
+            INNER JOIN users u ON u.id = g.user_id
+            WHERE g.id = ?
+        ");
         $stmt->execute([(int)$_GET['id']]);
         $row = $stmt->fetch();
 
@@ -21,7 +26,12 @@ if ($method === 'GET') {
         }
         echo json_encode($row);
     } else {
-        $rows = $pdo->query("SELECT id, title, src, description AS `desc` FROM gallery ORDER BY id")->fetchAll();
+        $rows = $pdo->query("
+            SELECT g.id, g.user_id, u.name AS author, g.title, g.src, g.description AS `desc`
+            FROM gallery g
+            INNER JOIN users u ON u.id = g.user_id
+            ORDER BY g.created_at DESC, g.id DESC
+        ")->fetchAll();
         echo json_encode($rows);
     }
     exit;
@@ -57,7 +67,14 @@ if ($method === 'POST') {
     $stmt->execute([$_SESSION['user_id'], $title, $src, $desc]);
 
     $newId = (int)$pdo->lastInsertId();
-    echo json_encode(['id' => $newId, 'title' => $title, 'src' => $src, 'desc' => $desc]);
+    echo json_encode([
+        'id'      => $newId,
+        'user_id' => (int)$_SESSION['user_id'],
+        'author'  => $_SESSION['user_name'],
+        'title'   => $title,
+        'src'     => $src,
+        'desc'    => $desc,
+    ]);
     exit;
 }
 

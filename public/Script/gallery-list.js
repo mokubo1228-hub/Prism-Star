@@ -1,10 +1,10 @@
 const template = document.getElementById("gallery-item-template");
 const gallery = document.getElementById("gallery");
 
-function renderItem(item) {
+function renderItem(item, prepend = false) {
   const clone = template.content.cloneNode(true);
 
-  const link = clone.querySelector("a");
+  const link = clone.querySelector(".work-link");
   link.href = `gallery-detail.html?id=${item.id}`;
 
   const img = clone.querySelector("img");
@@ -14,7 +14,17 @@ function renderItem(item) {
   const figcaption = clone.querySelector("figcaption");
   figcaption.textContent = item.title;
 
-  gallery.appendChild(clone);
+  const authorLink = clone.querySelector(".author-link");
+  if (authorLink) {
+    authorLink.href = `profile.html?id=${item.user_id}`;
+    authorLink.textContent = `by ${item.author || "Unknown"}`;
+  }
+
+  if (prepend) {
+    gallery.prepend(clone);
+  } else {
+    gallery.appendChild(clone);
+  }
 }
 
 // APIから一覧を取得して描画
@@ -84,7 +94,7 @@ if (postForm) {
         return res.json();
       })
       .then(newItem => {
-        renderItem(newItem);
+        renderItem(newItem, true);
         postModal.style.display = "none";
         postForm.reset();
       })

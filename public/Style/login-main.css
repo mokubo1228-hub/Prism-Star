@@ -98,3 +98,9 @@
 .login-navigation > a:hover {
     color: #00aced;
 }
+
+.form-error {
+  color: #b91c1c;
+  margin: 14px 0 0;
+  text-align: center;
+}

@@ -47,14 +47,15 @@
     <div class="gallery-back">
       <section id="gallery" class="gallery-grid">
         <template id="gallery-item-template">
-          <div>
-            <a href="gallery-detail.html?id={ID}">
+          <article class="gallery-card">
+            <a class="work-link" href="gallery-detail.html?id={ID}">
               <figure class="gallery-item">
                 <img src="{SRC}" alt="{TITLE}">
                 <figcaption>{TITLE}</figcaption>
               </figure>
             </a>
-          </div>
+            <a class="author-link" href="profile.html?id={USER_ID}">by {AUTHOR}</a>
+          </article>
         </template>
       </section>
     </div>

@@ -7,10 +7,9 @@
   <link rel="stylesheet" href="Style/sanitize.css">
   <link rel="stylesheet" href="Style/body.css">
   <link rel="stylesheet" href="Style/header.css">
-  <link rel="stylesheet" href="Style/login-main.css">
+  <link rel="stylesheet" href="Style/gallery-list.css">
   <link rel="stylesheet" href="Style/footer.css">
 </head>
-
 <body class="site-body">
 
   <header id="site-header" class="site-header">
@@ -38,40 +37,22 @@
     </div>
   </header>
 
-  <main class="login-page">
-
-    <section class="login-box">
-
-        <div class="site-title">
-            <h1>PrismStar</h1>
-            <p class="card-tagline">Shine in every color.</p>
-        </div>
-        
-        <h2 class="box-title">ログイン</h2>
-        
-        <form id="loginForm">
-          <div>
-              <label for="login-id">ID</label>
-              <input id="login-id" name="login-id" type="email" autocomplete="user-name" placeholder="メールアドレス"
-              spellcheck="false" required>
-          </div>
-
-            <div class="form-row">
-              <label for="login-pw">パスワード</label>
-              <input id="login-pw" name="login-pw" type="password" autocomplete="current-password" placeholder="ご自身で設定したパスワード">
-            </div>
-            
-            <div>
-              <button type="submit">ログイン</button>
-            </div>
-          </form>
-      
-          <p class="login-navigation">
-            <a href="#">パスワードをお忘れの場合</a> /
-            <a href="register.html">新規登録</a>
-          </p>
-
-    </section>
+  <main class="gallery-list">
+    <div class="gallery-back">
+      <h2 id="profileName" class="profile-heading"></h2>
+      <section id="profileWorks" class="gallery-grid">
+        <template id="profile-item-template">
+          <article class="gallery-card">
+            <a class="work-link" href="gallery-detail.html?id={ID}">
+              <figure class="gallery-item">
+                <img src="{SRC}" alt="{TITLE}">
+                <figcaption>{TITLE}</figcaption>
+              </figure>
+            </a>
+          </article>
+        </template>
+      </section>
+    </div>
   </main>
 
   <footer id="site-footer" class="site-footer">
@@ -106,6 +87,6 @@
   </footer>
 
   <script src="Script/common.js"></script>
-  <script src="Script/login.js"></script>
+  <script src="Script/profile.js"></script>
 </body>
 </html>

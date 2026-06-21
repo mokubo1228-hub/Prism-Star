@@ -32,6 +32,14 @@
   padding: 20px;
 }
 
+.gallery-card {
+  width: var(--gallery-icon-w);
+}
+
+.work-link {
+  display: block;
+}
+
 .gallery-item {
   width: var(--gallery-icon-w);
   height: var(--gallery-icon-h);
@@ -73,6 +81,35 @@
 .gallery-item:hover figcaption {
   background-color: #767575;
   color: #fff
+}
+
+.author-link {
+  color: #374151;
+  display: block;
+  font-size: 0.85rem;
+  margin-top: 6px;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.author-link:hover {
+  color: royalblue;
+}
+
+.profile-heading {
+  color: #374151;
+  margin: 0 20px 4px;
+  text-align: center;
+}
+
+.profile-empty,
+.profile-error {
+  color: #374151;
+  grid-column: 1 / -1;
+  margin: 0;
+  text-align: center;
 }
 
 @media (min-width: 600px) {

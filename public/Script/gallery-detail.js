@@ -61,7 +61,13 @@ if (!id || !template) {
       img.alt = work.title;
 
       clone.querySelector("figcaption h2").textContent = work.title;
-      clone.querySelector("p").textContent = work.desc;
+      clone.querySelector(".detail-txt").textContent = work.desc;
+
+      const authorLink = clone.querySelector(".detail-author a");
+      if (authorLink) {
+        authorLink.href = `profile.html?id=${work.user_id}`;
+        authorLink.textContent = work.author || "Unknown";
+      }
 
       const deleteBtn = clone.querySelector(".delete-work-btn");
       const deleteError = clone.querySelector(".delete-error");

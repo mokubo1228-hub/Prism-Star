@@ -40,6 +40,17 @@
     border-top: 1px solid #e5e7eb;
   }
 
+  .detail-author {
+    color: #4b5563;
+    font-size: 0.95rem;
+    margin: 8px 0 0;
+  }
+
+  .detail-author a {
+    color: royalblue;
+    text-decoration: underline;
+  }
+
   .detail-txt {
     font-size: 1rem;
     line-height: 1.8;
