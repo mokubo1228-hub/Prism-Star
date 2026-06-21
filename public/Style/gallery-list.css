@@ -112,6 +112,81 @@
   text-align: center;
 }
 
+.github-settings {
+  margin: 18px auto 24px;
+  max-width: 420px;
+}
+
+.github-settings label {
+  color: #374151;
+  display: block;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.github-settings-row {
+  display: flex;
+  gap: 8px;
+}
+
+.github-settings input {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  flex: 1;
+  padding: 10px 12px;
+}
+
+.github-settings button {
+  background: royalblue;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  padding: 10px 14px;
+}
+
+.github-message {
+  color: #166534;
+  margin: 8px 0 0;
+}
+
+.github-message.is-error {
+  color: #b91c1c;
+}
+
+.github-section {
+  border-top: 1px solid #e5e7eb;
+  margin-top: 28px;
+  padding-top: 24px;
+}
+
+.github-repos {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-top: 16px;
+}
+
+.github-repo-card {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.github-repo-card a {
+  color: royalblue;
+  font-weight: 700;
+}
+
+.github-repo-card p {
+  color: #374151;
+  margin: 8px 0 0;
+}
+
+.github-repo-meta {
+  font-size: 0.85rem;
+}
+
 @media (min-width: 600px) {
   :root {
     --gallery-icon-w: 180px;

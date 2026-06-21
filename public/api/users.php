@@ -1,10 +1,40 @@
 <?php
+session_start();
 require_once __DIR__ . '/../../src/db.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
 $pdo = getDb();
 $method = $_SERVER['REQUEST_METHOD'];
+
+if ($method === 'POST') {
+    if (empty($_SESSION['user_id'])) {
+        http_response_code(401);
+        echo json_encode(['error' => 'ログインが必要です']);
+        exit;
+    }
+
+    $data = json_decode(file_get_contents('php://input'), true);
+    $githubUsername = trim($data['github_username'] ?? '');
+
+    if ($githubUsername !== '') {
+        if (strlen($githubUsername) > 100 || !preg_match('/^[A-Za-z0-9-]+$/', $githubUsername)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'GitHubユーザー名は英数字とハイフンで入力してください']);
+            exit;
+        }
+    }
+
+    $value = $githubUsername === '' ? null : $githubUsername;
+    $stmt = $pdo->prepare("UPDATE users SET github_username = ? WHERE id = ?");
+    $stmt->execute([$value, $_SESSION['user_id']]);
+
+    echo json_encode([
+        'ok'              => true,
+        'github_username' => $value,
+    ]);
+    exit;
+}
 
 if ($method !== 'GET') {
     http_response_code(405);
@@ -19,7 +49,7 @@ if ($id <= 0) {
     exit;
 }
 
-$stmt = $pdo->prepare("SELECT id, name FROM users WHERE id = ?");
+$stmt = $pdo->prepare("SELECT id, name, github_username FROM users WHERE id = ?");
 $stmt->execute([$id]);
 $user = $stmt->fetch();
 
@@ -39,7 +69,8 @@ $stmt->execute([$id]);
 $works = $stmt->fetchAll();
 
 echo json_encode([
-    'id'    => (int)$user['id'],
-    'name'  => $user['name'],
-    'works' => $works,
+    'id'              => (int)$user['id'],
+    'name'            => $user['name'],
+    'github_username' => $user['github_username'],
+    'works'           => $works,
 ]);
