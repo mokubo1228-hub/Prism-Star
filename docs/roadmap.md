@@ -36,10 +36,14 @@ API は実装済みで UI だけ無いものを埋める。
 - ✅ 3-3 **新着フィード**：`gallery.php` GET を users JOIN＋`created_at DESC`、カード/詳細に投稿者リンク（専用 feed.php は作らず一覧を強化）。
 - 🧪 **後で修正**：register の重複INSERT を try/catch で 409 に（TOCTOU）、register/profile の視覚調整、username/slug 導入。
 
-## Phase 4 — GitHub 連携 🎯 ⬜
-- `api/github.php` を新設＝**サーバ側で token を隠して** GitHub API を呼ぶ（[ADR-003](decisions.md)）。
-- ユーザーが GitHub ユーザー名を登録 → 自分のリポジトリを「作品」として取り込み / 表示。
-- `gallery.source`（manual / github）等のスキーマ拡張（`docs/spec.md` §4）。
+## Phase 4 — GitHub 連携 🎯 ✅
+Codex 実装（`docs/phase-4-handoff.md`）・Claude Code review 済（SSRF・token秘匿を独立検証）。
+- ✅ 4-0 `.env` 化：DB 認証情報＋`GITHUB_TOKEN` を `.env`（gitignore）に、`.env.example` をコミット、`docker-compose.yml` を `${VAR}` 参照に（平文パスワード消滅）。[ADR-003]
+- ✅ 4-1 `users.github_username` 追加（`init.sql`＋冪等 `src/migrate.php`）、本人のみ設定 API（`POST users.php`）。
+- ✅ 4-2 `api/github.php?user=`：**サーバ側で token 使用**（未設定でも未認証で動く）、SSRF 対策（`^[A-Za-z0-9-]+$`）、応答に token を出さない。
+- ✅ 4-3 プロフィールに GitHub リポジトリのカード（⭐/言語/リンク）＋自分のプロフィールで username 設定 UI。
+- 🧪 **後で修正**：repos の `gallery` 永続化（source 種別・OG画像・重複処理）、README に `cp .env.example .env` 追記、fork 除外、視覚調整。
+- 📌 **判断事項**：`github.php` の文字列分割の撤去＋token漏れ検査の対象見直し → [ADR-011](decisions.md)（次の実装パスで実施）。
 
 ## Phase 5 — スター機能 ⭐ ⬜
 - お気に入り＝**スター(⭐)**（[ADR-009](decisions.md)）。`stars` テーブル ＋ `stars.php`。

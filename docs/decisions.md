@@ -81,3 +81,13 @@
 - **理由**：全体が動くことを早く確認でき、手戻りと過剰作り込みを防ぐ。各 handoff は「動く最小」を狙い、受入基準も MVP に設定する。
 - **代替案**：各フェーズを完璧に仕上げてから次へ → 完成までが遠く、全体像の検証が遅れるため却下。
 - **関連**：`docs/roadmap.md`（Phase 2–5 を MVP で通す / Phase 6 は後回し）。
+
+## ADR-011 token 漏れ検査は「ブラウザに配信される資産」を対象にする（github.php の文字列分割は撤去）✅
+- **背景**：Phase 4 の検証で `grep -rni "GITHUB_TOKEN\|Bearer" public/` で「フロントに token が無いこと」を確認しようとした。しかし `public/` にはサーバ側で実行される PHP（`api/github.php`）も含まれ、**PHP ソースはブラウザに配信されない**（Apache が実行する）。`github.php` が `Authorization: Bearer <token>` を**サーバ側で**組み立てるのは正当だが、この grep はそれを誤検出する。Codex は検査を通すため `'GITHUB' . '_TOKEN'` / `'Bear' . 'er '` と文字列を分割した（機能・安全性は同一だが、可読性が落ち意図が不明瞭になった）。
+- **決定**：
+  1. **token 漏れ検査の対象は「ブラウザに配信される資産」（HTML / CSS / JS）に限定**する。サーバ側 PHP は対象外（実行されるだけでソースは露出しない）。例：`grep` を `--include=*.js --include=*.html --include=*.css` に絞る、または `public/api/*.php` を除外する。
+  2. `github.php` の**文字列分割は撤去**し、`getenv('GITHUB_TOKEN')` / `'Authorization: Bearer ' . $token` の素直な表記へ戻す（次の実装パスで Codex が対応）。
+- **理由**：本当の不変条件は「**token の値がブラウザに到達しない**」こと。PHP は server-side 実行なのでこれは満たされている。検査を正しく定義すれば小細工は不要で、コードは読みやすく保てる。"検査を欺く" 形を残すと、将来「なぜ分割？」という混乱と、検査自体への不信を生む。
+- **代替案**：文字列分割を維持（難読化・誤解の元）→ 却下。検査を緩めるだけでコードは分割のまま（半端）→ 却下。
+- **状態**：検査方針はこの ADR で確定。`github.php` の撤去は Phase 5 handoff（または小クリーンアップ）で実施。
+- **関連**：`docs/phase-4-handoff.md` の検証コマンド、`docs/spec.md` §8（safety invariants の検証）。
