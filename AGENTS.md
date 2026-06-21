@@ -17,7 +17,7 @@ broad design / 方針検討には使わない。
 作業ルート：
 
 ```text
-/Users/USER/Documents/20_開発・システム学習/okubo-gallery
+/Users/USER/Documents/20_開発・システム学習/prismstar
 ```
 
 - 作業ブランチは **`develop`**（`main` は古い。本体は develop）。
@@ -29,7 +29,7 @@ broad design / 方針検討には使わない。
 
 ## Write Rules
 
-- 成果物は `okubo-gallery` 直下に作る。設計・handoff は `docs/` に置く。
+- 成果物はプロジェクト直下に作る。設計・handoff は `docs/` に置く。
 - **`git add .` は使わない。** 必要なファイルだけ明示 stage する。
 - secret（DB パスワード、GitHub token）をコミットしない。`db_data/` は `.gitignore` 済み。
 - `.gitignore` を勝手に変えない。

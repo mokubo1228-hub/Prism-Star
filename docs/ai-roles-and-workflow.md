@@ -76,6 +76,7 @@ User  ⇄  Claude Code                 →   Codex
 
 ### 共通
 - commit / push / tag / release / **GitHub への push やデプロイ**を実行判断するのは **User のみ**。
+- **プロセスの起動（`docker compose up`・サーバ起動・`open -a` 等）は事前に User の許可を取る。** 読み取り調査（ファイル閲覧・`git`・`grep`）は許可不要。起動したものは不要になれば止めて元に戻す。
 - **secret / API key / GitHub token / DB パスワードの値は表示・保存・フロントに出さない。**
 - `git add .` は使わない。必要なファイルだけ明示 stage する。
 
@@ -130,6 +131,7 @@ git diff --check                                              # 余分な空白 
 
 - `AGENTS.md`: 実装者 / Codex 向けの repo 規則（作業ルート、write rules、safety invariants、release policy）。役割モデルは本ファイルを参照。
 - `CLAUDE.md`: Claude Code 専用の作業ルール ＋ プロジェクト概要。役割モデルは本ファイルを参照。
+- `docs/START_HERE.md`: **ゼロコンテキスト復帰の入口**（現在地・どこに何があるか・起動・次の作業）。
 - `docs/spec.md`: **技術仕様書**（技術スタック・アーキテクチャ・データモデル・API・要件・セキュリティ）。
 - `docs/roadmap.md`: **実装計画**（フェーズ分割と進捗状態）。
 - `docs/decisions.md`: **意思決定ログ**（ADR-lite。背景 / 決定 / 理由 / 代替案）。
