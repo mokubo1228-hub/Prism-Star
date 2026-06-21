@@ -1,0 +1,91 @@
+# AGENTS.md
+
+このリポジトリで作業する AI agent（特に実装者 / Codex）向けの運用ルール。
+
+役割分担と開発フローの正本は `docs/ai-roles-and-workflow.md`。
+本ファイルは repository scope・write rules・safety invariants・release policy など、
+実装時に守る具体規則を扱う。Claude Code 固有のルールは `CLAUDE.md`。
+
+## 構成の前提
+
+本プロジェクトは **ChatGPT を使わない User / Claude Code / Codex の3者構成**。
+Codex は実装者として、Claude Code の handoff docs（`docs/*-handoff.md`）を入口に作業する。
+broad design / 方針検討には使わない。
+
+## Repository Scope
+
+作業ルート：
+
+```text
+/Users/USER/Documents/20_開発・システム学習/okubo-gallery
+```
+
+- 作業ブランチは **`develop`**（`main` は古い。本体は develop）。
+- 主なディレクトリ：
+  - `public/` … Apache ドキュメントルート（`*.html` / `Style/` / `Script/` / `api/*.php`）
+  - `src/` … PHP 共通処理（`db.php`, `seed.php`）
+  - `docker/` … `Dockerfile`, `init.sql`
+  - `docs/` … 設計・handoff docs
+
+## Write Rules
+
+- 成果物は `okubo-gallery` 直下に作る。設計・handoff は `docs/` に置く。
+- **`git add .` は使わない。** 必要なファイルだけ明示 stage する。
+- secret（DB パスワード、GitHub token）をコミットしない。`db_data/` は `.gitignore` 済み。
+- `.gitignore` を勝手に変えない。
+
+## Safety Invariants（壊さない）
+
+正本は `docs/ai-roles-and-workflow.md` §4。要約：
+
+- ギャラリー POST / DELETE はログイン必須。
+- SQL はプリペアドステートメント（文字列連結禁止）。
+- 削除は所有者限定（`WHERE id = ? AND user_id = ?`）。
+- パスワードは `password_hash` / `password_verify`。
+- 投稿画像 URL は http / https のみ。
+- GitHub token はサーバ側 env に置き、フロントに出さない。
+
+## Role Split（要約）
+
+正本は `docs/ai-roles-and-workflow.md`。要約：
+
+- **User**：direction / scope / phase / release / acceptance / commit・push 判断。
+- **Claude Code**：現在地整理・方針提案・設計・handoff docs 作成・design-intent review。明示 GO なしに実装 / commit / push しない。
+- **Codex**：handoff docs を読んで scoped に実装・検証・報告。broad design に使わない。明示依頼なしに commit / tag / push しない。
+
+フローは一方向の橋渡し（User ⇄ Claude Code → Codex）。
+Codex への入力は常に Claude Code の handoff docs を人間が渡す。
+
+## 実装依頼の標準テンプレート（Codex 向け）
+
+```text
+作業ブランチは develop。まず docs/ai-roles-and-workflow.md, PROJECT.md, README.md を読む。
+
+指定の phase だけを実装する。scope を広げない。隣接 future phase を実装しない。
+commit / tag / push はしない。
+
+編集前に簡潔に報告：
+- git status --short
+- 触る予定のファイル
+- 実装方針を 3-5 行
+
+編集後に実行：
+- docker compose ps
+- docker compose exec -T app php -l <変更した PHP>
+- 影響 API を curl でスモーク
+- git diff --check
+
+報告：
+- 変更ファイル
+- 実装概要 / 挙動変化
+- 検証結果
+- git status --short
+```
+
+docs-only の場合は php / docker チェック不要。`git diff --check` を優先する。
+
+## Release Policy
+
+- Phase は細かく、commit / tag は粗く扱う。
+- commit / push / tag / GitHub push / デプロイ は **User のみ** が実行判断する。
+- 小さな Phase ごとに毎回 tag を切らない。ユーザー体験がまとまって変わった時だけ release に進む。

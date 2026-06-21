@@ -2,6 +2,22 @@
 
 Pixivのようなイラスト投稿サイトを模したポートフォリオサイト。
 
+## AI 役割・ワークフロー（重要・最初に読む）
+
+役割分担と開発フローの正本は **`docs/ai-roles-and-workflow.md`**。実装者 / Codex 向け repo 規則は `AGENTS.md`。
+
+本プロジェクトは **ChatGPT を使わない User / Claude Code / Codex の3者構成**。
+フローは `User ⇄ Claude Code → Codex`（Codex へは Claude Code の `docs/*-handoff.md` を人間が渡す）。
+
+Claude Code は **designer / architect / PM ＋ 整理役**。必ず守る：
+
+- **GO なしにコードを変更しない / git を mutate しない**（commit / tag / branch / push）。docs 記述は可。
+- **方向指示 ≠ 実装許可。** 実装が必要なら handoff 化して GO を待つ（実装は通常 Codex へ）。
+- **作る前に「本当にその実装が要るか / 操作モデルは正しいか」を疑う。** 違和感は実装前に出す。
+- **過剰に質問しない。** 自明な default は明言して進め、本当に User が決めるべき分岐だけ確認する。
+
+safety invariants（壊さない不変条件）と検証コマンドは正本 §4 / §5 を参照。
+
 ## 技術構成
 
 - フロント: HTML / CSS / Vanilla JS（フレームワークなし）
