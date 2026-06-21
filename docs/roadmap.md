@@ -16,14 +16,14 @@
 - `develop` を作業ベースに切替、Docker 環境を起動、API / ログイン / 投稿の疎通確認。
 - 結果：`app(:8080)` + `db(MySQL)` healthy、seed 投入、主要 API 疎通 OK。
 
-## Phase 1 — 既存機能の仕上げ 🚧
+## Phase 1 — 既存機能の仕上げ ✅
 API は実装済みで UI だけ無いものを埋める。
 - ✅ 1-1 ログイン状態の UI 反映＋ログアウト（`common.js` / `gallery-list.html`）
   - ※ 仕様確定前に Claude Code が直接実装した**例外**（[ADR-005](decisions.md) の運用モデル確立前）。以降は Codex 経由。
-- ⬜ 1-2 削除ボタン（詳細ページ、自分の作品のときのみ）
-  - 前提：`api/gallery.php` の詳細 GET に `user_id` を追加し、所有者判定に使う。
-- ⬜ 1-3 `login.html` / `form.html` にヘッダー / フッターを追加（現状この2ページだけナビが出ない）
-- → 1-2 / 1-3 は `docs/phase-1-handoff.md` を書いて Codex に渡す。
+- ✅ 1-2 削除ボタン（詳細ページ、所有者のみ）— Codex 実装（`docs/phase-1-handoff.md`）、Claude Code review 済。
+  - 詳細 GET に `user_id` 追加 → `gallery-detail.js` で所有者判定 → DELETE 結線。
+- ✅ 1-3 `login.html` / `form.html` にヘッダー / フッター追加 — Codex 実装、review 済。
+- ※ 視覚（ブラウザ）確認は推奨（Codex 環境にブラウザが無く、API / 配信スモークまで検証済）。
 
 ## Phase 2 — PrismStar リブランド ⬜
 - 表示名 `Okubo Gallery` / `大久保の館` → **`PrismStar`**（通称 Prism）。タグライン `"Shine in every color."`。
