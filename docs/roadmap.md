@@ -43,12 +43,17 @@ Codex 実装（`docs/phase-4-handoff.md`）・Claude Code review 済（SSRF・to
 - ✅ 4-2 `api/github.php?user=`：**サーバ側で token 使用**（未設定でも未認証で動く）、SSRF 対策（`^[A-Za-z0-9-]+$`）、応答に token を出さない。
 - ✅ 4-3 プロフィールに GitHub リポジトリのカード（⭐/言語/リンク）＋自分のプロフィールで username 設定 UI。
 - 🧪 **後で修正**：repos の `gallery` 永続化（source 種別・OG画像・重複処理）、README に `cp .env.example .env` 追記、fork 除外、視覚調整。
-- 📌 **判断事項**：`github.php` の文字列分割の撤去＋token漏れ検査の対象見直し → [ADR-011](decisions.md)（次の実装パスで実施）。
+- 📌 **判断事項**：`github.php` の文字列分割の撤去＋token漏れ検査の対象見直し → [ADR-011](decisions.md)（✅ Phase 5 で実施済み）。
 
-## Phase 5 — スター機能 ⭐ ⬜
-- お気に入り＝**スター(⭐)**（[ADR-009](decisions.md)）。`stars` テーブル ＋ `stars.php`。
-- 取り込んだ GitHub リポは GitHub の⭐数を表示、サイト内作品はユーザーが星を付与。
-- プロフィールに**獲得スター総数** → "スターを集める" を成立させる。
+## Phase 5 — スター機能 ⭐ ✅
+Codex 実装（`docs/phase-5-handoff.md`）・Claude Code review 済（冪等/401/404/権限/ADR-011撤去を独立検証）。
+- ✅ `stars` テーブル（`id` PK＋`UNIQUE(user_id,gallery_id)`＋両FK `ON DELETE CASCADE`）＋冪等 migration。
+- ✅ `stars.php`：付与/解除トグル（`INSERT IGNORE`で冪等・要ログイン・404/401）。
+- ✅ `gallery.php` に `star_count`/`starred`、`users.php` に `total_stars`。
+- ✅ 一覧/詳細に⭐ボタン＋数（入れ子`<a>`回避・`aria-pressed`）、プロフィールに獲得スター総数。
+- ✅ ADR-011 クリーンアップ（github.php の文字列分割撤去＋token検査を配信資産に限定）。
+
+> 🎉 **Phase 0–5 完了＝「一回完成」（PrismStar v1 MVP）達成。** 以降は ADR-010 どおり「後で修正」（視覚 polish・repo永続化・画像アップロード等）を任意の順で。
 
 ## Phase 6 — 仕上げ（任意）⬜
 - 画像ファイルのアップロード（現在は外部 URL のみ）、ページネーション 等。

@@ -89,5 +89,5 @@
   2. `github.php` の**文字列分割は撤去**し、`getenv('GITHUB_TOKEN')` / `'Authorization: Bearer ' . $token` の素直な表記へ戻す（次の実装パスで Codex が対応）。
 - **理由**：本当の不変条件は「**token の値がブラウザに到達しない**」こと。PHP は server-side 実行なのでこれは満たされている。検査を正しく定義すれば小細工は不要で、コードは読みやすく保てる。"検査を欺く" 形を残すと、将来「なぜ分割？」という混乱と、検査自体への不信を生む。
 - **代替案**：文字列分割を維持（難読化・誤解の元）→ 却下。検査を緩めるだけでコードは分割のまま（半端）→ 却下。
-- **状態**：検査方針はこの ADR で確定。`github.php` の撤去は Phase 5 handoff（または小クリーンアップ）で実施。
+- **状態**：✅ 実施済み（Phase 5）。`github.php` の文字列分割を撤去し素直な表記に戻した。token 漏れ検査は配信資産（`--include=*.js --include=*.html --include=*.css`）に限定。
 - **関連**：`docs/phase-4-handoff.md` の検証コマンド、`docs/spec.md` §8（safety invariants の検証）。
