@@ -6,6 +6,7 @@
   <title>大久保の館</title>
   <link rel="stylesheet" href="Style/sanitize.css">
   <link rel="stylesheet" href="Style/body.css">
+  <link rel="stylesheet" href="Style/header.css">
   <link rel="stylesheet" href="Style/form-main.css">
   <link rel="stylesheet" href="Style/footer.css">
 
@@ -14,6 +15,28 @@
 
 
 <body class="site-body">
+
+  <header id="site-header" class="site-header">
+    <div class="header-inner">
+      <button id="hamburger" class="hamburger">
+        <span></span><span></span><span></span>
+      </button>
+
+      <h1 class="site-title"><a href="gallery-list.html">Okubo Gallery</a></h1>
+
+      <nav class="header-menu">
+        <ul class="header-nav">
+          <li class="nav-icon">
+            <img src="https://placehold.jp/100x100.png" alt="作者アイコン" class="icon">
+          </li>
+
+          <template id="nav-item-template">
+            <li><a class="header-a" href="{HREF}">{LABEL}</a></li>
+          </template>
+        </ul>
+      </nav>
+    </div>
+  </header>
 
 	<main class="form-main">
         <section class="form-page">
@@ -57,6 +80,38 @@
         </section>
 	</main>
 
+    <footer id="site-footer" class="site-footer">
+        <div class="footer-info">
+            <p class="footer-corporate">&copy; 2025 Miz..Kingdom</p>
+            <p>Developer：Miz Kingdom</p>
+            <p>Mail: <a class="footer-a" href="mailto:okubo.m.jobs@gmail.com">okubo.m.jobs@gmail.com</a></p>
+        </div>
+
+        <nav class="footer-nav">
+            <ul>
+                <template id="nav-item-template">
+                    <li><a class="footer-a" href="{HREF}">{LABEL}</a></li>
+                </template>
+            </ul>
+        </nav>
+
+        <div class="footer-social">
+            <a class="footer-a" href="https://github.com/mokubo1228-hub" target="_blank">
+                <img src="Image/review-icon.png" alt="Review">
+            </a>
+            <a class="footer-a" href="https://twitter.com" target="_blank">
+                <img src="Image/x-icon.png" alt="X">
+            </a>
+            <a class="footer-a" href="https://github.com" target="_blank">
+                <img src="Image/Github-icon.png" alt="GitHub">
+            </a>
+            <a class="footer-a" href="https://linkedin.com" target="_blank">
+                <img src="Image/linkedin-icon.png" alt="LinkedIn">
+            </a>
+        </div>
+    </footer>
+
+  <script src="Script/common.js"></script>
   <script src="Script/form.js"></script>
 </body>
 </html>

@@ -10,7 +10,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 // ---------- GET: 一覧 or 1件取得 ----------
 if ($method === 'GET') {
     if (isset($_GET['id'])) {
-        $stmt = $pdo->prepare("SELECT id, title, src, description AS `desc` FROM gallery WHERE id = ?");
+        $stmt = $pdo->prepare("SELECT id, user_id, title, src, description AS `desc` FROM gallery WHERE id = ?");
         $stmt->execute([(int)$_GET['id']]);
         $row = $stmt->fetch();
 

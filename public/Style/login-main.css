@@ -1,6 +1,6 @@
 .login-page {
     background:#f5f7fa; 
-    min-height:100dvh;
+    min-height:100%;
     display:flex;
     justify-content: center;
     align-items: center;
@@ -16,7 +16,7 @@
   }
 
 
-  .site-title{
+  .login-box .site-title{
     display:block;
     text-align:center;
     background: royalblue;

@@ -2,12 +2,12 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    min-height: 100%;
     background-color: #f5f5f5;
     padding: 40px 20px;
   }
 
-  .site-title{
+  .form-page .site-title{
     display:block;
     text-align:center;
     background: royalblue;
@@ -22,7 +22,7 @@
     border-top-right-radius:14px;
     
   }
-  
+
   .form-page {
     background: #fff;
     padding: 25px;
@@ -32,16 +32,14 @@
     width: 100%;
     max-width: 500px;
   }
-  
   .page-title {
     /* text-align: center; */
     margin-bottom: 24px;
   }
-  
+
   .site-form > div {
     margin-bottom: 20px;
   }
-  
   .site-form > div:first-of-type {
     display: flex;
     gap: 16px;
@@ -127,4 +125,3 @@
       flex-direction: column;
     }
   }
-  

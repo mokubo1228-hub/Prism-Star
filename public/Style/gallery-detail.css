@@ -30,7 +30,7 @@
     border-radius: 8px;
     object-fit: contain;
   }
-  
+
   .detail-img {
     width: 100%;
     text-align: center;
@@ -49,9 +49,12 @@
     border-bottom: 1px solid #e5e7eb; 
   }
 
-  .back-menu-btn {
+  .detail-actions {
     display: flex;
     justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
   }
 
   .back-menu {
@@ -61,7 +64,25 @@
     text-decoration:none; 
     color:#374151;
   }
-  
+
+  .delete-work-btn {
+    border: 0;
+    border-radius: 8px;
+    background: #dc2626;
+    color: #fff;
+    cursor: pointer;
+    padding: 8px 14px;
+  }
+
+  .delete-work-btn:hover {
+    background: #991b1b;
+  }
+
+  .delete-error {
+    color: #b91c1c;
+    text-align: center;
+    margin: 0 0 12px;
+  }
   @media (max-width: 1024px) {
     .detail-page { 
       width: clamp(320px, 70%, 880px);
@@ -80,6 +101,5 @@
     .detail-txt { line-height:1.6; }
     .back-menu { font-size: .9rem; }
     .detail-img figcaption h2 { font-size:1rem; }
-  
+
   }
-  
