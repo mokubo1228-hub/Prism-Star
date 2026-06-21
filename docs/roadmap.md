@@ -25,10 +25,9 @@ API は実装済みで UI だけ無いものを埋める。
 - ✅ 1-3 `login.html` / `form.html` にヘッダー / フッター追加 — Codex 実装、review 済。
 - ※ 視覚（ブラウザ）確認は推奨（Codex 環境にブラウザが無く、API / 配信スモークまで検証済）。
 
-## Phase 2 — PrismStar リブランド ⬜
-- 表示名 `Okubo Gallery` / `大久保の館` → **`PrismStar`**（通称 Prism）。タグライン `"Shine in every color."`。
-- `README.md` / `CLAUDE.md` / `PROJECT.md` の名称統一（フォルダ / リポジトリ名は任意で後回し可）。
-- 🧪 虹色アクセントのビジュアル方針を検討（名前＝デザイン指針）。
+## Phase 2 — PrismStar リブランド ✅
+- 表示名 `Okubo Gallery` / `大久保の館` → **`PrismStar`** ＋ タグライン `"Shine in every color."`。全 `public/*.html` の `<title>`・ヘッダー・login/form カード・policy 本文・README を統一。Codex 実装・review 済。
+- 🧪 **後で修正**（ADR-010）：虹色テーマ／ロゴ／配色、ヘッダーのモバイル微調整、login/form のタグライン重複、内部 doc（CLAUDE.md / PROJECT.md）の名称統一、フォルダ / リポジトリ名。視覚確認はブラウザ推奨。
 
 ## Phase 3 — 発信者オンボーディング ⬜
 「**全員が発信者**」を成立させる核（[ADR-008](decisions.md)）。
