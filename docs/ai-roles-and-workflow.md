@@ -132,6 +132,7 @@ git diff --check                                              # 余分な空白 
 - `AGENTS.md`: 実装者 / Codex 向けの repo 規則（作業ルート、write rules、safety invariants、release policy）。役割モデルは本ファイルを参照。
 - `CLAUDE.md`: Claude Code 専用の作業ルール ＋ プロジェクト概要。役割モデルは本ファイルを参照。
 - `docs/START_HERE.md`: **ゼロコンテキスト復帰の入口**（現在地・どこに何があるか・起動・次の作業）。
+- `docs/highlights.md`: **ポートフォリオ読みどころ**（こだわり・横断する判断軸・技術スタックと選定理由）。ADR/spec への索引。
 - `docs/spec.md`: **技術仕様書**（技術スタック・アーキテクチャ・データモデル・API・要件・セキュリティ）。
 - `docs/roadmap.md`: **実装計画**（フェーズ分割と進捗状態）。
 - `docs/decisions.md`: **意思決定ログ**（ADR-lite。背景 / 決定 / 理由 / 代替案）。

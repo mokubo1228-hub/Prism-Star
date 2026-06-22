@@ -1,6 +1,6 @@
-# Okubo Gallery
+# PrismStar
 
-Pixivのようなイラスト投稿サイトを模したポートフォリオサイト。
+「全員が発信者」のマルチユーザー作品プラットフォーム ＋ GitHub 連携。タグライン "Shine in every color."
 
 ## AI 役割・ワークフロー（重要・最初に読む）
 

@@ -2,7 +2,7 @@
 
 Shine in every color.
 
-Pixivのようなイラスト投稿サイトを模したポートフォリオサイト。
+「全員が発信者」のマルチユーザー作品プラットフォーム。非エンジニアは画像・文字を、エンジニアは GitHub リポジトリを発信でき、評価はスター(⭐)で集まる。
 
 ## 必要なもの
 
@@ -54,3 +54,5 @@ docker compose down -v
 - フロント: HTML / CSS / Vanilla JS
 - バックエンド: PHP 8.2 / MySQL 8.0
 - 開発環境: Docker Compose
+
+選定理由・設計のこだわり・判断軸は **[docs/highlights.md](docs/highlights.md)** を参照。

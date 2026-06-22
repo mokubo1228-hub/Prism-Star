@@ -8,9 +8,10 @@
 ---
 
 ## どこに何があるか
+- **読みどころ**（こだわり・判断軸・技術選定の理由）：`docs/highlights.md`
 - **技術仕様**（スタック/構成/データモデル/API/要件）：`docs/spec.md`
 - **実装計画と進捗**：`docs/roadmap.md`
-- **意思決定と理由**（ADR-001〜011）：`docs/decisions.md`
+- **意思決定と理由**（ADR-001〜012）：`docs/decisions.md`
 - **AI 開発の役割・フロー**（User / Claude Code / Codex の3者）：`docs/ai-roles-and-workflow.md`
 - **実装者（Codex）向け repo 規則**：`AGENTS.md`
 - **各フェーズの Codex 実装指示**：`docs/phase-*-handoff.md`
@@ -18,7 +19,7 @@
 - **使い方 / 起動**：`README.md`
 
 ## 現在地（2026-06-21 時点）
-- **Phase 0–5 完了＝「一回完成」（v1 MVP）達成。** 作業ブランチは **`develop`**。
+- **Phase 0–5 完了＝ v1 達成。** 作業ブランチは **`develop`**。
   - 0 ベースライン / 1 既存機能の仕上げ / 2 PrismStar リブランド / 3 発信者オンボーディング（登録・プロフィール・新着フィード）/ 4 GitHub 連携（`.env` 化・サーバ側 token・SSRF対策）/ 5 スター ⭐（付与・獲得数）。
 - **技術**：HTML / CSS / Vanilla JS ＋ PHP 8.2(Apache) ＋ MySQL 8.0 ＋ Docker Compose。
 - **AI 運用**：ChatGPT 無し。`User ⇄ Claude Code → Codex`。実装は Codex に `docs/phase-*-handoff.md` で渡し、Claude Code が design-intent review、User が commit。
@@ -33,10 +34,11 @@ docker compose exec app php /var/www/html/src/migrate.php  # 冪等
 ```
 ※ **Docker 等プロセスの起動は User の許可を取ってから**（`docs/ai-roles-and-workflow.md` §3 共通）。
 
-## 次にやること（「後で修正」/ ADR-010 MVP-first の残）
-`docs/roadmap.md` の Phase 6 ＋ 各フェーズの 🧪後で修正：
-- 視覚 polish（虹色テーマ・カード/スター/プロフィールの見た目）
-- `register` の重複 INSERT を try/catch で 409 に（TOCTOU）
-- README の起動手順に `cp .env.example .env` を追記
-- GitHub repos の `gallery` 永続化（source 種別・OG画像・重複処理）
+## 今後の発展（ロードマップ）
+`docs/roadmap.md` の Phase 6（PHP 部品化）＋ Phase 7（今後の発展）：
+- ブランド表現（虹色テーマ・カード/スター/プロフィールの作り込み）
+- 登録の同時実行に対する堅牢化（重複を 409 で防ぐ）
+- 取り込んだ GitHub リポジトリの `gallery` 永続化（source 種別・OG画像）
 - 画像アップロード、ページネーション、fork 除外
+
+> 細かな作業メモ（既知の粗・ドキュメント不備など）は repo に置かず、運用側（Claude Code のメモリ）で管理する。

@@ -27,14 +27,14 @@ API は実装済みで UI だけ無いものを埋める。
 
 ## Phase 2 — PrismStar リブランド ✅
 - 表示名 `Okubo Gallery` / `大久保の館` → **`PrismStar`** ＋ タグライン `"Shine in every color."`。全 `public/*.html` の `<title>`・ヘッダー・login/form カード・policy 本文・README を統一。Codex 実装・review 済。
-- 🧪 **後で修正**（ADR-010）：虹色テーマ／ロゴ／配色、ヘッダーのモバイル微調整、login/form のタグライン重複、内部 doc（CLAUDE.md / PROJECT.md）の名称統一、フォルダ / リポジトリ名。視覚確認はブラウザ推奨。
+- 🔭 **今後の発展**：虹色アクセントによるブランド表現（ロゴ／配色）、レスポンシブの細部調整。
 
 ## Phase 3 — 発信者オンボーディング ✅
 「**全員が発信者**」を成立させる核（[ADR-008](decisions.md)）。Codex 実装（`docs/phase-3-handoff.md`）・Claude Code review 済。スキーマ変更なし。
 - ✅ 3-1 オープン**新規登録**（`auth.php?action=register`：検証・重複409・`password_hash`・自動ログイン）＋ `register.html`。
 - ✅ 3-2 **プロフィール / 個人ギャラリー**（`users.php?id=N` は公開情報のみ＝email/pass 返さない）＋ `profile.html`。
 - ✅ 3-3 **新着フィード**：`gallery.php` GET を users JOIN＋`created_at DESC`、カード/詳細に投稿者リンク（専用 feed.php は作らず一覧を強化）。
-- 🧪 **後で修正**：register の重複INSERT を try/catch で 409 に（TOCTOU）、register/profile の視覚調整、username/slug 導入。
+- 🔭 **今後の発展**：登録の同時実行に対する堅牢化（重複を 409 で防ぐ）、username / slug の導入。
 
 ## Phase 4 — GitHub 連携 🎯 ✅
 Codex 実装（`docs/phase-4-handoff.md`）・Claude Code review 済（SSRF・token秘匿を独立検証）。
@@ -42,7 +42,7 @@ Codex 実装（`docs/phase-4-handoff.md`）・Claude Code review 済（SSRF・to
 - ✅ 4-1 `users.github_username` 追加（`init.sql`＋冪等 `src/migrate.php`）、本人のみ設定 API（`POST users.php`）。
 - ✅ 4-2 `api/github.php?user=`：**サーバ側で token 使用**（未設定でも未認証で動く）、SSRF 対策（`^[A-Za-z0-9-]+$`）、応答に token を出さない。
 - ✅ 4-3 プロフィールに GitHub リポジトリのカード（⭐/言語/リンク）＋自分のプロフィールで username 設定 UI。
-- 🧪 **後で修正**：repos の `gallery` 永続化（source 種別・OG画像・重複処理）、README に `cp .env.example .env` 追記、fork 除外、視覚調整。
+- 🔭 **今後の発展**：取り込んだ GitHub リポジトリの `gallery` 永続化（source 種別・OG画像）、fork 除外。
 - 📌 **判断事項**：`github.php` の文字列分割の撤去＋token漏れ検査の対象見直し → [ADR-011](decisions.md)（✅ Phase 5 で実施済み）。
 
 ## Phase 5 — スター機能 ⭐ ✅
@@ -53,10 +53,14 @@ Codex 実装（`docs/phase-5-handoff.md`）・Claude Code review 済（冪等/40
 - ✅ 一覧/詳細に⭐ボタン＋数（入れ子`<a>`回避・`aria-pressed`）、プロフィールに獲得スター総数。
 - ✅ ADR-011 クリーンアップ（github.php の文字列分割撤去＋token検査を配信資産に限定）。
 
-> 🎉 **Phase 0–5 完了＝「一回完成」（PrismStar v1 MVP）達成。** 以降は ADR-010 どおり「後で修正」（視覚 polish・repo永続化・画像アップロード等）を任意の順で。
+> 🎉 **Phase 0–5 完了＝ PrismStar v1 達成。** 以降は下記ロードマップ（今後の発展）を順次進める。
 
-## Phase 6 — 仕上げ（任意）⬜
-- 画像ファイルのアップロード（現在は外部 URL のみ）、ページネーション 等。
+## Phase 6 — PHP 部品化リファクタ（header/footer 共通化）⬜
+ページを `.php` 化し、header/footer（と head）を `public/includes/*.php` の partial に1箇所化（[ADR-012](decisions.md)）。挙動は不変の構造リファクタ。`base.html` はなごりとして保持。handoff：`docs/phase-6-handoff.md`。
+
+## Phase 7 — 今後の発展 ⬜
+- 画像ファイルのアップロード（現在は外部 URL に対応）、一覧のページネーション。
+- ブランド表現（虹色テーマ）の作り込み、取り込んだ GitHub リポジトリの永続化、fork 除外。
 
 ---
 
