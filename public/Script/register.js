@@ -31,7 +31,7 @@ if (registerForm) {
         return res.json();
       })
       .then(() => {
-        window.location.href = "gallery-list.html";
+        window.location.href = "gallery-list.php";
       })
       .catch(err => showRegisterError(err.message));
   });

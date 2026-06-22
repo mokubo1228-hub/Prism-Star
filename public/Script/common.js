@@ -1,8 +1,8 @@
 const navItems = [
-  { href: 'login.html', label: 'Login' },
-  { href: 'gallery-list.html', label: 'Gallery' },
-  { href: 'form.html', label: 'Contact' },
-  { href: 'policy.html', label: 'Privacy Policy' }
+  { href: 'login.php', label: 'Login' },
+  { href: 'gallery-list.php', label: 'Gallery' },
+  { href: 'form.php', label: 'Contact' },
+  { href: 'policy.php', label: 'Privacy Policy' }
 ];
 
 function renderNavigation() {
@@ -43,7 +43,7 @@ async function applyAuthState() {
   // ナビの「Login」リンクを、ログイン中は「Logout」に切り替える
   if (loggedIn) {
     document.querySelectorAll('.header-nav a, .footer-nav a').forEach(link => {
-      if (link.getAttribute('href') === 'login.html') {
+      if (link.getAttribute('href') === 'login.php') {
         link.textContent = 'Logout';
         link.href = '#';
         link.addEventListener('click', handleLogout);
@@ -55,7 +55,7 @@ async function applyAuthState() {
 function handleLogout(e) {
   e.preventDefault();
   fetch('/api/auth.php?action=logout', { method: 'POST' })
-    .finally(() => { window.location.href = 'gallery-list.html'; });
+    .finally(() => { window.location.href = 'gallery-list.php'; });
 }
 
 document.addEventListener('DOMContentLoaded', () => {

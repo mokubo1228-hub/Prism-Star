@@ -30,7 +30,7 @@ function renderItem(item, prepend = false) {
   const clone = template.content.cloneNode(true);
 
   const link = clone.querySelector(".work-link");
-  link.href = `gallery-detail.html?id=${item.id}`;
+  link.href = `gallery-detail.php?id=${item.id}`;
 
   const img = clone.querySelector("img");
   img.src = item.src;
@@ -41,7 +41,7 @@ function renderItem(item, prepend = false) {
 
   const authorLink = clone.querySelector(".author-link");
   if (authorLink) {
-    authorLink.href = `profile.html?id=${item.user_id}`;
+    authorLink.href = `profile.php?id=${item.user_id}`;
     authorLink.textContent = `by ${item.author || "Unknown"}`;
   }
 

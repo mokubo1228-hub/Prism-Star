@@ -22,7 +22,7 @@ if (loginForm) {
         return res.json();
       })
       .then(() => {
-        window.location.href = "gallery-list.html";
+        window.location.href = "gallery-list.php";
       })
       .catch(err => alert(err.message));
   });

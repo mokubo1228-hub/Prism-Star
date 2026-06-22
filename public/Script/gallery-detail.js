@@ -6,7 +6,7 @@ const template = document.getElementById("detail-template");
 function showError() {
   container.innerHTML = `
     <p>指定された作品が見つかりません。</p>
-    <div class="detail-actions"><a class="back-menu" href="gallery-list.html">ギャラリーへ戻る</a></div>
+    <div class="detail-actions"><a class="back-menu" href="gallery-list.php">ギャラリーへ戻る</a></div>
   `;
 }
 
@@ -34,7 +34,7 @@ async function deleteWork(errorEl) {
       throw new Error(data.error || "削除に失敗しました。");
     }
 
-    window.location.href = "gallery-list.html";
+    window.location.href = "gallery-list.php";
   } catch (err) {
     errorEl.textContent = err.message;
     errorEl.hidden = false;
@@ -90,7 +90,7 @@ if (!id || !template) {
 
       const authorLink = clone.querySelector(".detail-author a");
       if (authorLink) {
-        authorLink.href = `profile.html?id=${work.user_id}`;
+        authorLink.href = `profile.php?id=${work.user_id}`;
         authorLink.textContent = work.author || "Unknown";
       }
 

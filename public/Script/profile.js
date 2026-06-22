@@ -20,7 +20,7 @@ function renderProfileWork(work) {
   const img = clone.querySelector("img");
   const figcaption = clone.querySelector("figcaption");
 
-  link.href = `gallery-detail.html?id=${work.id}`;
+  link.href = `gallery-detail.php?id=${work.id}`;
   img.src = work.src;
   img.alt = work.title;
   figcaption.textContent = work.title;

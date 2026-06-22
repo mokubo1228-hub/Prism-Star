@@ -1,43 +1,11 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PrismStar</title>
-  <link rel="stylesheet" href="Style/sanitize.css">
-  <link rel="stylesheet" href="Style/header.css">
-  <link rel="stylesheet" href="Style/body.css">
-  <link rel="stylesheet" href="Style/policy.css">
-  <link rel="stylesheet" href="Style/footer.css">
-
-</head>
+<?php
+$pageStyles = ['policy.css'];
+include __DIR__ . '/includes/head.php';
+?>
 
 <body class="site-body">
 
-  <header id="site-header" class="site-header">
-    <div class="header-inner">
-      <button id="hamburger" class="hamburger">
-        <span></span><span></span><span></span>
-      </button>
- 
-      <div class="site-brand">
-        <h1 class="site-title"><a href="gallery-list.html">PrismStar</a></h1>
-        <p class="site-tagline">Shine in every color.</p>
-      </div>
- 
-      <nav class="header-menu">
-        <ul class="header-nav">
-          <li class="nav-icon">
-            <img src="https://placehold.jp/100x100.png" alt="作者アイコン" class="icon">
-          </li>
-          
-          <template id="nav-item-template">
-            <li><a class="header-a" href="{HREF}">{LABEL}</a></li>
-          </template>
-        </ul>
-      </nav>
-    </div>
-  </header>
+<?php include __DIR__ . '/includes/header.php'; ?>
 
     <main class="privacy-main">
         <article class="privacy-article">
@@ -45,35 +13,35 @@
           <p class="policy-intro">
             PrismStar（以下「当サイト」といいます）は、個人情報の重要性を認識し、以下の方針に基づき個人情報の保護に努めます。
           </p>
-    
+
           <section class="policy-section">
             <h2>1. 個人情報の管理</h2>
             <p>
               当サイトは、利用者の個人情報を正確かつ最新の状態に保ち、不正アクセス、紛失、破損、改ざん、漏えい等を防止するため、安全対策を講じます。
             </p>
           </section>
-    
+
           <section class="policy-section">
             <h2>2. 個人情報の利用目的</h2>
             <p>
               当サイトでは、お問い合わせの際に名前、メールアドレスなどの個人情報を登録いただく場合があります。これらの情報はお問い合わせへの回答や必要なご連絡にのみ使用します。
             </p>
           </section>
-    
+
           <section class="policy-section">
             <h2>3. 個人情報の第三者提供</h2>
             <p>
               当サイトは、法令に基づく場合を除き、本人の同意なく第三者に個人情報を提供することはありません。
             </p>
           </section>
-    
+
           <section class="policy-section">
             <h2>4. アクセス解析ツールについて</h2>
             <p>
               当サイトでは、サイトの利用状況を把握するためにアクセス解析ツールを使用する場合があります。これにより収集される情報は個人を特定するものではありません。
             </p>
           </section>
-    
+
           <section class="policy-section">
             <h2>5. 免責事項</h2>
             <p>
@@ -81,51 +49,20 @@
               当サイトの情報利用によって生じた損害等の責任は負いかねます。
             </p>
           </section>
-    
+
           <section class="policy-section">
             <h2>6. プライバシーポリシーの変更</h2>
             <p>
               本ポリシーの内容は、法令その他の変更により予告なく改定されることがあります。変更後のポリシーは当サイトに掲載された時点で効力を有します。
             </p>
           </section>
-    
+
           <p class="policy-date">制定日：2025年10月7日<br>改定日：2025年10月7日</p>
           <p class="policy-owner">PrismStar 管理者：Miz Kingdom</p>
         </article>
       </main>
 
-      <footer id="site-footer" class="site-footer">
-        <div class="footer-info">
-          <p class="footer-corporate">&copy; 2025 Miz..Kingdom</p>
-          <p>Developer：Miz Kingdom</p>
-          <p>Mail: <a class="footer-a" href="mailto:okubo.m.jobs@gmail.com">okubo.m.jobs@gmail.com</a></p>
-        </div>
-
-        <nav class="footer-nav">
-          <ul>
-            <template id="nav-item-template">
-              <li><a class="footer-a" href="{HREF}">{LABEL}</a></li>
-            </template>
-          </ul>
-        </nav>
-
-        <div class="footer-social">
-          <a class="footer-a" href="https://github.com/mokubo1228-hub" target="_blank">
-            <img src="Image/review-icon.png" alt="Review">
-          </a>
-          <a class="footer-a" href="https://twitter.com" target="_blank">
-            <img src="Image/x-icon.png" alt="X">
-          </a>
-          <a class="footer-a" href="https://github.com" target="_blank">
-            <img src="Image/Github-icon.png" alt="GitHub">
-          </a> 
-          <a class="footer-a" href="https://linkedin.com" target="_blank">
-            <img src="Image/linkedin-icon.png" alt="LinkedIn">
-          </a>
-        </div>
-      </footer>
-
-  <script src="Script/common.js"></script>
+<?php include __DIR__ . '/includes/footer.php'; ?>
 
 </body>
 </html>
