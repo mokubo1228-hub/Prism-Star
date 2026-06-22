@@ -133,7 +133,8 @@ git diff --check                                              # 余分な空白 
 - `CLAUDE.md`: Claude Code 専用の作業ルール ＋ プロジェクト概要。役割モデルは本ファイルを参照。
 - `docs/START_HERE.md`: **ゼロコンテキスト復帰の入口**（現在地・どこに何があるか・起動・次の作業）。
 - `docs/highlights.md`: **ポートフォリオ読みどころ**（こだわり・横断する判断軸・技術スタックと選定理由）。ADR/spec への索引。
-- `docs/spec.md`: **技術仕様書**（技術スタック・アーキテクチャ・データモデル・API・要件・セキュリティ）。
+- `docs/spec.md`: **技術仕様書**（v1 現状：技術スタック・アーキテクチャ・データモデル・API・要件・セキュリティ）。
+- `docs/requirements-v2.md`: **v2 要件定義**（動線・画面・データモデル差分・API 差分・可視性ルール）。
 - `docs/roadmap.md`: **実装計画**（フェーズ分割と進捗状態）。
 - `docs/decisions.md`: **意思決定ログ**（ADR-lite。背景 / 決定 / 理由 / 代替案）。
 - `docs/phase-*-handoff.md`: 各フェーズの Codex 向け実装指示（§5 の handoff contract に従う）。

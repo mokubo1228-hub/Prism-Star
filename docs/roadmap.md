@@ -5,7 +5,8 @@
 - 粒度の細かいタスク：`PROJECT.md`「今後の課題」
 - 各フェーズの Codex 向け実装指示：`docs/phase-*-handoff.md`
 - 重要な意思決定と理由：`docs/decisions.md`
-- 技術仕様：`docs/spec.md`
+- 技術仕様（v1 現状）：`docs/spec.md`
+- v2 の要件・動線：`docs/requirements-v2.md`
 - 役割・フロー：`docs/ai-roles-and-workflow.md`
 
 状態凡例：✅ 完了 / 🚧 進行中 / ⬜ 未着手
@@ -58,9 +59,29 @@ Codex 実装（`docs/phase-5-handoff.md`）・Claude Code review 済（冪等/40
 ## Phase 6 — PHP 部品化リファクタ（header/footer 共通化）⬜
 ページを `.php` 化し、header/footer（と head）を `public/includes/*.php` の partial に1箇所化（[ADR-012](decisions.md)）。挙動は不変の構造リファクタ。`base.html` はなごりとして保持。handoff：`docs/phase-6-handoff.md`。
 
-## Phase 7 — 今後の発展 ⬜
-- 画像ファイルのアップロード（現在は外部 URL に対応）、一覧のページネーション。
-- ブランド表現（虹色テーマ）の作り込み、取り込んだ GitHub リポジトリの永続化、fork 除外。
+---
+
+> 📐 **ここから v2**（マイページ・公開非公開・作品作成/編集・タグ・検索）。要件の全体像は `docs/requirements-v2.md`。
+
+## Phase 7 — 公開 / 非公開（可視性の土台）⬜
+作品に公開/非公開の2状態を持たせる（[ADR-014](decisions.md)）。`gallery.visibility`（既定 公開）を冪等 migration で追加 ＋ **一覧・検索・ユーザーページの全 SELECT に公開フィルタ**、詳細は「公開＝誰でも／非公開＝本人のみ」。作成時に可視性を選べる・後から切替可。**非公開を所有者以外に返さない**ことが核。
+
+## Phase 8 — マイページ（管理画面）＋ 作品作成 / 編集 ⬜
+本人専用のマイページ（=管理画面）を公開プロフィール（ユーザーページ）と別に新設（[ADR-013](decisions.md)）。本人の**全作品（非公開含む）**一覧＋新規作成・編集・削除・公開切替・GitHub 設定。作成/編集はモーダルから**専用フォーム画面**へ格上げ。ユーザーページ（`profile.php`）は**公開作品のみ**に整理。
+
+## Phase 9 — 画像アップロード ⬜
+作品画像をサーバ保存に対応（[ADR-015](decisions.md)）。`public/uploads/` 保存・`src` にパス。MIME/拡張子/サイズ検証・ファイル名サーバ生成（safety invariant 追加）。作成/編集フォームに統合（外部 URL も併存可）。
+
+## Phase 10 — タグ ⬜
+作品にタグを付与（[ADR-017](decisions.md)）。`tags` ＋ `gallery_tags`（多対多）。作成/編集にタグ入力、詳細/カードにタグ表示。
+
+## Phase 11 — 検索 ⬜
+検索画面 `search.php`（`docs/requirements-v2.md` §6）。ワード（タイトル/説明）＋タグで**公開作品**を検索（**自分の作品は除く**）、ユーザー（名前/GitHub）検索。
+
+## 今後の発展（ロードマップ）⬜
+- 一覧のページネーション、ブランド表現（虹色テーマ）の作り込み。
+- GitHub 連携の発展：取り込み作品の永続化・fork 除外（現状は表示レイヤー＝[ADR-016](decisions.md)）。
+- 登録の同時実行に対する堅牢化、username / slug の導入。
 
 ---
 
