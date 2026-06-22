@@ -42,6 +42,59 @@ a {
     gap: 12px;
     margin-left: auto;
   }
+
+  .header-auth-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 12px;
+  }
+
+  .auth-guest-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .auth-action {
+    border: 1px solid rgba(255, 255, 255, 0.78);
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.9rem;
+    line-height: 1;
+    padding: 10px 12px;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .auth-action-login,
+  .auth-action-logout {
+    background: rgba(255, 255, 255, 0.14);
+  }
+
+  .auth-action-register {
+    background: #fff;
+    color: royalblue;
+  }
+
+  .auth-action-logout {
+    font-family: inherit;
+  }
+
+  .auth-action:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+
+  .auth-action-register:hover {
+    background: #eef4ff;
+  }
+
+  .auth-action[hidden],
+  .auth-guest-actions[hidden] {
+    display: none;
+  }
+
   .nav-icon {
     text-align: center;
     margin-bottom: 40px;
@@ -159,6 +212,7 @@ a {
   text-decoration: none;
   transition: background 0.3s, transform 0.2s;
   margin-right: 1%;
+  margin-left: 12px;
 }
 
 .add-post-btn:hover {
@@ -175,8 +229,42 @@ a {
   
   @media (max-width: 480px){
     .header-inner { 
-      flex-direction: column; 
+      flex-wrap: wrap;
+      height: auto;
+      min-height: 100px;
+      row-gap: 8px;
+      padding: 8px 0;
     }
+
+    .site-brand {
+      position: static;
+      transform: none;
+      order: 2;
+      width: 100%;
+    }
+
+    .header-menu {
+      margin-left: 0;
+      order: 1;
+    }
+
+    .header-auth-actions {
+      margin-left: auto;
+      margin-right: 1%;
+      order: 1;
+    }
+
+    .auth-action {
+      font-size: 0.82rem;
+      padding: 8px 9px;
+    }
+
+    .add-post-btn {
+      height: 44px;
+      margin-left: 8px;
+      order: 1;
+    }
+
     .icon { 
       width: 48px; 
       height: 48px; 

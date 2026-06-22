@@ -9,12 +9,24 @@ function updateStarButton(button, starCount, starred) {
 }
 
 function toggleStar(item, button) {
+  if (!document.body.classList.contains("is-authed")) {
+    if (confirm("スターを付けるにはログインが必要です。ログインページへ移動しますか？")) {
+      window.location.href = "login.php";
+    }
+    return;
+  }
+
   const starred = button.dataset.starred === "true";
   const method = starred ? "DELETE" : "POST";
 
   fetch(`/api/stars.php?gallery_id=${encodeURIComponent(item.id)}`, { method })
     .then(res => {
-      if (res.status === 401) throw new Error("スターを付けるにはログインが必要です。");
+      if (res.status === 401) {
+        if (confirm("スターを付けるにはログインが必要です。ログインページへ移動しますか？")) {
+          window.location.href = "login.php";
+        }
+        throw new Error("");
+      }
       if (!res.ok) return res.json().then(d => { throw new Error(d.error); });
       return res.json();
     })
@@ -23,7 +35,9 @@ function toggleStar(item, button) {
       item.starred = data.starred;
       updateStarButton(button, data.star_count, data.starred);
     })
-    .catch(err => alert(err.message));
+    .catch(err => {
+      if (err.message) alert(err.message);
+    });
 }
 
 function renderItem(item, prepend = false) {

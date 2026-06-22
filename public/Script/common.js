@@ -1,5 +1,4 @@
 const navItems = [
-  { href: 'login.php', label: 'Login' },
   { href: 'gallery-list.php', label: 'Gallery' },
   { href: 'form.php', label: 'Contact' },
   { href: 'policy.php', label: 'Privacy Policy' }
@@ -40,15 +39,15 @@ async function applyAuthState() {
   const addBtn = document.querySelector('.add-post-btn');
   if (addBtn) addBtn.style.display = loggedIn ? 'flex' : 'none';
 
-  // ナビの「Login」リンクを、ログイン中は「Logout」に切り替える
-  if (loggedIn) {
-    document.querySelectorAll('.header-nav a, .footer-nav a').forEach(link => {
-      if (link.getAttribute('href') === 'login.php') {
-        link.textContent = 'Logout';
-        link.href = '#';
-        link.addEventListener('click', handleLogout);
-      }
-    });
+  // ヘッダーの認証アクションは常時見える位置で状態に応じて出し分ける
+  const guestActions = document.querySelector('.auth-guest-actions');
+  const logoutButton = document.querySelector('.auth-action-logout');
+
+  if (guestActions) guestActions.hidden = loggedIn;
+  if (logoutButton) {
+    logoutButton.hidden = !loggedIn;
+    logoutButton.removeEventListener('click', handleLogout);
+    logoutButton.addEventListener('click', handleLogout);
   }
 }
 

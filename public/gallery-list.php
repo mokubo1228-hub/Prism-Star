@@ -9,6 +9,10 @@ include __DIR__ . '/includes/head.php';
 
   <main class="gallery-list">
     <div class="gallery-back">
+      <div class="gallery-list-heading">
+        <h2>みんなの作品</h2>
+        <p>新着</p>
+      </div>
       <section id="gallery" class="gallery-grid">
         <template id="gallery-item-template">
           <article class="gallery-card">
