@@ -53,6 +53,6 @@
         <button type="submit">ログイン</button>
         <p id="authGateError" class="auth-gate-error" hidden></p>
       </form>
-      <p class="auth-gate-register"><a href="register.php">新規登録</a></p>
+      <p class="auth-gate-register"><a href="forgot.php">パスワードをお忘れの場合</a> / <a href="register.php">新規登録</a></p>
     </div>
   </div>
