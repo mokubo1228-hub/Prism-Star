@@ -12,15 +12,15 @@
 }
 
 .gallery-back {
-  /* width: 95%; */
   align-items: center;
   background-color: #fff;
   border: 1px solid #ddd;
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 40px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   margin-top: 30px;
   margin-bottom: 30px;
+  max-width: min(1180px, 96vw);
 }
 
 .gallery-list-heading {
@@ -134,6 +134,17 @@
   color: #92400e;
 }
 
+.tag-list {
+  color: #4b5563;
+  font-size: 0.8rem;
+  margin: 6px 0 0;
+  min-height: 1.2em;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .profile-heading {
   color: #374151;
   margin: 0 20px 4px;
@@ -216,6 +227,109 @@
   padding: 14px;
 }
 
+.search-form {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(180px, 1fr) minmax(140px, 220px) 130px auto;
+  margin: 0 auto 18px;
+  max-width: 860px;
+}
+
+.search-form input,
+.search-form select {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.search-form button,
+.primary-action {
+  background: royalblue;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  padding: 10px 14px;
+  text-align: center;
+}
+
+.user-result-card {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 14px;
+  width: var(--gallery-icon-w);
+}
+
+.user-result-card a {
+  color: royalblue;
+  font-weight: 700;
+}
+
+.user-result-card p,
+.user-result-card span {
+  color: #374151;
+  display: block;
+  margin: 8px 0 0;
+}
+
+.mypage-actions {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 20px;
+}
+
+.mywork-list {
+  display: grid;
+  gap: 14px;
+}
+
+.mywork-card {
+  align-items: center;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 120px minmax(0, 1fr);
+  padding: 12px;
+}
+
+.mywork-card img {
+  aspect-ratio: 4 / 3;
+  border-radius: 6px;
+  object-fit: cover;
+  width: 120px;
+}
+
+.mywork-body h3 {
+  color: #374151;
+  margin: 0;
+}
+
+.mywork-meta {
+  color: #6b7280;
+  margin: 6px 0;
+}
+
+.mywork-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mywork-actions a,
+.mywork-actions button {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  color: #374151;
+  cursor: pointer;
+  padding: 8px 10px;
+}
+
+.mywork-actions .danger-action {
+  border-color: #dc2626;
+  color: #fff;
+}
+
 .github-repo-card a {
   color: royalblue;
   font-weight: 700;
@@ -237,6 +351,24 @@
     --cap-h: 32px;
     --cols: 2;
     --gap: 16px;
+  }
+}
+
+@media (max-width: 760px) {
+  .gallery-back {
+    padding: 24px 12px;
+  }
+
+  .search-form {
+    grid-template-columns: 1fr;
+  }
+
+  .mywork-card {
+    grid-template-columns: 1fr;
+  }
+
+  .mywork-card img {
+    width: 100%;
   }
 }
 

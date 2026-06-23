@@ -99,6 +99,19 @@
     color:#374151;
   }
 
+  .edit-work-link {
+    background: royalblue;
+    border-radius: 8px;
+    color: #fff;
+    padding: 8px 14px;
+  }
+
+  .detail-meta {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin: 8px 0 0;
+  }
+
   .delete-work-btn {
     border: 0;
     border-radius: 8px;

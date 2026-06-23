@@ -60,12 +60,18 @@
 }
 
 .login-box input[type="email"],
-.login-box input[type="password"]{
+.login-box input[type="password"],
+.login-box input[type="text"],
+.login-box input[type="url"],
+.login-box input[type="file"],
+.login-box textarea,
+.login-box select{
   width:100%;
   padding:12px;
   border:1px solid #d1d5db;
   border-radius:10px;
   outline:none;
+  font: inherit;
 }
 
 .login-box input:focus{ 
@@ -103,4 +109,42 @@
   color: #b91c1c;
   margin: 14px 0 0;
   text-align: center;
+}
+
+.form-message {
+  color: #166534;
+  margin: 14px 0 0;
+  text-align: center;
+}
+
+.work-edit-box label {
+  color: #374151;
+  font-weight: 700;
+}
+
+.work-edit-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.work-edit-actions button[type="submit"] {
+  flex: 1 1 160px;
+  margin-top: 0;
+}
+
+.work-edit-actions a {
+  color: royalblue;
+  padding: 10px 12px;
+}
+
+.danger-action {
+  background: #dc2626;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  padding: 10px 12px;
 }

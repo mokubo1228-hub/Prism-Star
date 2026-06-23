@@ -8,142 +8,74 @@ function updateStarButton(button, starCount, starred) {
   button.dataset.starred = String(starred);
 }
 
-function toggleStar(item, button) {
-  if (!document.body.classList.contains("is-authed")) {
-    if (confirm("スターを付けるにはログインが必要です。ログインページへ移動しますか？")) {
-      window.location.href = "login.php";
-    }
-    return;
-  }
+async function toggleStar(item, button) {
+  if (!await window.PrismAuth.requireAuth(window.location.href)) return;
 
   const starred = button.dataset.starred === "true";
   const method = starred ? "DELETE" : "POST";
 
-  fetch(`/api/stars.php?gallery_id=${encodeURIComponent(item.id)}`, { method })
-    .then(res => {
-      if (res.status === 401) {
-        if (confirm("スターを付けるにはログインが必要です。ログインページへ移動しますか？")) {
-          window.location.href = "login.php";
-        }
-        throw new Error("");
-      }
-      if (!res.ok) return res.json().then(d => { throw new Error(d.error); });
-      return res.json();
-    })
-    .then(data => {
-      item.star_count = data.star_count;
-      item.starred = data.starred;
-      updateStarButton(button, data.star_count, data.starred);
-    })
-    .catch(err => {
-      if (err.message) alert(err.message);
-    });
+  try {
+    const res = await fetch(`/api/stars.php?gallery_id=${encodeURIComponent(item.id)}`, { method });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "スターを更新できませんでした");
+    item.star_count = data.star_count;
+    item.starred = data.starred;
+    updateStarButton(button, data.star_count, data.starred);
+  } catch (err) {
+    alert(err.message);
+  }
 }
 
-function renderItem(item, prepend = false) {
+function renderItem(item) {
   const clone = template.content.cloneNode(true);
 
   const link = clone.querySelector(".work-link");
   link.href = `gallery-detail.php?id=${item.id}`;
+  link.addEventListener("click", async (e) => {
+    e.preventDefault();
+    if (await window.PrismAuth.requireAuth(link.href)) {
+      window.location.href = link.href;
+    }
+  });
 
   const img = clone.querySelector("img");
   img.src = item.src;
   img.alt = item.title;
 
-  const figcaption = clone.querySelector("figcaption");
-  figcaption.textContent = item.title;
+  clone.querySelector("figcaption").textContent = item.title;
 
   const authorLink = clone.querySelector(".author-link");
-  if (authorLink) {
-    authorLink.href = `profile.php?id=${item.user_id}`;
-    authorLink.textContent = `by ${item.author || "Unknown"}`;
-  }
+  authorLink.href = `profile.php?id=${item.user_id}`;
+  authorLink.textContent = `by ${item.author || "Unknown"}`;
+  authorLink.addEventListener("click", async (e) => {
+    e.preventDefault();
+    if (await window.PrismAuth.requireAuth(authorLink.href)) {
+      window.location.href = authorLink.href;
+    }
+  });
+
+  const tagList = clone.querySelector(".tag-list");
+  tagList.textContent = (item.tags || []).map(tag => `#${tag}`).join(" ");
 
   const starButton = clone.querySelector(".star-button");
-  if (starButton) {
-    starButton.dataset.galleryId = item.id;
-    updateStarButton(starButton, item.star_count || 0, Boolean(item.starred));
-    starButton.addEventListener("click", () => toggleStar(item, starButton));
-  }
+  updateStarButton(starButton, item.star_count || 0, Boolean(item.starred));
+  starButton.addEventListener("click", () => toggleStar(item, starButton));
 
-  if (prepend) {
-    gallery.prepend(clone);
-  } else {
-    gallery.appendChild(clone);
-  }
+  gallery.appendChild(clone);
 }
 
-// APIから一覧を取得して描画
 if (template && gallery) {
   fetch("/api/gallery.php")
     .then(res => res.json())
-    .then(data => data.forEach(renderItem))
-    .catch(() => {
-      gallery.innerHTML = "<p>作品の読み込みに失敗しました。</p>";
-    });
-}
-
-// モーダル開閉
-const addBtn = document.querySelector(".add-post-btn");
-const postModal = document.getElementById("postModal");
-const closeBtn = document.querySelector(".modal-close");
-
-if (addBtn && postModal && closeBtn) {
-  addBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    postModal.style.display = "flex";
-  });
-
-  closeBtn.addEventListener("click", () => {
-    postModal.style.display = "none";
-  });
-
-  postModal.addEventListener("click", (e) => {
-    if (e.target === postModal) postModal.style.display = "none";
-  });
-}
-
-// 投稿フォーム
-const postForm = document.getElementById("postForm");
-
-function isSafeUrl(url) {
-  try {
-    const parsed = new URL(url);
-    return ["http:", "https:"].includes(parsed.protocol);
-  } catch {
-    return false;
-  }
-}
-
-if (postForm) {
-  postForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    const title = document.getElementById("postTitle").value.trim();
-    const src = document.getElementById("postImage").value.trim();
-    const desc = document.getElementById("postDesc").value.trim();
-
-    if (!title || !src || !desc) return;
-
-    if (!isSafeUrl(src)) {
-      alert("画像URLはhttp://またはhttps://で始まるURLを入力してください。");
-      return;
-    }
-
-    fetch("/api/gallery.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, src, desc }),
+    .then(data => {
+      gallery.innerHTML = "";
+      if (!Array.isArray(data) || data.length === 0) {
+        gallery.innerHTML = "<p class=\"profile-empty\">公開作品がありません。</p>";
+        return;
+      }
+      data.forEach(renderItem);
     })
-      .then(res => {
-        if (!res.ok) return res.json().then(d => { throw new Error(d.error); });
-        return res.json();
-      })
-      .then(newItem => {
-        renderItem(newItem, true);
-        postModal.style.display = "none";
-        postForm.reset();
-      })
-      .catch(err => alert(err.message));
-  });
+    .catch(() => {
+      gallery.innerHTML = "<p class=\"profile-error\">作品の読み込みに失敗しました。</p>";
+    });
 }

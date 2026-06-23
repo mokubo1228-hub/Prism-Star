@@ -34,9 +34,10 @@ include __DIR__ . '/includes/head.php';
               <button type="submit">ログイン</button>
             </div>
           </form>
+          <p id="loginError" class="form-error" hidden></p>
 
           <p class="login-navigation">
-            <a href="#">パスワードをお忘れの場合</a> /
+            <a href="forgot.php">パスワードをお忘れの場合</a> /
             <a href="register.php">新規登録</a>
           </p>
 

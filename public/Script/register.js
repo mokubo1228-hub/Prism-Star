@@ -1,37 +1,41 @@
 const registerForm = document.getElementById("registerForm");
 const registerError = document.getElementById("registerError");
+const registerMessage = document.getElementById("registerMessage");
 
 function showRegisterError(message) {
   registerError.textContent = message;
   registerError.hidden = false;
 }
 
+function showRegisterMessage(message) {
+  registerMessage.textContent = message;
+  registerMessage.hidden = false;
+}
+
 if (registerForm) {
   registerForm.addEventListener("submit", (e) => {
     e.preventDefault();
     registerError.hidden = true;
-    registerError.textContent = "";
+    registerMessage.hidden = true;
 
-    const name = document.getElementById("register-name").value.trim();
     const email = document.getElementById("register-email").value.trim();
-    const password = document.getElementById("register-password").value;
-
-    if (!name || !email || !password) {
-      showRegisterError("すべての項目を入力してください。");
+    if (!email) {
+      showRegisterError("メールアドレスを入力してください。");
       return;
     }
 
-    fetch("/api/auth.php?action=register", {
+    fetch("/api/auth.php?action=register-request", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ email })
     })
       .then(res => {
         if (!res.ok) return res.json().then(d => { throw new Error(d.error); });
         return res.json();
       })
-      .then(() => {
-        window.location.href = "gallery-list.php";
+      .then(data => {
+        showRegisterMessage(data.message || "確認メールを送信しました。");
+        registerForm.reset();
       })
       .catch(err => showRegisterError(err.message));
   });

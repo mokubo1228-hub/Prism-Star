@@ -6,35 +6,34 @@ include __DIR__ . '/includes/head.php';
 
 <?php include __DIR__ . '/includes/header.php'; ?>
 
-    <main class="gallery-detail-page">
-        <article id="work-detail" class="detail-page">
-          <template id="detail-template">
-            <h1 class="gallery-title">{TITLE}</h1>
-            <figure class="detail-img">
-              <img src="{SRC}" alt="{TITLE}">
-              <figcaption>
-                <h2>{TITLE}</h2>
-                <p class="detail-author">投稿者：<a href="profile.php?id={USER_ID}">{AUTHOR}</a></p>
-                <button type="button" class="star-button detail-star-button" aria-pressed="false">
-                  <span class="star-icon">⭐</span>
-                  <span class="star-count">0</span>
-                </button>
-              </figcaption>
-            </figure>
-            <section>
-              <p class="detail-txt">{DESC}</p>
-            </section>
-            <p class="delete-error" hidden></p>
-            <div class="detail-actions">
-              <button type="button" class="delete-work-btn" hidden>削除</button>
-              <a class="back-menu" href="gallery-list.php">戻る</a>
-            </div>
-          </template>
-        </article>
-    </main>
+  <main class="gallery-detail-page">
+    <article id="work-detail" class="detail-page">
+      <template id="detail-template">
+        <h1 class="gallery-title">{TITLE}</h1>
+        <figure class="detail-img">
+          <img src="{SRC}" alt="{TITLE}">
+          <figcaption>
+            <h2>{TITLE}</h2>
+            <p class="detail-author">投稿者：<a href="profile.php?id={USER_ID}">{AUTHOR}</a></p>
+            <p class="detail-meta"></p>
+            <button type="button" class="star-button detail-star-button" aria-pressed="false">
+              <span class="star-icon">⭐</span>
+              <span class="star-count">0</span>
+            </button>
+          </figcaption>
+        </figure>
+        <section>
+          <p class="detail-txt">{DESC}</p>
+        </section>
+        <div class="detail-actions">
+          <a class="back-menu" href="gallery-list.php">戻る</a>
+          <a class="edit-work-link" href="#" hidden>編集</a>
+        </div>
+      </template>
+    </article>
+  </main>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
-
-    <script src="Script/gallery-detail.js"></script>
+  <script src="Script/gallery-detail.js"></script>
 </body>
 </html>

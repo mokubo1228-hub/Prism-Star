@@ -9,16 +9,16 @@ a {
     background-color: royalblue;
   }
   .header-inner{
-    height: 100px;
+    min-height: 104px;
     display: flex;
     align-items: center;
+    gap: 16px;
     justify-content: space-between;
     position: relative;
+    padding: 10px 14px;
   }
   .site-brand {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    flex: 0 0 auto;
     text-align: center;
   }
 
@@ -41,6 +41,31 @@ a {
     align-items: center;
     gap: 12px;
     margin-left: auto;
+  }
+
+  .header-search {
+    display: flex;
+    flex: 1 1 420px;
+    max-width: 520px;
+    min-width: 220px;
+  }
+
+  .header-search input {
+    border: 1px solid rgba(255, 255, 255, 0.78);
+    border-radius: 8px 0 0 8px;
+    min-width: 0;
+    padding: 10px 12px;
+    width: 100%;
+  }
+
+  .header-search button {
+    background: #111827;
+    border: 1px solid #111827;
+    border-radius: 0 8px 8px 0;
+    color: #fff;
+    cursor: pointer;
+    padding: 10px 14px;
+    white-space: nowrap;
   }
 
   .header-auth-actions {
@@ -93,6 +118,90 @@ a {
   .auth-action[hidden],
   .auth-guest-actions[hidden] {
     display: none;
+  }
+
+  .auth-gate-modal {
+    align-items: center;
+    background: rgba(15, 23, 42, 0.48);
+    backdrop-filter: blur(5px);
+    display: flex;
+    inset: 0;
+    justify-content: center;
+    padding: 20px;
+    position: fixed;
+    z-index: 1200;
+  }
+
+  .auth-gate-modal[hidden] {
+    display: none;
+  }
+
+  .auth-gate-dialog {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
+    color: #111827;
+    max-width: 380px;
+    padding: 24px;
+    position: relative;
+    width: min(100%, 380px);
+  }
+
+  .auth-gate-dialog h2 {
+    color: #111827;
+    margin: 0 0 18px;
+  }
+
+  .auth-gate-dialog label {
+    color: #374151;
+    display: block;
+    font-weight: 700;
+    margin-top: 12px;
+  }
+
+  .auth-gate-dialog input {
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    margin-top: 6px;
+    padding: 10px 12px;
+    width: 100%;
+  }
+
+  .auth-gate-dialog button[type="submit"] {
+    background: royalblue;
+    border: 0;
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+    margin-top: 16px;
+    padding: 11px 14px;
+    width: 100%;
+  }
+
+  .auth-gate-close {
+    background: transparent;
+    border: 0;
+    color: #4b5563;
+    cursor: pointer;
+    font-size: 28px;
+    line-height: 1;
+    position: absolute;
+    right: 14px;
+    top: 10px;
+  }
+
+  .auth-gate-register {
+    margin: 16px 0 0;
+    text-align: center;
+  }
+
+  .auth-gate-register a {
+    color: royalblue;
+  }
+
+  .auth-gate-error {
+    color: #b91c1c;
+    margin: 12px 0 0;
   }
 
   .nav-icon {
@@ -198,36 +307,7 @@ a {
     opacity: 1;
   }
 
-  /* 新規投稿ボタン */
-.add-post-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 70%;                 /* ヘッダーの高さに対して70% */
-  aspect-ratio: 1 / 1;
-  border-radius: 50%;
-  background-color: #333;
-  color: #fff;
-  font-size: 100%;
-  text-decoration: none;
-  transition: background 0.3s, transform 0.2s;
-  margin-right: 1%;
-  margin-left: 12px;
-}
-
-.add-post-btn:hover {
-  background-color: #555;
-  transform: scale(1.05);
-}
-
-.add-post-btn span {
-  font-size: 2.2em;            /* 👈 大きめ（前は1.5emくらい） */
-  font-weight: 300;
-  line-height: 1;
-  margin-top: -2%;
-}
-  
-  @media (max-width: 480px){
+  @media (max-width: 760px){
     .header-inner { 
       flex-wrap: wrap;
       height: auto;
@@ -239,8 +319,8 @@ a {
     .site-brand {
       position: static;
       transform: none;
-      order: 2;
-      width: 100%;
+      order: 1;
+      width: calc(100% - 80px);
     }
 
     .header-menu {
@@ -248,21 +328,23 @@ a {
       order: 1;
     }
 
+    .header-search {
+      flex-basis: 100%;
+      max-width: none;
+      order: 3;
+      padding: 0 8px;
+    }
+
     .header-auth-actions {
-      margin-left: auto;
-      margin-right: 1%;
-      order: 1;
+      margin: 0 8px;
+      order: 4;
+      width: 100%;
+      justify-content: center;
     }
 
     .auth-action {
       font-size: 0.82rem;
       padding: 8px 9px;
-    }
-
-    .add-post-btn {
-      height: 44px;
-      margin-left: 8px;
-      order: 1;
     }
 
     .icon { 

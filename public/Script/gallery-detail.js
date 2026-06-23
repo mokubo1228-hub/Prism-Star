@@ -3,42 +3,11 @@ const id = params.get("id");
 const container = document.getElementById("work-detail");
 const template = document.getElementById("detail-template");
 
-function showError() {
+function showError(message = "指定された作品が見つかりません。") {
   container.innerHTML = `
-    <p>指定された作品が見つかりません。</p>
+    <p>${message}</p>
     <div class="detail-actions"><a class="back-menu" href="gallery-list.php">ギャラリーへ戻る</a></div>
   `;
-}
-
-async function fetchStatus() {
-  try {
-    const res = await fetch("/api/auth.php?action=status");
-    if (!res.ok) return { loggedIn: false };
-    return await res.json();
-  } catch {
-    return { loggedIn: false };
-  }
-}
-
-async function deleteWork(errorEl) {
-  errorEl.hidden = true;
-  errorEl.textContent = "";
-
-  try {
-    const res = await fetch(`/api/gallery.php?id=${encodeURIComponent(id)}`, {
-      method: "DELETE",
-    });
-
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      throw new Error(data.error || "削除に失敗しました。");
-    }
-
-    window.location.href = "gallery-list.php";
-  } catch (err) {
-    errorEl.textContent = err.message;
-    errorEl.hidden = false;
-  }
 }
 
 function updateStarButton(button, starCount, starred) {
@@ -48,83 +17,75 @@ function updateStarButton(button, starCount, starred) {
   button.dataset.starred = String(starred);
 }
 
-function toggleStar(work, button) {
-  if (!document.body.classList.contains("is-authed")) {
-    if (confirm("スターを付けるにはログインが必要です。ログインページへ移動しますか？")) {
-      window.location.href = "login.php";
-    }
-    return;
-  }
+async function toggleStar(work, button) {
+  if (!await window.PrismAuth.requireAuth(window.location.href)) return;
 
   const starred = button.dataset.starred === "true";
   const method = starred ? "DELETE" : "POST";
 
-  fetch(`/api/stars.php?gallery_id=${encodeURIComponent(work.id)}`, { method })
-    .then(res => {
-      if (res.status === 401) {
-        if (confirm("スターを付けるにはログインが必要です。ログインページへ移動しますか？")) {
-          window.location.href = "login.php";
-        }
-        throw new Error("");
-      }
-      if (!res.ok) return res.json().then(d => { throw new Error(d.error); });
-      return res.json();
-    })
-    .then(data => {
-      work.star_count = data.star_count;
-      work.starred = data.starred;
-      updateStarButton(button, data.star_count, data.starred);
-    })
-    .catch(err => {
-      if (err.message) alert(err.message);
-    });
+  try {
+    const res = await fetch(`/api/stars.php?gallery_id=${encodeURIComponent(work.id)}`, { method });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "スターを更新できませんでした");
+    work.star_count = data.star_count;
+    work.starred = data.starred;
+    updateStarButton(button, data.star_count, data.starred);
+  } catch (err) {
+    alert(err.message);
+  }
 }
 
-if (!id || !template) {
-  showError();
-} else {
-  Promise.all([
-    fetch(`/api/gallery.php?id=${encodeURIComponent(id)}`).then(res => {
-      if (!res.ok) throw new Error();
-      return res.json();
-    }),
-    fetchStatus(),
-  ])
-    .then(([work, status]) => {
-      const clone = template.content.cloneNode(true);
+async function loadDetail() {
+  await window.PrismAuth.ready;
+  if (!await window.PrismAuth.requireAuth(window.location.href)) {
+    showError("ログインすると作品詳細を表示できます。");
+    return;
+  }
 
-      clone.querySelector("h1").textContent = work.title;
+  if (!id || !template) {
+    showError();
+    return;
+  }
 
-      const img = clone.querySelector("img");
-      img.src = work.src;
-      img.alt = work.title;
+  try {
+    const res = await fetch(`/api/gallery.php?id=${encodeURIComponent(id)}`);
+    const work = await res.json();
+    if (!res.ok) throw new Error(work.error || "作品が見つかりません");
 
-      clone.querySelector("figcaption h2").textContent = work.title;
-      clone.querySelector(".detail-txt").textContent = work.desc;
+    const clone = template.content.cloneNode(true);
+    clone.querySelector("h1").textContent = work.title;
 
-      const authorLink = clone.querySelector(".detail-author a");
-      if (authorLink) {
-        authorLink.href = `profile.php?id=${work.user_id}`;
-        authorLink.textContent = work.author || "Unknown";
-      }
+    const img = clone.querySelector("img");
+    img.src = work.src;
+    img.alt = work.title;
 
-      const starButton = clone.querySelector(".star-button");
-      if (starButton) {
-        updateStarButton(starButton, work.star_count || 0, Boolean(work.starred));
-        starButton.addEventListener("click", () => toggleStar(work, starButton));
-      }
+    clone.querySelector("figcaption h2").textContent = work.title;
+    clone.querySelector(".detail-txt").textContent = work.desc || "";
 
-      const deleteBtn = clone.querySelector(".delete-work-btn");
-      const deleteError = clone.querySelector(".delete-error");
-      const userId = Number(status.user?.id);
-      const ownerId = Number(work.user_id);
+    const authorLink = clone.querySelector(".detail-author a");
+    authorLink.href = `profile.php?id=${work.user_id}`;
+    authorLink.textContent = work.author || "Unknown";
 
-      if (status.loggedIn && userId === ownerId) {
-        deleteBtn.hidden = false;
-        deleteBtn.addEventListener("click", () => deleteWork(deleteError));
-      }
+    const meta = clone.querySelector(".detail-meta");
+    const tags = (work.tags || []).map(tag => `#${tag}`).join(" ");
+    meta.textContent = `${work.visibility === "private" ? "非公開" : "公開"} ${tags}`;
 
-      container.appendChild(clone);
-    })
-    .catch(showError);
+    const starButton = clone.querySelector(".star-button");
+    updateStarButton(starButton, work.star_count || 0, Boolean(work.starred));
+    starButton.addEventListener("click", () => toggleStar(work, starButton));
+
+    const editLink = clone.querySelector(".edit-work-link");
+    if (work.is_owner) {
+      editLink.hidden = false;
+      editLink.href = `work-edit.php?id=${work.id}`;
+      editLink.textContent = "編集";
+    }
+
+    container.innerHTML = "";
+    container.appendChild(clone);
+  } catch (err) {
+    showError(err.message);
+  }
 }
+
+loadDetail();

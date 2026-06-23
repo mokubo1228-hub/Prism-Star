@@ -8,122 +8,313 @@ $pdo = getDb();
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? '';
 
-// ---------- GET: ログイン状態確認 ----------
-if ($method === 'GET' && $action === 'status') {
-    if (!empty($_SESSION['user_id'])) {
-        echo json_encode([
-            'loggedIn' => true,
-            'user'     => [
-                'id'    => $_SESSION['user_id'],
-                'email' => $_SESSION['user_email'],
-                'name'  => $_SESSION['user_name'],
-            ],
-        ]);
-    } else {
-        echo json_encode(['loggedIn' => false]);
-    }
+function authJson(array $payload, int $status = 200): void
+{
+    http_response_code($status);
+    echo json_encode($payload, JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-// ---------- POST: ログイン / ログアウト ----------
-if ($method === 'POST') {
-    if ($action === 'logout') {
-        $_SESSION = [];
-        session_destroy();
-        echo json_encode(['ok' => true]);
-        exit;
-    }
-
-    if ($action === 'register') {
-        $data = json_decode(file_get_contents('php://input'), true);
-        $email    = trim($data['email'] ?? '');
-        $password = $data['password'] ?? '';
-        $name     = trim($data['name'] ?? '');
-
-        if ($name === '') {
-            http_response_code(400);
-            echo json_encode(['error' => '名前を入力してください']);
-            exit;
-        }
-
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            http_response_code(400);
-            echo json_encode(['error' => 'メールアドレスの形式が正しくありません']);
-            exit;
-        }
-
-        if (strlen($password) < 8) {
-            http_response_code(400);
-            echo json_encode(['error' => 'パスワードは8文字以上で入力してください']);
-            exit;
-        }
-
-        $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
-        $stmt->execute([$email]);
-        if ($stmt->fetch()) {
-            http_response_code(409);
-            echo json_encode(['error' => 'このメールアドレスは既に登録されています']);
-            exit;
-        }
-
-        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-        $stmt = $pdo->prepare("INSERT INTO users (email, password_hash, name) VALUES (?, ?, ?)");
-        $stmt->execute([$email, $passwordHash, $name]);
-
-        $userId = (int)$pdo->lastInsertId();
-        session_regenerate_id(true);
-        $_SESSION['user_id']    = $userId;
-        $_SESSION['user_email'] = $email;
-        $_SESSION['user_name']  = $name;
-
-        echo json_encode([
-            'ok'   => true,
-            'user' => [
-                'id'    => $userId,
-                'email' => $email,
-                'name'  => $name,
-            ],
-        ]);
-        exit;
-    }
-
-    if ($action === 'login') {
-        $data = json_decode(file_get_contents('php://input'), true);
-        $email    = trim($data['email'] ?? '');
-        $password = $data['password'] ?? '';
-
-        if ($email === '' || $password === '') {
-            http_response_code(400);
-            echo json_encode(['error' => 'IDとパスワードを入力してください']);
-            exit;
-        }
-
-        $stmt = $pdo->prepare("SELECT id, email, password_hash, name FROM users WHERE email = ?");
-        $stmt->execute([$email]);
-        $user = $stmt->fetch();
-
-        if (!$user || !password_verify($password, $user['password_hash'])) {
-            http_response_code(401);
-            echo json_encode(['error' => 'メールアドレスまたはパスワードが正しくありません']);
-            exit;
-        }
-
-        session_regenerate_id(true);
-        $_SESSION['user_id']    = $user['id'];
-        $_SESSION['user_email'] = $user['email'];
-        $_SESSION['user_name']  = $user['name'];
-
-        echo json_encode([
-            'ok'   => true,
-            'user' => [
-                'id'    => $user['id'],
-                'email' => $user['email'],
-                'name'  => $user['name'],
-            ],
-        ]);
-        exit;
-    }
+function readJsonBody(): array
+{
+    $data = json_decode(file_get_contents('php://input'), true);
+    return is_array($data) ? $data : [];
 }
 
-http_response_code(400);
-echo json_encode(['error' => '不正なリクエストです']);
+function smtpRead($socket): string
+{
+    $response = '';
+    while (($line = fgets($socket, 512)) !== false) {
+        $response .= $line;
+        if (strlen($line) >= 4 && $line[3] === ' ') {
+            break;
+        }
+    }
+    return $response;
+}
+
+function smtpCommand($socket, string $command): void
+{
+    fwrite($socket, $command . "\r\n");
+    smtpRead($socket);
+}
+
+function sendTokenMail(string $email, string $subject, string $body): bool
+{
+    $host = getenv('SMTP_HOST') ?: 'mailhog';
+    $port = (int)(getenv('SMTP_PORT') ?: 1025);
+    $from = getenv('MAIL_FROM') ?: 'no-reply@prismstar.local';
+
+    $socket = @fsockopen($host, $port, $errno, $errstr, 5);
+    if (!$socket) {
+        return false;
+    }
+
+    smtpRead($socket);
+    smtpCommand($socket, 'HELO prismstar.local');
+    smtpCommand($socket, 'MAIL FROM:<' . $from . '>');
+    smtpCommand($socket, 'RCPT TO:<' . $email . '>');
+    smtpCommand($socket, 'DATA');
+
+    $message = [
+        'From: PrismStar <' . $from . '>',
+        'To: <' . $email . '>',
+        'Subject: ' . str_replace(["\r", "\n"], '', $subject),
+        'Content-Type: text/plain; charset=UTF-8',
+        '',
+        $body,
+    ];
+    $payload = str_replace("\n.", "\n..", implode("\r\n", $message));
+    fwrite($socket, $payload . "\r\n.\r\n");
+    smtpRead($socket);
+    smtpCommand($socket, 'QUIT');
+    fclose($socket);
+
+    return true;
+}
+
+function appUrl(): string
+{
+    return rtrim(getenv('APP_URL') ?: 'http://localhost:8080', '/');
+}
+
+function sendVerificationMail(string $email, string $token): bool
+{
+    $verifyUrl = appUrl() . '/verify.php?token=' . rawurlencode($token);
+    $body = "PrismStarの登録を続けるには、以下のURLを開いてください。\r\n\r\n"
+        . $verifyUrl . "\r\n\r\n"
+        . "このURLの有効期限は24時間です。";
+
+    return sendTokenMail($email, 'PrismStar registration verification', $body);
+}
+
+function sendResetMail(string $email, string $token): bool
+{
+    $resetUrl = appUrl() . '/reset.php?token=' . rawurlencode($token);
+    $body = "PrismStarのパスワードを再設定するには、以下のURLを開いてください。\r\n\r\n"
+        . $resetUrl . "\r\n\r\n"
+        . "このURLの有効期限は1時間です。";
+
+    return sendTokenMail($email, 'PrismStar password reset', $body);
+}
+
+if ($method === 'GET' && $action === 'status') {
+    if (!empty($_SESSION['user_id'])) {
+        authJson([
+            'loggedIn' => true,
+            'user' => [
+                'id' => (int)$_SESSION['user_id'],
+                'email' => $_SESSION['user_email'],
+                'name' => $_SESSION['user_name'],
+            ],
+        ]);
+    }
+    authJson(['loggedIn' => false]);
+}
+
+if ($method !== 'POST') {
+    authJson(['error' => '不正なリクエストです'], 400);
+}
+
+if ($action === 'logout') {
+    $_SESSION = [];
+    session_destroy();
+    authJson(['ok' => true]);
+}
+
+if ($action === 'login') {
+    $data = readJsonBody();
+    $email = trim((string)($data['email'] ?? ''));
+    $password = (string)($data['password'] ?? '');
+
+    if ($email === '' || $password === '') {
+        authJson(['error' => 'IDとパスワードを入力してください'], 400);
+    }
+
+    $stmt = $pdo->prepare("SELECT id, email, password_hash, name FROM users WHERE email = ?");
+    $stmt->execute([$email]);
+    $user = $stmt->fetch();
+
+    if (!$user || !password_verify($password, $user['password_hash'])) {
+        authJson(['error' => 'メールアドレスまたはパスワードが正しくありません'], 401);
+    }
+
+    session_regenerate_id(true);
+    $_SESSION['user_id'] = (int)$user['id'];
+    $_SESSION['user_email'] = $user['email'];
+    $_SESSION['user_name'] = $user['name'];
+
+    authJson([
+        'ok' => true,
+        'user' => [
+            'id' => (int)$user['id'],
+            'email' => $user['email'],
+            'name' => $user['name'],
+        ],
+    ]);
+}
+
+if ($action === 'register-request') {
+    $data = readJsonBody();
+    $email = trim((string)($data['email'] ?? ''));
+    $neutral = ['ok' => true, 'message' => '登録できる場合は確認メールを送信しました。'];
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        authJson(['error' => 'メールアドレスの形式が正しくありません'], 400);
+    }
+
+    $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+    $stmt->execute([$email]);
+    if ($stmt->fetch()) {
+        authJson($neutral);
+    }
+
+    $token = bin2hex(random_bytes(32));
+    $tokenHash = hash('sha256', $token);
+    $expiresAt = (new DateTimeImmutable('+24 hours'))->format('Y-m-d H:i:s');
+
+    $pdo->beginTransaction();
+    try {
+        $delete = $pdo->prepare("DELETE FROM pending_registrations WHERE email = ?");
+        $delete->execute([$email]);
+        $insert = $pdo->prepare("INSERT INTO pending_registrations (email, token_hash, expires_at) VALUES (?, ?, ?)");
+        $insert->execute([$email, $tokenHash, $expiresAt]);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        $pdo->rollBack();
+        throw $e;
+    }
+
+    if (!sendVerificationMail($email, $token)) {
+        error_log('Registration verification mail send failed for ' . $email);
+    }
+
+    authJson($neutral);
+}
+
+if ($action === 'register-complete') {
+    $data = readJsonBody();
+    $token = trim((string)($data['token'] ?? ''));
+    $name = trim((string)($data['name'] ?? ''));
+    $password = (string)($data['password'] ?? '');
+
+    if ($token === '' || $name === '' || strlen($password) < 8) {
+        authJson(['error' => '表示名と8文字以上のパスワードを入力してください'], 400);
+    }
+
+    $tokenHash = hash('sha256', $token);
+    $stmt = $pdo->prepare("SELECT id, email FROM pending_registrations WHERE token_hash = ? AND expires_at > NOW()");
+    $stmt->execute([$tokenHash]);
+    $pending = $stmt->fetch();
+    if (!$pending) {
+        authJson(['error' => '確認URLが無効または期限切れです'], 400);
+    }
+
+    $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+    $stmt->execute([$pending['email']]);
+    if ($stmt->fetch()) {
+        $pdo->prepare("DELETE FROM pending_registrations WHERE id = ?")->execute([$pending['id']]);
+        authJson(['error' => 'このメールアドレスは既に登録されています'], 409);
+    }
+
+    $pdo->beginTransaction();
+    try {
+        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+        $insert = $pdo->prepare("INSERT INTO users (email, password_hash, name) VALUES (?, ?, ?)");
+        $insert->execute([$pending['email'], $passwordHash, $name]);
+        $userId = (int)$pdo->lastInsertId();
+        $pdo->prepare("DELETE FROM pending_registrations WHERE id = ?")->execute([$pending['id']]);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        $pdo->rollBack();
+        throw $e;
+    }
+
+    session_regenerate_id(true);
+    $_SESSION['user_id'] = $userId;
+    $_SESSION['user_email'] = $pending['email'];
+    $_SESSION['user_name'] = $name;
+
+    authJson([
+        'ok' => true,
+        'user' => [
+            'id' => $userId,
+            'email' => $pending['email'],
+            'name' => $name,
+        ],
+    ]);
+}
+
+if ($action === 'reset-request') {
+    $data = readJsonBody();
+    $email = trim((string)($data['email'] ?? ''));
+    $neutral = ['ok' => true, 'message' => '登録済みの場合は再設定メールを送信しました。'];
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        authJson(['error' => 'メールアドレスの形式が正しくありません'], 400);
+    }
+
+    $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+    $stmt->execute([$email]);
+    $user = $stmt->fetch();
+    if (!$user) {
+        authJson($neutral);
+    }
+
+    $token = bin2hex(random_bytes(32));
+    $tokenHash = hash('sha256', $token);
+    $expiresAt = (new DateTimeImmutable('+1 hour'))->format('Y-m-d H:i:s');
+
+    $pdo->beginTransaction();
+    try {
+        $delete = $pdo->prepare("DELETE FROM password_resets WHERE user_id = ?");
+        $delete->execute([$user['id']]);
+        $insert = $pdo->prepare("INSERT INTO password_resets (user_id, token_hash, expires_at) VALUES (?, ?, ?)");
+        $insert->execute([$user['id'], $tokenHash, $expiresAt]);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        $pdo->rollBack();
+        throw $e;
+    }
+
+    if (!sendResetMail($email, $token)) {
+        error_log('Password reset mail send failed for user_id=' . (int)$user['id']);
+    }
+
+    authJson($neutral);
+}
+
+if ($action === 'reset-complete') {
+    $data = readJsonBody();
+    $token = trim((string)($data['token'] ?? ''));
+    $password = (string)($data['password'] ?? '');
+
+    if ($token === '' || strlen($password) < 8) {
+        authJson(['error' => '8文字以上の新しいパスワードを入力してください'], 400);
+    }
+
+    $tokenHash = hash('sha256', $token);
+    $stmt = $pdo->prepare("SELECT id, user_id FROM password_resets WHERE token_hash = ? AND expires_at > NOW()");
+    $stmt->execute([$tokenHash]);
+    $reset = $stmt->fetch();
+    if (!$reset) {
+        authJson(['error' => '再設定URLが無効または期限切れです'], 400);
+    }
+
+    $pdo->beginTransaction();
+    try {
+        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+        $update = $pdo->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
+        $update->execute([$passwordHash, $reset['user_id']]);
+        $delete = $pdo->prepare("DELETE FROM password_resets WHERE id = ?");
+        $delete->execute([$reset['id']]);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        $pdo->rollBack();
+        throw $e;
+    }
+
+    authJson(['ok' => true, 'message' => 'パスワードを再設定しました。ログインしてください。']);
+}
+
+authJson(['error' => '不正なリクエストです'], 400);

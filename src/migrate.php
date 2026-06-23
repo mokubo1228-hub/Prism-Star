@@ -3,31 +3,39 @@ require_once __DIR__ . '/db.php';
 
 $pdo = getDb();
 
-$stmt = $pdo->prepare("
-    SELECT COUNT(*)
-    FROM information_schema.COLUMNS
-    WHERE TABLE_SCHEMA = DATABASE()
-      AND TABLE_NAME = 'users'
-      AND COLUMN_NAME = 'github_username'
-");
-$stmt->execute();
+function columnExists(PDO $pdo, string $table, string $column): bool
+{
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*)
+        FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = ?
+          AND COLUMN_NAME = ?
+    ");
+    $stmt->execute([$table, $column]);
+    return (int)$stmt->fetchColumn() > 0;
+}
 
-if ((int)$stmt->fetchColumn() === 0) {
+function tableExists(PDO $pdo, string $table): bool
+{
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*)
+        FROM information_schema.TABLES
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = ?
+    ");
+    $stmt->execute([$table]);
+    return (int)$stmt->fetchColumn() > 0;
+}
+
+if (!columnExists($pdo, 'users', 'github_username')) {
     $pdo->exec("ALTER TABLE users ADD COLUMN github_username VARCHAR(100) NULL AFTER name");
     echo "Added users.github_username\n";
 } else {
     echo "users.github_username already exists\n";
 }
 
-$stmt = $pdo->prepare("
-    SELECT COUNT(*)
-    FROM information_schema.TABLES
-    WHERE TABLE_SCHEMA = DATABASE()
-      AND TABLE_NAME = 'stars'
-");
-$stmt->execute();
-
-if ((int)$stmt->fetchColumn() === 0) {
+if (!tableExists($pdo, 'stars')) {
     $pdo->exec("
         CREATE TABLE stars (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -42,4 +50,74 @@ if ((int)$stmt->fetchColumn() === 0) {
     echo "Added stars table\n";
 } else {
     echo "stars table already exists\n";
+}
+
+if (!columnExists($pdo, 'gallery', 'visibility')) {
+    $pdo->exec("ALTER TABLE gallery ADD COLUMN visibility ENUM('public','private') NOT NULL DEFAULT 'public' AFTER description");
+    echo "Added gallery.visibility\n";
+} else {
+    echo "gallery.visibility already exists\n";
+}
+
+if (!tableExists($pdo, 'tags')) {
+    $pdo->exec("
+        CREATE TABLE tags (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(80) NOT NULL UNIQUE,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ");
+    echo "Added tags table\n";
+} else {
+    echo "tags table already exists\n";
+}
+
+if (!tableExists($pdo, 'gallery_tags')) {
+    $pdo->exec("
+        CREATE TABLE gallery_tags (
+            gallery_id INT NOT NULL,
+            tag_id INT NOT NULL,
+            PRIMARY KEY (gallery_id, tag_id),
+            FOREIGN KEY (gallery_id) REFERENCES gallery(id) ON DELETE CASCADE,
+            FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+        )
+    ");
+    echo "Added gallery_tags table\n";
+} else {
+    echo "gallery_tags table already exists\n";
+}
+
+if (!tableExists($pdo, 'pending_registrations')) {
+    $pdo->exec("
+        CREATE TABLE pending_registrations (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            email VARCHAR(255) NOT NULL,
+            token_hash CHAR(64) NOT NULL UNIQUE,
+            expires_at DATETIME NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_pending_email (email),
+            INDEX idx_pending_expires_at (expires_at)
+        )
+    ");
+    echo "Added pending_registrations table\n";
+} else {
+    echo "pending_registrations table already exists\n";
+}
+
+if (!tableExists($pdo, 'password_resets')) {
+    $pdo->exec("
+        CREATE TABLE password_resets (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            token_hash CHAR(64) NOT NULL UNIQUE,
+            expires_at DATETIME NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_password_resets_user_id (user_id),
+            INDEX idx_password_resets_expires_at (expires_at),
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    ");
+    echo "Added password_resets table\n";
+} else {
+    echo "password_resets table already exists\n";
 }

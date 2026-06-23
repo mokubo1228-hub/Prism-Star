@@ -17,24 +17,15 @@ include __DIR__ . '/includes/head.php';
 
       <form id="registerForm">
         <div>
-          <label for="register-name">名前</label>
-          <input id="register-name" name="register-name" type="text" autocomplete="name" placeholder="表示名" required>
-        </div>
-
-        <div class="form-row">
           <label for="register-email">メールアドレス</label>
           <input id="register-email" name="register-email" type="email" autocomplete="email" placeholder="メールアドレス" spellcheck="false" required>
         </div>
 
-        <div class="form-row">
-          <label for="register-password">パスワード</label>
-          <input id="register-password" name="register-password" type="password" autocomplete="new-password" placeholder="8文字以上" required>
-        </div>
-
         <div>
-          <button type="submit">登録する</button>
+          <button type="submit">確認メールを送信</button>
         </div>
 
+        <p id="registerMessage" class="form-message" hidden></p>
         <p id="registerError" class="form-error" hidden></p>
       </form>
 

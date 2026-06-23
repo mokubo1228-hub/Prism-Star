@@ -1,6 +1,3 @@
-<?php
-$showAddPostButton = $showAddPostButton ?? false;
-?>
   <header id="site-header" class="site-header">
     <div class="header-inner">
       <button id="hamburger" class="hamburger">
@@ -11,6 +8,11 @@ $showAddPostButton = $showAddPostButton ?? false;
         <h1 class="site-title"><a href="gallery-list.php">PrismStar</a></h1>
         <p class="site-tagline">Shine in every color.</p>
       </div>
+
+      <form id="headerSearchForm" class="header-search" role="search">
+        <input id="headerSearchInput" type="search" name="q" placeholder="作品・タグ・ユーザーを検索" autocomplete="off">
+        <button type="submit">検索</button>
+      </form>
 
       <nav class="header-menu">
         <ul class="header-nav">
@@ -29,13 +31,28 @@ $showAddPostButton = $showAddPostButton ?? false;
           <a class="auth-action auth-action-login" href="login.php">ログイン</a>
           <a class="auth-action auth-action-register" href="register.php">新規登録</a>
         </div>
+        <a class="auth-action auth-action-mypage" href="mypage.php" hidden>マイページ</a>
         <button type="button" class="auth-action auth-action-logout" hidden>ログアウト</button>
       </div>
-
-<?php if ($showAddPostButton): ?>
-      <a href="#" class="add-post-btn" title="新規投稿" style="display: none;">
-        <span>＋</span>
-      </a>
-<?php endif; ?>
     </div>
   </header>
+
+  <div id="authGateModal" class="auth-gate-modal" hidden>
+    <div class="auth-gate-dialog" role="dialog" aria-modal="true" aria-labelledby="authGateTitle">
+      <button type="button" class="auth-gate-close" aria-label="閉じる">&times;</button>
+      <h2 id="authGateTitle">ログイン</h2>
+      <form id="authGateLoginForm">
+        <label>
+          メールアドレス
+          <input id="authGateEmail" type="email" autocomplete="email" required>
+        </label>
+        <label>
+          パスワード
+          <input id="authGatePassword" type="password" autocomplete="current-password" required>
+        </label>
+        <button type="submit">ログイン</button>
+        <p id="authGateError" class="auth-gate-error" hidden></p>
+      </form>
+      <p class="auth-gate-register"><a href="register.php">新規登録</a></p>
+    </div>
+  </div>
