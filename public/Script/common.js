@@ -1,3 +1,26 @@
+(function () {
+  const meta = document.querySelector('meta[name="csrf-token"]');
+  const token = meta ? meta.content : "";
+  const nativeFetch = window.fetch.bind(window);
+  const mutating = /^(POST|PUT|PATCH|DELETE)$/i;
+
+  window.fetch = function (input, init = {}) {
+    const url = typeof input === "string" ? input : input.url;
+    const method = (init.method || (typeof input !== "string" && input.method) || "GET").toUpperCase();
+    const sameOrigin = !/^https?:\/\//i.test(url) || url.startsWith(window.location.origin);
+
+    if (token && sameOrigin && mutating.test(method)) {
+      const headers = new Headers(init.headers || (typeof input !== "string" ? input.headers : undefined));
+      if (!headers.has("X-CSRF-Token")) {
+        headers.set("X-CSRF-Token", token);
+      }
+      init = { ...init, headers };
+    }
+
+    return nativeFetch(input, init);
+  };
+})();
+
 const navItems = [
   { href: "gallery-list.php", label: "おすすめ" },
   { href: "search.php", label: "検索" },

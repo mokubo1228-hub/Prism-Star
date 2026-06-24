@@ -1,6 +1,8 @@
 <?php
-session_start();
+require_once __DIR__ . '/../../src/session.php';
 require_once __DIR__ . '/../../src/db.php';
+
+bootSession();
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -117,6 +119,8 @@ if ($method === 'GET' && $action === 'status') {
 if ($method !== 'POST') {
     authJson(['error' => '不正なリクエストです'], 400);
 }
+
+requireCsrf();
 
 if ($action === 'logout') {
     $_SESSION = [];

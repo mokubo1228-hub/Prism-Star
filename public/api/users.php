@@ -1,6 +1,8 @@
 <?php
-session_start();
+require_once __DIR__ . '/../../src/session.php';
 require_once __DIR__ . '/../../src/db.php';
+
+bootSession();
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -15,6 +17,8 @@ function usersJson(array $payload, int $status = 200): void
 }
 
 if ($method === 'POST') {
+    requireCsrf();
+
     if (empty($_SESSION['user_id'])) {
         usersJson(['error' => 'ログインが必要です'], 401);
     }

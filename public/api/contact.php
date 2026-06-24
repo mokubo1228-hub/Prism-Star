@@ -1,5 +1,8 @@
 <?php
+require_once __DIR__ . '/../../src/session.php';
 require_once __DIR__ . '/../../src/db.php';
+
+bootSession();
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -8,6 +11,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['error' => '許可されていないメソッドです']);
     exit;
 }
+
+requireCsrf();
 
 $data = json_decode(file_get_contents('php://input'), true);
 

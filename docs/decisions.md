@@ -218,3 +218,14 @@
   - **SQL のパラメータずれ**：`q` 分岐からタグの `EXISTS` を外す際、対応するバインド値（`$like`）も1個減らさないと placeholder と引数の数がずれる。クエリと `execute()` をセットで直した。
   - **ヘッダー select の見切れ**：flex 内で `min-width:0` だと「キーワード」が潰れて切れた。`flex:0 0 auto`（内容幅・縮めない）で解消。
 - **関連**：`docs/search-consolidation-handoff.md`、[ADR-019](decisions.md)（検索バー常設・ゲート）、`public/includes/header.php`、`public/Script/common.js`、`public/search.php`。
+
+## ADR-026 セッション堅牢化＋CSRF 対策 ⬜（優先トラック①）
+- **背景**：マルチユーザーで状態変更 API（投稿/編集/削除・スター・GitHub 取り込み・ログイン/登録/再設定）があるのに、**CSRF 防御が無く、セッション Cookie の属性（SameSite/HttpOnly/Secure）も未設定**だった。`session_start()` は各 API（auth/gallery/users/stars/search）に素で散在。
+- **決定**：
+  1. セッション開始を **`src/session.php` に共通化**し、`session_start()` の前に `SameSite=Lax＋HttpOnly＋Secure(https のとき)＋path=/` を設定（既に開始済みなら二重起動しない）。各 API と `head.php` はこれ経由でセッションを開く。
+  2. セッションに **CSRF トークン**（`bin2hex(random_bytes(32))`）を保持し、**状態変更系（POST/PATCH/DELETE）で `X-CSRF-Token` を `hash_equals` 検証**、不一致は 403。
+  3. `head.php` が `<meta name="csrf-token">` でトークンを配り、`common.js` が **同一オリジンの mutating fetch に自動付与**（`window.fetch` を薄くラップ）。
+- **理由**：**SameSite=Lax だけで cross-site CSRF をほぼ封殺**でき安い。その上でトークンを足して明示的な二重防御にする（レビュアーが必ず見る所で、効果に対し低コスト）。フロントは**ラッパで中央化**し、状態変更 fetch 14 箇所を個別改修せず漏れなくカバーする。正規フローは透過で**挙動不変**。
+- **代替案**：(a) 何もしない→却下。(b) SameSite だけ→最低限だが、トークンまで入れて明示する方が堅く示せる。(c) 各 fetch を個別にトークン付与→付け忘れが出るのでラッパで中央化。
+- **影響**：`src/session.php` 新規、`api/{auth,gallery,users,stars,search,contact}.php` が `session.php` 経由＋状態変更ブランチで `requireCsrf()`、`head.php` に session boot＋meta、`common.js` に fetch ラッパ。挙動は変えない（トークンは透過的に付く）。`session_regenerate_id` 後もトークンは保持。
+- **関連**：`docs/security-hardening-handoff.md`、`src/session.php`、`public/includes/head.php`、`public/Script/common.js`、`docs/roadmap.md`（優先トラック①）。

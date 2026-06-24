@@ -1,6 +1,8 @@
 <?php
-session_start();
+require_once __DIR__ . '/../../src/session.php';
 require_once __DIR__ . '/../../src/db.php';
+
+bootSession();
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -17,6 +19,8 @@ function starsJson(array $payload, int $status = 200): void
 if (!in_array($method, ['POST', 'DELETE'], true)) {
     starsJson(['error' => '許可されていないメソッドです'], 405);
 }
+
+requireCsrf();
 
 if (empty($_SESSION['user_id'])) {
     starsJson(['error' => 'ログインが必要です'], 401);

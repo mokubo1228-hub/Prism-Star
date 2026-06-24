@@ -1,7 +1,9 @@
 <?php
-session_start();
+require_once __DIR__ . '/../../src/session.php';
 require_once __DIR__ . '/../../src/db.php';
 require_once __DIR__ . '/../../src/github_client.php';
+
+bootSession();
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -240,6 +242,10 @@ if ($method === 'GET') {
     $stmt->execute([$userId, $userId]);
     echo json_encode(mapRows($stmt->fetchAll()), JSON_UNESCAPED_UNICODE);
     exit;
+}
+
+if (in_array($method, ['POST', 'PATCH', 'DELETE'], true)) {
+    requireCsrf();
 }
 
 if ($method === 'POST') {
