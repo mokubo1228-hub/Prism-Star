@@ -128,13 +128,41 @@ function bindAuthGate() {
 
 function bindHeaderSearch() {
   const form = document.getElementById("headerSearchForm");
+  const type = document.getElementById("headerSearchType");
   const input = document.getElementById("headerSearchInput");
-  if (!form || !input) return;
+  if (!form || !type || !input) return;
+
+  // search.php 上ではバーに現在の検索を復元する。タグ検索（URL に tag）は対象=作品のまま
+  // 入力を "#タグ" の形に戻し、入力の見た目と検索条件を一致させる。
+  const currentParams = new URLSearchParams(window.location.search);
+  if (window.location.pathname.endsWith("search.php")) {
+    if (currentParams.get("type") === "users") {
+      type.value = "users";
+      input.value = currentParams.get("q") || "";
+    } else if (currentParams.get("tag")) {
+      type.value = "works";
+      input.value = "#" + currentParams.get("tag");
+    } else {
+      type.value = "works";
+      input.value = currentParams.get("q") || "";
+    }
+  }
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const q = input.value.trim();
-    const destination = `search.php?q=${encodeURIComponent(q)}`;
+    const raw = input.value.trim();
+    // 対象はプルダウン（作品/ユーザー）。作品では入力が # 始まりならタグ検索、それ以外は
+    // キーワード（タイトル/説明）。空でも遷移する＝空検索は全件ブラウズ。
+    let destination;
+    if (type.value === "users") {
+      destination = `search.php?type=users&q=${encodeURIComponent(raw)}`;
+    } else if (raw.startsWith("#") || raw.startsWith("＃")) {
+      const tag = raw.replace(/^[#＃]+\s*/, "");
+      destination = `search.php?tag=${encodeURIComponent(tag)}`;
+    } else {
+      destination = `search.php?q=${encodeURIComponent(raw)}`;
+    }
+
     if (await PrismAuth.requireAuth(destination)) {
       window.location.href = destination;
     }

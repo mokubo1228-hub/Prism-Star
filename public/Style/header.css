@@ -50,11 +50,21 @@ a {
     min-width: 220px;
   }
 
+  .header-search select,
   .header-search input {
     border: 1px solid rgba(255, 255, 255, 0.78);
-    border-radius: 8px 0 0 8px;
     min-width: 0;
     padding: 10px 12px;
+  }
+
+  .header-search select {
+    border-radius: 8px 0 0 8px;
+    flex: 0 0 auto;
+  }
+
+  .header-search input {
+    border-left: 0;
+    border-radius: 0;
     width: 100%;
   }
 

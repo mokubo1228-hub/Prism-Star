@@ -1,9 +1,24 @@
-const searchForm = document.getElementById("searchForm");
-const searchQuery = document.getElementById("searchQuery");
-const searchTag = document.getElementById("searchTag");
-const searchType = document.getElementById("searchType");
+const searchHeading = document.getElementById("searchHeading");
 const searchResults = document.getElementById("searchResults");
 const initialParams = new URLSearchParams(window.location.search);
+
+function showSearchMessage(message, className = "profile-empty") {
+  searchResults.textContent = "";
+  const item = document.createElement("p");
+  item.className = className;
+  item.textContent = message;
+  searchResults.appendChild(item);
+}
+
+function currentSearchLabel(params) {
+  if (params.get("type") === "users") {
+    return { type: "users", term: params.get("q") || "", label: "ユーザー" };
+  }
+  if (params.get("tag")) {
+    return { type: "works", term: params.get("tag") || "", label: "タグ" };
+  }
+  return { type: "works", term: params.get("q") || "", label: "キーワード" };
+}
 
 function renderWork(work) {
   const article = document.createElement("article");
@@ -61,48 +76,35 @@ function renderUser(user) {
 }
 
 async function runSearch() {
+  const search = currentSearchLabel(initialParams);
+  if (searchHeading) {
+    // 空検索は「全件ブラウズ」。サーバは q/tag が空なら全公開作品（自分以外）/全ユーザーを返す。
+    searchHeading.textContent = search.term === ""
+      ? (search.type === "users" ? "すべてのユーザー" : "すべての作品")
+      : `${search.label}「${search.term}」の検索結果`;
+  }
+
   await window.PrismAuth.ready;
   if (!await window.PrismAuth.requireAuth(window.location.href)) {
-    searchResults.innerHTML = "<p class=\"profile-empty\">ログインすると検索結果を表示できます。</p>";
+    showSearchMessage("ログインすると検索結果を表示できます。");
     return;
   }
 
-  const params = new URLSearchParams({
-    q: searchQuery.value.trim(),
-    tag: searchTag.value.trim(),
-    type: searchType.value
-  });
-  history.replaceState(null, "", `search.php?${params.toString()}`);
-  searchResults.innerHTML = "<p class=\"profile-empty\">検索中...</p>";
+  showSearchMessage("検索中...");
 
   try {
-    const res = await fetch(`/api/search.php?${params.toString()}`);
+    const res = await fetch(`/api/search.php?${initialParams.toString()}`);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "検索に失敗しました");
-    searchResults.innerHTML = "";
+    searchResults.textContent = "";
     if (!data.results.length) {
-      searchResults.innerHTML = "<p class=\"profile-empty\">結果がありません。</p>";
+      showSearchMessage("結果がありません。");
       return;
     }
     data.results.forEach(data.type === "users" ? renderUser : renderWork);
   } catch (err) {
-    searchResults.innerHTML = "";
-    const message = document.createElement("p");
-    message.className = "profile-error";
-    message.textContent = err.message;
-    searchResults.appendChild(message);
+    showSearchMessage(err.message, "profile-error");
   }
 }
 
-searchQuery.value = initialParams.get("q") || "";
-searchTag.value = initialParams.get("tag") || "";
-searchType.value = initialParams.get("type") || "works";
-
-searchForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-  runSearch();
-});
-
-if (initialParams.toString()) {
-  runSearch();
-}
+runSearch();

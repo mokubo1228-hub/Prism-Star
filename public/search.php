@@ -8,17 +8,8 @@ include __DIR__ . '/includes/head.php';
   <main class="gallery-list">
     <div class="gallery-back search-back">
       <div class="gallery-list-heading">
-        <h2>検索</h2>
+        <h2 id="searchHeading">検索</h2>
       </div>
-      <form id="searchForm" class="search-form">
-        <input id="searchQuery" type="search" name="q" placeholder="キーワード">
-        <input id="searchTag" type="search" name="tag" placeholder="タグ">
-        <select id="searchType" name="type">
-          <option value="works">作品</option>
-          <option value="users">ユーザー</option>
-        </select>
-        <button type="submit">検索</button>
-      </form>
       <section id="searchResults" class="gallery-grid search-results"></section>
     </div>
   </main>

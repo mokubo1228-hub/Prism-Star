@@ -90,6 +90,7 @@ Codex 実装（`docs/phase-5-handoff.md`）・Claude Code review 済（冪等/40
 ## Phase 11 — 検索 ✅
 検索画面 `search.php`（`docs/requirements-v2.md` §6）。ワード（タイトル/説明）＋タグで**公開作品**を検索（**自分の作品は除く**）、ユーザー（名前/GitHub）検索。
 - ✅ 確認：`api/search.php` は作品（`title`/`description`/タグ LIKE）とユーザー（`name`/`github_username` LIKE）の2系統、`WHERE g.visibility='public' AND (?=0 OR g.user_id<>?)` で**公開のみ＋自分除外**。ヘッダー検索（`common.js`）は `search.php?q=` へ。
+- 🔧 入口の一本化（[ADR-025](decisions.md)・handoff 済／GO 待ち）：`search.php` の独自フォームとヘッダー検索が二重だったので、**ヘッダーの種別プルダウン（キーワード/タグ/ユーザー）に集約**し search 画面はフォーム撤去＝結果専用に。API は不変。handoff：`docs/search-consolidation-handoff.md`。
 
 ## Phase 12 — 登録フロー（double opt-in / メール確認先行）✅（独立トラック）
 登録を**メール確認先行**に変更（[ADR-018](decisions.md)／`requirements-v2.md` §7.2）。① email 入力 → ② 確認URL送信 → ③ 表示名/パスワード設定 → ④ 本登録・自動ログイン。`pending_registrations` を冪等 migration で追加、`verify.php` 新設、`auth.php` の register を **request / complete の2アクションに分割**。**ローカルのメール送信は MailHog を docker-compose に追加**（Web UI `:8025`、SMTP は `.env`）。token は hash 保存・単回・期限／enumeration 対策／email 一意は④で最終チェック。

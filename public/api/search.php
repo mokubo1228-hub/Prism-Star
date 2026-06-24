@@ -15,6 +15,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 $type = $_GET['type'] ?? 'works';
 $q = trim((string)($_GET['q'] ?? ''));
 $tag = trim((string)($_GET['tag'] ?? ''));
+// タグは表示上 "#雨" だが DB には "雨" で入る。ユーザーが表示どおり # を付けて打っても
+// 当たるよう、先頭の #（半角/全角）を落として正規化する（キーワードも tag に当たるので同様に）。
+$q = preg_replace('/^[#＃]+\s*/u', '', $q);
+$tag = preg_replace('/^[#＃]+\s*/u', '', $tag);
 $currentUserId = (int)($_SESSION['user_id'] ?? 0);
 
 // ユーザー検索：表示名 / GitHub ユーザー名で一致。公開作品数・スター総数は
@@ -49,7 +53,8 @@ if ($type === 'users') {
 
 // 作品検索は「他人の公開作品を見つける」場。結果は必ず公開のみ（非公開は所有者だけが見られる）で、
 // ログイン中は自分の作品を除外する（自作はマイページで管理する前提）。未ログイン時は currentUserId=0 になり、
-// WHERE の (? = 0 OR g.user_id <> ?) で除外条件をスキップする。q はタイトル/説明/タグ、tag はタグでの絞り込み。
+// WHERE の (? = 0 OR g.user_id <> ?) で除外条件をスキップする。q はタイトル/説明の文字列検索（タグは含めない）、
+// tag はタグ検索。フロントは入力が # 始まりなら tag に、それ以外は q に振り分ける（[ADR-025]）。
 $like = '%' . $q . '%';
 $tagLike = '%' . $tag . '%';
 $stmt = $pdo->prepare("
@@ -75,12 +80,6 @@ $stmt = $pdo->prepare("
         ? = ''
         OR g.title LIKE ?
         OR g.description LIKE ?
-        OR EXISTS (
-            SELECT 1
-            FROM gallery_tags gt2
-            INNER JOIN tags t2 ON t2.id = gt2.tag_id
-            WHERE gt2.gallery_id = g.id AND t2.name LIKE ?
-        )
       )
       AND (
         ? = ''
@@ -95,7 +94,7 @@ $stmt = $pdo->prepare("
     ORDER BY star_count DESC, g.created_at DESC, g.id DESC
     LIMIT 50
 ");
-$stmt->execute([$currentUserId, $currentUserId, $q, $like, $like, $like, $tag, $tagLike]);
+$stmt->execute([$currentUserId, $currentUserId, $q, $like, $like, $tag, $tagLike]);
 $rows = array_map(static function (array $row): array {
     $row['id'] = (int)$row['id'];
     $row['user_id'] = (int)$row['user_id'];

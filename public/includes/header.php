@@ -10,7 +10,11 @@
       </div>
 
       <form id="headerSearchForm" class="header-search" role="search">
-        <input id="headerSearchInput" type="search" name="q" placeholder="作品・タグ・ユーザーを検索" autocomplete="off">
+        <select id="headerSearchType" aria-label="検索の対象">
+          <option value="works">作品</option>
+          <option value="users">ユーザー</option>
+        </select>
+        <input id="headerSearchInput" type="search" name="q" placeholder="キーワード / #タグ" autocomplete="off">
         <button type="submit">検索</button>
       </form>
 
