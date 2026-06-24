@@ -80,13 +80,7 @@ async function loadDetail() {
     updateStarButton(starButton, work.star_count || 0, Boolean(work.starred));
     starButton.addEventListener("click", () => toggleStar(work, starButton));
 
-    const editLink = clone.querySelector(".edit-work-link");
-    if (work.is_owner) {
-      editLink.hidden = false;
-      editLink.href = `work-edit.php?id=${work.id}`;
-      editLink.textContent = "編集";
-    }
-
+    // 詳細は閲覧専用（[ADR-027]）。所有者でも編集導線は出さない＝編集はマイページから行う。
     if (work.source === "github" && work.source_url) {
       const sourceLink = document.createElement("a");
       sourceLink.className = "source-link";
@@ -94,7 +88,7 @@ async function loadDetail() {
       sourceLink.target = "_blank";
       sourceLink.rel = "noopener noreferrer";
       sourceLink.textContent = "リポジトリを見る";
-      clone.querySelector(".detail-actions").insertBefore(sourceLink, editLink);
+      clone.querySelector(".detail-actions").appendChild(sourceLink);
     }
 
     container.innerHTML = "";

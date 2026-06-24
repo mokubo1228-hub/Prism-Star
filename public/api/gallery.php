@@ -237,9 +237,11 @@ if ($method === 'GET') {
         exit;
     }
 
-    // 一覧（おすすめ）は公開作品のみ。未ログインに見せる teaser もこの公開フィードに限られる。
-    $stmt = $pdo->prepare(baseSelectSql("WHERE g.visibility = 'public'") . " ORDER BY star_count DESC, g.created_at DESC, g.id DESC");
-    $stmt->execute([$userId, $userId]);
+    // おすすめは公開作品のみ。ログイン中は自分の作品を除外する（発見系＝他人の作品を見つける場。
+    // 自作はマイページ/プロフィールで見る。検索と同じ方針＝[ADR-027]）。未ログイン（userId=0）は
+    // (? = 0) が真になり除外をスキップ＝teaser には全公開作品が出る。
+    $stmt = $pdo->prepare(baseSelectSql("WHERE g.visibility = 'public' AND (? = 0 OR g.user_id <> ?)") . " ORDER BY star_count DESC, g.created_at DESC, g.id DESC");
+    $stmt->execute([$userId, $userId, $userId, $userId]);
     echo json_encode(mapRows($stmt->fetchAll()), JSON_UNESCAPED_UNICODE);
     exit;
 }

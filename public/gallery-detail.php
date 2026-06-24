@@ -27,7 +27,6 @@ include __DIR__ . '/includes/head.php';
         </section>
         <div class="detail-actions">
           <a class="back-menu" href="gallery-list.php">戻る</a>
-          <a class="edit-work-link" href="#" hidden>編集</a>
         </div>
       </template>
     </article>
