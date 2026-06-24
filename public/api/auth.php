@@ -128,6 +128,39 @@ if ($action === 'logout') {
     authJson(['ok' => true]);
 }
 
+if ($action === 'change-password') {
+    // ログイン中の本人がその場でパスワードを変える。対象は常にセッションの user_id（client の id を信用しない）。
+    // 現行パスワードの再確認を必須にし、セッションだけ奪った相手や離席端末からの無断変更を防ぐ。
+    if (empty($_SESSION['user_id'])) {
+        authJson(['error' => 'ログインが必要です'], 401);
+    }
+
+    $data = readJsonBody();
+    $currentPassword = (string)($data['current_password'] ?? '');
+    $newPassword = (string)($data['new_password'] ?? '');
+
+    if (strlen($newPassword) < 8) {
+        authJson(['error' => '新しいパスワードは8文字以上で入力してください'], 400);
+    }
+
+    $userId = (int)$_SESSION['user_id'];
+    $stmt = $pdo->prepare("SELECT password_hash FROM users WHERE id = ?");
+    $stmt->execute([$userId]);
+    $passwordHash = $stmt->fetchColumn();
+
+    if (!$passwordHash || !password_verify($currentPassword, $passwordHash)) {
+        authJson(['error' => '現在のパスワードが正しくありません'], 401);
+    }
+
+    $newHash = password_hash($newPassword, PASSWORD_DEFAULT);
+    $stmt = $pdo->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
+    $stmt->execute([$newHash, $userId]);
+
+    // 資格情報を変えたらセッション ID を更新する（固定化対策・古い ID を無効化）。
+    session_regenerate_id(true);
+    authJson(['ok' => true, 'message' => 'パスワードを変更しました。']);
+}
+
 if ($action === 'login') {
     $data = readJsonBody();
     $email = trim((string)($data['email'] ?? ''));

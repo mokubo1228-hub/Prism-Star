@@ -24,20 +24,40 @@ if ($method === 'POST') {
     }
 
     $data = json_decode(file_get_contents('php://input'), true);
-    $githubUsername = trim((string)($data['github_username'] ?? ''));
+    if (!is_array($data)) {
+        $data = [];
+    }
+    $userId = (int)$_SESSION['user_id'];
+    $response = ['ok' => true];
 
-    if ($githubUsername !== '' && (strlen($githubUsername) > 100 || !preg_match('/^[A-Za-z0-9-]+$/', $githubUsername))) {
-        usersJson(['error' => 'GitHubユーザー名は英数字とハイフンで入力してください'], 400);
+    if (array_key_exists('name', $data)) {
+        $name = trim((string)$data['name']);
+        $nameLength = function_exists('mb_strlen') ? mb_strlen($name) : strlen($name);
+        if ($name === '' || $nameLength > 100) {
+            usersJson(['error' => '表示名は1文字以上100文字以下で入力してください'], 400);
+        }
+
+        // アカウント更新は常にセッションの user_id だけに限定し、client から id を受け取らない。
+        $stmt = $pdo->prepare("UPDATE users SET name = ? WHERE id = ?");
+        $stmt->execute([$name, $userId]);
+        $_SESSION['user_name'] = $name;
+        $response['name'] = $name;
     }
 
-    $value = $githubUsername === '' ? null : $githubUsername;
-    $stmt = $pdo->prepare("UPDATE users SET github_username = ? WHERE id = ?");
-    $stmt->execute([$value, $_SESSION['user_id']]);
+    if (array_key_exists('github_username', $data)) {
+        $githubUsername = trim((string)$data['github_username']);
 
-    usersJson([
-        'ok' => true,
-        'github_username' => $value,
-    ]);
+        if ($githubUsername !== '' && (strlen($githubUsername) > 100 || !preg_match('/^[A-Za-z0-9-]+$/', $githubUsername))) {
+            usersJson(['error' => 'GitHubユーザー名は英数字とハイフンで入力してください'], 400);
+        }
+
+        $value = $githubUsername === '' ? null : $githubUsername;
+        $stmt = $pdo->prepare("UPDATE users SET github_username = ? WHERE id = ?");
+        $stmt->execute([$value, $userId]);
+        $response['github_username'] = $value;
+    }
+
+    usersJson($response);
 }
 
 if ($method !== 'GET') {

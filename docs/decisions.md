@@ -240,3 +240,17 @@
 - **代替案**：(a) おすすめに自作も出す（プラットフォーム全体ランキング）→ 検索と不整合・自分に自分を薦める無意味さで却下。(b) 詳細に編集を残す → 導線が2か所に散る・[ADR-013](decisions.md)（マイページ＝管理画面）の方針ともずれるので、マイページ一本に。
 - **影響**：`gallery.php` 一覧に自分除外（未ログインは据え置き）、`gallery-detail.{php,js}` から `.edit-work-link` を撤去（GitHub「リポジトリを見る」リンクの挿入位置も append に変更）。詳細の所有者閲覧（`public OR owner`）と API の `is_owner` は維持（将来再利用可）。
 - **関連**：[ADR-025](decisions.md)（検索の自分除外）、[ADR-013](decisions.md)（マイページ＝管理画面）、`public/api/gallery.php`、`public/Script/gallery-detail.js`、`public/gallery-detail.php`。
+
+## ADR-028 アカウント設定（表示名・パスワード変更）⬜（優先トラック②）
+- **背景**：ログイン中に**表示名・パスワードを変更する手段が無かった**（自己更新できるのは `github_username` のみ）。「プロフィールも変えられない SNS」は不自然で、基本機能の穴。パスワード再設定はメール経由（[ADR-021](decisions.md)）はあるが、ログイン済みユーザーがその場で変える導線が無い。
+- **決定**：マイページに「アカウント設定」を新設し、(1) **表示名変更**、(2) **パスワード変更（現行パスワード確認つき）**を足す。配置は責務で分ける：
+  - 表示名は profile フィールドなので **`users.php` POST**（既存の自己更新）に同居。`name` と `github_username` を**独立に部分更新**（送られたフィールドだけ更新）。更新後は `$_SESSION['user_name']` も同期。
+  - パスワードは資格情報なので **`auth.php?action=change-password`**（login/reset と同じ並び）。**現行パスワードを `password_verify` で確認**してから更新し、`session_regenerate_id(true)`。
+- **理由**：本人限定＝**更新対象は常にセッションの `user_id`**（client の id を信用しない）。現行パスワード確認を必須にし、「セッションだけ奪った相手」「離席端末」からの無断変更を防ぐ（標準的な再認証）。CSRF は [ADR-026](decisions.md) の fetch ラッパ＋`requireCsrf` で**自動的に効く**（auth.php の POST 共通 requireCsrf に新 action も含まれる）ため追加対応は不要。
+- **代替案**：(a) すべて `users.php` に集約 → パスワードは資格情報なので auth に並べる方が筋。(b) 現行パスワード確認なし → セッション奪取/離席で乗っ取られるので必須に。(c) 別ページのアカウント設定 → マイページ＝管理画面（[ADR-013](decisions.md)）に同居が素直。
+- **影響**：`users.php` POST が name/github を `array_key_exists` で部分更新＋session 同期、`auth.php` に `change-password`、`mypage.{php,js}` に「アカウント設定」UI（表示名フォーム・パスワード変更フォーム）。スキーマ変更なし（`users.name VARCHAR(100)` 既存）。
+- **詰まりどころ・判断メモ（苦労）**：
+  - **部分更新の設計**：`name` と `github_username` を `array_key_exists` で**独立更新**にした。`$data['x'] ?? ''` だと「フィールド未送信」と「空文字で送信」を区別できず、片方のフォームを保存しただけでもう片方を消しかねない。「**送られたキーだけ更新**」にして取りこぼし・誤消去を防いだ。
+  - **②の CSRF はタダだった**：①（[ADR-026](decisions.md)）でセッション開始と `requireCsrf` を共通化済みだったので、新 action `change-password` も auth.php の POST 共通 `requireCsrf` で**自動的に CSRF 対象**になり、fetch ラッパが token を付ける。②側に CSRF 用のコードは一切書いていない＝**基盤を中央化した恩恵**。
+  - **資格情報変更後のセッション**：パスワード更新後に `session_regenerate_id(true)`（固定化対策・古い ID の無効化）。
+- **関連**：`docs/account-settings-handoff.md`、[ADR-013](decisions.md)、[ADR-021](decisions.md)、[ADR-026](decisions.md)（CSRF）、`public/api/{users,auth}.php`、`public/mypage.php`。

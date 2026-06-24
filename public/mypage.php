@@ -14,6 +14,25 @@ include __DIR__ . '/includes/head.php';
       <div class="mypage-actions">
         <a class="primary-action" href="work-edit.php">新規作成</a>
       </div>
+      <section class="account-settings">
+        <h3>アカウント設定</h3>
+        <form id="accountNameForm" class="github-settings">
+          <label for="accountName">表示名</label>
+          <div class="github-settings-row">
+            <input id="accountName" type="text" name="name" autocomplete="name" maxlength="100" required>
+            <button type="submit">保存</button>
+          </div>
+          <p id="accountNameMessage" class="github-message" hidden></p>
+        </form>
+        <form id="passwordChangeForm" class="github-settings">
+          <label for="currentPassword">現在のパスワード</label>
+          <input id="currentPassword" type="password" name="current_password" autocomplete="current-password" required>
+          <label for="newPassword">新しいパスワード</label>
+          <input id="newPassword" type="password" name="new_password" autocomplete="new-password" minlength="8" required>
+          <button type="submit">パスワードを変更</button>
+          <p id="passwordChangeMessage" class="github-message" hidden></p>
+        </form>
+      </section>
       <form id="githubSettingsForm" class="github-settings">
         <label for="githubUsername">GitHub username</label>
         <div class="github-settings-row">
