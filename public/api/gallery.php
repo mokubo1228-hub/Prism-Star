@@ -6,6 +6,8 @@ header('Content-Type: application/json; charset=utf-8');
 
 $pdo = getDb();
 $method = $_SERVER['REQUEST_METHOD'];
+// 編集は画像ファイルを伴う multipart 送信になり得るが、PHP は multipart の PATCH 本文を
+// $_POST に展開してくれない。そのため編集は POST＋?_method=PATCH で送らせ、ここで PATCH に正規化する。
 if ($method === 'POST' && strtoupper($_GET['_method'] ?? '') === 'PATCH') {
     $method = 'PATCH';
 }
@@ -41,6 +43,8 @@ function readInput(): array
     return $_POST;
 }
 
+// 可視性はクライアント由来。ENUM の 2 値だけを許し、未知の値は既定の public に倒す
+// （不正な文字列をそのまま DB に渡さないための whitelist）。
 function normalizeVisibility(string $visibility): string
 {
     return $visibility === 'private' ? 'private' : 'public';
@@ -78,6 +82,10 @@ function validateImageUrl(string $url): bool
     return $parsed && in_array($parsed['scheme'] ?? '', ['http', 'https'], true);
 }
 
+// 画像アップロードの安全弁（[ADR-015]）。「偽装した実行可能ファイルの設置」を 3 段で防ぐ：
+//   ① 拡張子 allowlist ② finfo による実体 MIME と拡張子の一致確認
+//   ③ 保存名はサーバ生成の乱数（元のファイル名を信用せず、上書き・パス操作・.php 偽装を断つ）。
+// 保存先 public/uploads/ は .htaccess で PHP 実行を無効化済みで、これと二重の防御になる。
 function storeUpload(string $fieldName): ?string
 {
     if (empty($_FILES[$fieldName]) || ($_FILES[$fieldName]['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
@@ -125,6 +133,8 @@ function storeUpload(string $fieldName): ?string
     return 'uploads/' . $name;
 }
 
+// タグは差分更新でなく「全削除→張り直し」。送られてきたタグ集合を最終状態としてそのまま反映する方が、
+// 編集時の付け外しを取りこぼさず単純（1作品あたり最大10タグ前提なので張り直しコストも問題にならない）。
 function syncTags(PDO $pdo, int $galleryId, array $tags): void
 {
     $pdo->prepare("DELETE FROM gallery_tags WHERE gallery_id = ?")->execute([$galleryId]);
@@ -189,6 +199,7 @@ function baseSelectSql(string $where): string
 if ($method === 'GET') {
     $userId = currentUserId();
 
+    // マイページ（管理画面）専用。本人の作品だけを、非公開も含めて返す（要ログイン）。
     if (isset($_GET['mine'])) {
         $userId = requireLogin();
         $stmt = $pdo->prepare(baseSelectSql("WHERE g.user_id = ?") . " ORDER BY g.created_at DESC, g.id DESC");
@@ -197,6 +208,8 @@ if ($method === 'GET') {
         exit;
     }
 
+    // 詳細：公開は誰でも、非公開は所有者だけ。条件に合致しない非公開作品はそもそも行が返らず、
+    // 「非公開」とも「存在しない」とも区別させずに一律 404（safety invariant：非公開を所有者以外に返さない）。
     if (isset($_GET['id'])) {
         $id = (int)$_GET['id'];
         $stmt = $pdo->prepare(baseSelectSql("WHERE g.id = ? AND (g.visibility = 'public' OR g.user_id = ?)"));
@@ -209,6 +222,7 @@ if ($method === 'GET') {
         exit;
     }
 
+    // 一覧（おすすめ）は公開作品のみ。未ログインに見せる teaser もこの公開フィードに限られる。
     $stmt = $pdo->prepare(baseSelectSql("WHERE g.visibility = 'public'") . " ORDER BY star_count DESC, g.created_at DESC, g.id DESC");
     $stmt->execute([$userId, $userId]);
     echo json_encode(mapRows($stmt->fetchAll()), JSON_UNESCAPED_UNICODE);
@@ -282,6 +296,8 @@ if ($method === 'PATCH') {
 
     $pdo->beginTransaction();
     try {
+        // 更新条件に user_id を必ず含める＝他人の作品 ID を渡されても 0 行で弾く（IDOR 防止）。
+        // 画像を差し替えていない（$src === null）ときは src を更新せず既存画像を保持する。
         if ($src === null) {
             $stmt = $pdo->prepare("UPDATE gallery SET title = ?, description = ?, visibility = ? WHERE id = ? AND user_id = ?");
             $stmt->execute([$title, $desc, $visibility, $id, $userId]);
@@ -320,6 +336,7 @@ if ($method === 'DELETE') {
         respondJson(['error' => 'IDが不正です'], 400);
     }
 
+    // 削除も user_id 込みで限定。所有者でなければ 0 行＝404（他人の作品は消せず、存在も示唆しない）。
     $stmt = $pdo->prepare("DELETE FROM gallery WHERE id = ? AND user_id = ?");
     $stmt->execute([$id, $userId]);
     if ($stmt->rowCount() === 0) {

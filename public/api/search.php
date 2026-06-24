@@ -17,6 +17,8 @@ $q = trim((string)($_GET['q'] ?? ''));
 $tag = trim((string)($_GET['tag'] ?? ''));
 $currentUserId = (int)($_SESSION['user_id'] ?? 0);
 
+// ユーザー検索：表示名 / GitHub ユーザー名で一致。公開作品数・スター総数は
+// gallery を visibility='public' で JOIN して数えるので、非公開は集計にも漏れない。
 if ($type === 'users') {
     $like = '%' . $q . '%';
     $stmt = $pdo->prepare("
@@ -45,6 +47,9 @@ if ($type === 'users') {
     exit;
 }
 
+// 作品検索は「他人の公開作品を見つける」場。結果は必ず公開のみ（非公開は所有者だけが見られる）で、
+// ログイン中は自分の作品を除外する（自作はマイページで管理する前提）。未ログイン時は currentUserId=0 になり、
+// WHERE の (? = 0 OR g.user_id <> ?) で除外条件をスキップする。q はタイトル/説明/タグ、tag はタグでの絞り込み。
 $like = '%' . $q . '%';
 $tagLike = '%' . $tag . '%';
 $stmt = $pdo->prepare("

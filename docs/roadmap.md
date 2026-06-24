@@ -65,38 +65,51 @@ Codex 実装（`docs/phase-5-handoff.md`）・Claude Code review 済（冪等/40
 
 > 📐 **ここから v2**（マイページ・公開非公開・作品作成/編集・タグ・検索）。要件の全体像は `docs/requirements-v2.md`。
 
-## 認証動線・ナビ UX（フロント・独立トラック）⬜ → **ゲート型に再定義（[ADR-019](decisions.md)）**
-ヘッダーの**ログイン/新規登録ボタン**・**検索バー常設**・**未ログイン操作時のモーダル誘導**は維持。ただし旧前提「閲覧は自由」は **[ADR-019](decisions.md) のゲート型回遊で上書き**：未ログインはスタート画面の teaser まで、詳細/検索結果/ユーザーページ等は登録/ログイン モーダルでゲート（`docs/requirements-v2.md` §7・§7.1）。見出しは「おすすめ」。`[マイページ]` は Phase 8 で有効化。handoff：`docs/phase-auth-ux-handoff.md`。
+## 認証動線・ナビ UX（フロント・独立トラック）✅ **ゲート型（[ADR-019](decisions.md)）**
+ヘッダーの**ログイン/新規登録ボタン**・**検索バー常設**・**未ログイン操作時のモーダル誘導**は維持。旧前提「閲覧は自由」は **[ADR-019](decisions.md) のゲート型回遊で上書き**：未ログインはスタート画面の teaser まで、詳細/検索結果/ユーザーページ等は登録/ログイン モーダルでゲート（`docs/requirements-v2.md` §7・§7.1）。見出しは「おすすめ」。
+- ✅ 確認：`header.php` にゲートモーダル＋常設検索、`common.js` の `showAuthGate()`／`bindAuthGate()`／`bindHeaderSearch()`、未ログイン時の `data-gated-link` 誘導。ゲートにも再設定動線（[ADR-023](decisions.md)）。
 
-## Phase 7 — 公開 / 非公開（可視性の土台）⬜
+## Phase 7 — 公開 / 非公開（可視性の土台）✅
 作品に公開/非公開の2状態を持たせる（[ADR-014](decisions.md)）。`gallery.visibility`（既定 公開）を冪等 migration で追加 ＋ **一覧・検索・ユーザーページの全 SELECT に公開フィルタ**、詳細は「公開＝誰でも／非公開＝本人のみ」。作成時に可視性を選べる・後から切替可。**非公開を所有者以外に返さない**ことが核。
 - **seed をテスト fixture に格上げ**（[ADR-020](decisions.md)）：各ユーザー（demo/Aoi/Ren/Mio）に**公開＋非公開を混在**させ、非公開遮断・所有・検索の自分除外を実データで検証できるようにする。
+- ✅ 確認（Claude Code review）：`gallery.php` 一覧は `WHERE g.visibility='public'`、詳細は `(g.visibility='public' OR g.user_id=?)`→他人の非公開は 404。PATCH/DELETE は `WHERE id=? AND user_id=?`。`search.php`／`users.php` も公開のみ。
 
-## Phase 8 — マイページ（管理画面）＋ 作品作成 / 編集 ⬜
+## Phase 8 — マイページ（管理画面）＋ 作品作成 / 編集 ✅
 本人専用のマイページ（=管理画面）を公開プロフィール（ユーザーページ）と別に新設（[ADR-013](decisions.md)）。本人の**全作品（非公開含む）**一覧＋新規作成・編集・削除・公開切替・GitHub 設定。作成/編集はモーダルから**専用フォーム画面**へ格上げ。ユーザーページ（`profile.php`）は**公開作品のみ**に整理。
 - **公開の作品詳細ページから v1 のインライン削除ボタンを撤去**し、編集/削除/公開切替はマイページに集約（詳細は閲覧専用＋所有者には「編集」導線のみ／`requirements-v2.md` §3）。
+- ✅ 確認：`mypage.php`／`mypage.js`（`?mine=1` で非公開含む一覧・公開切替・編集→`work-edit.php`・削除・GitHub 設定）、`work-edit.php`／`work-edit.js`（専用フォーム）、`gallery-detail.js` は所有者のみ「編集」導線・旧インライン削除なし。
 
-## Phase 9 — 画像アップロード ⬜
+## Phase 9 — 画像アップロード ✅
 作品画像をサーバ保存に対応（[ADR-015](decisions.md)）。`public/uploads/` 保存・`src` にパス。MIME/拡張子/サイズ検証・ファイル名サーバ生成（safety invariant 追加）。作成/編集フォームに統合（外部 URL も併存可）。
+- ✅ 確認：`gallery.php` の `storeUpload()` が **拡張子allowlist(jpg/png/webp/gif)＋finfo の MIME 一致＋5MB＋`random_bytes` 由来のファイル名**で保存、`public/uploads/.htaccess` で PHP 実行を無効化。`work-edit.js` は画像ファイル or 外部 URL を送信。
 
-## Phase 10 — タグ ⬜
+## Phase 10 — タグ ✅
 作品にタグを付与（[ADR-017](decisions.md)）。`tags` ＋ `gallery_tags`（多対多）。作成/編集にタグ入力、詳細/カードにタグ表示。
+- ✅ 確認：`gallery.php` の `normalizeTags()`（重複排除・最大10）＋`syncTags()`（タグ upsert→`gallery_tags` 張り直し）、読み出しは `GROUP_CONCAT`。`gallery-list.js`／`gallery-detail.js`／`profile.js` がカード・詳細に `#tag` 描画、`search.php` もタグ検索対応。
 
-## Phase 11 — 検索 ⬜
+## Phase 11 — 検索 ✅
 検索画面 `search.php`（`docs/requirements-v2.md` §6）。ワード（タイトル/説明）＋タグで**公開作品**を検索（**自分の作品は除く**）、ユーザー（名前/GitHub）検索。
+- ✅ 確認：`api/search.php` は作品（`title`/`description`/タグ LIKE）とユーザー（`name`/`github_username` LIKE）の2系統、`WHERE g.visibility='public' AND (?=0 OR g.user_id<>?)` で**公開のみ＋自分除外**。ヘッダー検索（`common.js`）は `search.php?q=` へ。
 
-## Phase 12 — 登録フロー（double opt-in / メール確認先行）⬜（独立トラック）
-登録を**メール確認先行**に変更（[ADR-018](decisions.md)／`requirements-v2.md` §7.2）。① email 入力 → ② 確認URL送信 → ③ 表示名/パスワード設定 → ④ 本登録・自動ログイン。`pending_registrations` を冪等 migration で追加、`verify.php` 新設、`auth.php` の register を **request / complete の2アクションに分割**。**ローカルのメール送信は MailHog を docker-compose に追加**（Web UI `:8025`、SMTP は `.env`）。token は hash 保存・単回・期限／enumeration 対策／email 一意は④で最終チェック。可視性トラック（Phase 7–11）と**独立**して着手可。handoff：`docs/phase-12-handoff.md`（GO 後に作成）。
+## Phase 12 — 登録フロー（double opt-in / メール確認先行）✅（独立トラック）
+登録を**メール確認先行**に変更（[ADR-018](decisions.md)／`requirements-v2.md` §7.2）。① email 入力 → ② 確認URL送信 → ③ 表示名/パスワード設定 → ④ 本登録・自動ログイン。`pending_registrations` を冪等 migration で追加、`verify.php` 新設、`auth.php` の register を **request / complete の2アクションに分割**。**ローカルのメール送信は MailHog を docker-compose に追加**（Web UI `:8025`、SMTP は `.env`）。token は hash 保存・単回・期限／enumeration 対策／email 一意は④で最終チェック。
+- ✅ 確認（Claude Code review）：`auth.php` の `register-request`/`register-complete`、token は `random_bytes(32)`→`sha256` 保存・期限24h・単回。存在の有無で応答を変えない neutral（送信失敗も `error_log` に留め neutral）。`register-complete` で email 一意を最終チェック（request〜complete 間の TOCTOU を塞ぐ）。
 
-## パスワードリセット（独立トラック・[ADR-021](decisions.md)）⬜
+## パスワードリセット（独立トラック・[ADR-021](decisions.md)）✅
 認証の基本機能（再設定）を揃える。登録 double opt-in と同じメールトークン方式で `forgot.php`→メール（MailHog）→`reset.php?token=`→新パスワード→ログイン。`password_resets` テーブル追加、`auth.php` に reset-request / reset-complete、login の死にリンク（`href="#"`）を `forgot.php` へ。token は 256bit・sha256 hash・単回・**期限1h**、enumeration 対策。handoff：`docs/password-reset-handoff.md`。
+- ✅ 確認（Claude Code review）：`reset-complete` は `UPDATE users ... WHERE id = $reset['user_id']`（更新対象はトークン照合で得た user_id＝**クライアント値を信用しない**）、トークンは単回（削除）・期限1h、`reset.php` は token を `htmlspecialchars(...,ENT_QUOTES)` で出力。ゲートモーダルにも再設定動線（[ADR-023](decisions.md)）。
 
 ## 静的アセット cache-busting（独立トラック・[ADR-022](decisions.md)）✅
 v2 で JS を全面刷新 → 再訪問ブラウザが古い JS を掴んで壊れる事象が発生。JS/CSS の URL に**バージョンクエリ（`?v=filemtime`）**を付ける。`asset()`（`public/includes/asset.php`）ヘルパーで `head.php`（共通 CSS＋`$pageStyles`）・`footer.php`（`common.js`）・各ページの `<script>` を置換。挙動不変。Codex 実装・Claude Code review 済（12 ページ＋common.js の結線網羅・生参照ゼロ・全ページ 200・`?v=` 出力を独立確認）。`Cache-Control` は Docker Apache に `mod_headers` が無く見送り、version クエリ単独で成立（[ADR-022](decisions.md) 実装メモ）。handoff：`docs/cache-busting-handoff.md`。
 
+> 🎉 **v2 機能セット（可視性・マイページ/作成編集・画像アップロード・タグ・検索・double opt-in 登録・パスワード再設定・ゲート型回遊・cache-busting）は実装到達。** 以降は下記の発展。
+
+## 次の本命 — GitHub 取り込みの永続化 ⬜
+看板の「全員が発信者 ＋ GitHub 取り込み」のうち、**取り込みがまだ表示レイヤーだけ**（`github.php` が GitHub API を叩いてプロフィールにリポジトリを並べるのみ・[ADR-016](decisions.md)）。リポジトリを **PrismStar の作品として `gallery` に保存**する経路（source 種別・OG 画像・fork 除外）が空いている。v2 が出揃った今、差別化に最も効くのはここ。着手前に handoff（`docs/github-import-handoff.md`）と必要なら ADR を起こす。
+
 ## 今後の発展（ロードマップ）⬜
-- 一覧のページネーション、ブランド表現（虹色テーマ）の作り込み。
-- GitHub 連携の発展：取り込み作品の永続化・fork 除外（現状は表示レイヤー＝[ADR-016](decisions.md)）。
+- 一覧・検索のページネーション（現状は全件返し。seed 規模では可だが「プラットフォーム」としては要る）。
+- ブランド表現（虹色テーマ）の作り込み。
 - username / slug（公開 URL）の導入（登録の同時実行堅牢化は Phase 12 の double opt-in で吸収）。
 
 ---

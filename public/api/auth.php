@@ -39,6 +39,8 @@ function smtpCommand($socket, string $command): void
     smtpRead($socket);
 }
 
+// ローカル開発の確認/再設定メールは MailHog（docker-compose）へ直接 SMTP で投げる最小実装。
+// 外部に実送信しない catch-all 前提なので、ライブラリ依存を増やさず fsockopen で済ませている。
 function sendTokenMail(string $email, string $subject, string $body): bool
 {
     $host = getenv('SMTP_HOST') ?: 'mailhog';
@@ -154,6 +156,8 @@ if ($action === 'login') {
     ]);
 }
 
+// 登録リクエスト（double opt-in の①）。メールアドレスの登録有無を外から探られない（enumeration 対策）よう、
+// 「既に登録済み」「未登録で受理」「送信失敗」のどれでも同じ neutral 応答を返し、失敗はログにだけ残す。
 if ($action === 'register-request') {
     $data = readJsonBody();
     $email = trim((string)($data['email'] ?? ''));
@@ -169,6 +173,8 @@ if ($action === 'register-request') {
         authJson($neutral);
     }
 
+    // トークンは 256bit 乱数をメールで配り、DB には sha256 ハッシュだけ保存する。
+    // こうすれば DB が漏れても元トークンは復元できず、URL を知る本人だけが完了できる。期限と単回使用も前提。
     $token = bin2hex(random_bytes(32));
     $tokenHash = hash('sha256', $token);
     $expiresAt = (new DateTimeImmutable('+24 hours'))->format('Y-m-d H:i:s');
@@ -210,6 +216,8 @@ if ($action === 'register-complete') {
         authJson(['error' => '確認URLが無効または期限切れです'], 400);
     }
 
+    // email の一意性は「完了時」に最終チェックする。①リクエスト〜③完了の間に同じアドレスで
+    // 別経路から登録され得る（TOCTOU）ため、ここで再確認してから本登録し、二重登録を防ぐ。
     $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
     $stmt->execute([$pending['email']]);
     if ($stmt->fetch()) {
@@ -245,6 +253,7 @@ if ($action === 'register-complete') {
     ]);
 }
 
+// パスワード再設定リクエスト。登録と同じ理由で、登録の有無や送信可否を漏らさない neutral 応答に揃える。
 if ($action === 'reset-request') {
     $data = readJsonBody();
     $email = trim((string)($data['email'] ?? ''));
@@ -293,6 +302,8 @@ if ($action === 'reset-complete') {
         authJson(['error' => '8文字以上の新しいパスワードを入力してください'], 400);
     }
 
+    // 再設定対象のユーザーは「トークン照合で得た user_id」だけを使う（リクエスト本文に user_id を持たせない）。
+    // 他人のトークンを知らない限り他人のパスワードは変えられない。期限切れトークンもここで弾く。
     $tokenHash = hash('sha256', $token);
     $stmt = $pdo->prepare("SELECT id, user_id FROM password_resets WHERE token_hash = ? AND expires_at > NOW()");
     $stmt->execute([$tokenHash]);
