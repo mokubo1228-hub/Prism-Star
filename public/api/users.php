@@ -61,6 +61,8 @@ $stmt = $pdo->prepare("
         g.src,
         g.description AS `desc`,
         g.visibility,
+        g.source,
+        g.source_url,
         COUNT(DISTINCT s.id) AS star_count,
         GROUP_CONCAT(DISTINCT t.name ORDER BY t.name SEPARATOR ',') AS tags
     FROM gallery g
@@ -68,7 +70,7 @@ $stmt = $pdo->prepare("
     LEFT JOIN gallery_tags gt ON gt.gallery_id = g.id
     LEFT JOIN tags t ON t.id = gt.tag_id
     WHERE g.user_id = ? AND g.visibility = 'public'
-    GROUP BY g.id, g.user_id, g.title, g.src, g.description, g.visibility, g.created_at
+    GROUP BY g.id, g.user_id, g.title, g.src, g.description, g.visibility, g.source, g.source_url, g.created_at
     ORDER BY g.created_at DESC, g.id DESC
 ");
 $stmt->execute([$id]);

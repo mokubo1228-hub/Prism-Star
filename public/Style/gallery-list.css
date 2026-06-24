@@ -145,6 +145,19 @@
   white-space: nowrap;
 }
 
+.source-badge {
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 999px;
+  color: #3730a3;
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 3px 7px;
+  vertical-align: middle;
+}
+
 .profile-heading {
   color: #374151;
   margin: 0 20px 4px;
@@ -212,6 +225,62 @@
   border-top: 1px solid #e5e7eb;
   margin-top: 28px;
   padding-top: 24px;
+}
+
+.github-import-panel {
+  border-top: 1px solid #e5e7eb;
+  margin: 0 0 24px;
+  padding-top: 20px;
+}
+
+.github-import-panel h3 {
+  color: #374151;
+  margin: 0 0 10px;
+  text-align: center;
+}
+
+.github-import-repos {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-top: 12px;
+}
+
+.github-import-card {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.github-import-card a {
+  color: royalblue;
+  font-weight: 700;
+}
+
+.github-import-card p {
+  color: #374151;
+  margin: 0;
+}
+
+.github-import-card button {
+  background: royalblue;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  padding: 8px 10px;
+}
+
+.github-import-card button:disabled {
+  background: #9ca3af;
+  cursor: wait;
+}
+
+.github-import-status {
+  color: #4b5563;
+  font-size: 0.85rem;
 }
 
 .github-repos {

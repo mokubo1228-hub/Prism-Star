@@ -15,6 +15,8 @@ include __DIR__ . '/includes/head.php';
       <h2 id="workEditTitle" class="box-title">作品作成</h2>
 
       <form id="workEditForm" enctype="multipart/form-data">
+        <p id="workSourceNote" class="form-note" hidden></p>
+
         <label for="workTitle">タイトル</label>
         <input id="workTitle" name="title" type="text" required>
 

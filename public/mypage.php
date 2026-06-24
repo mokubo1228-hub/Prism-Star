@@ -22,6 +22,11 @@ include __DIR__ . '/includes/head.php';
         </div>
         <p id="githubSettingsMessage" class="github-message" hidden></p>
       </form>
+      <section id="githubImportPanel" class="github-import-panel" hidden>
+        <h3>GitHub から取り込む</h3>
+        <p id="githubImportMessage" class="github-message"></p>
+        <div id="githubImportRepos" class="github-import-repos"></div>
+      </section>
       <section id="myWorks" class="mywork-list"></section>
     </div>
   </main>

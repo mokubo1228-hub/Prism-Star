@@ -10,11 +10,38 @@ const workTags = document.getElementById("workTags");
 const workVisibility = document.getElementById("workVisibility");
 const workEditError = document.getElementById("workEditError");
 const deleteWorkButton = document.getElementById("deleteWorkButton");
+const workSourceNote = document.getElementById("workSourceNote");
+const workImageLabel = document.querySelector("label[for=\"workImage\"]");
+const workImageUrlLabel = document.querySelector("label[for=\"workImageUrl\"]");
 let loadedWork = null;
 
 function showWorkError(message) {
   workEditError.textContent = message;
   workEditError.hidden = false;
+}
+
+function applySourceMode(work) {
+  const isGithubWork = work.source === "github";
+  workTitle.readOnly = isGithubWork;
+  workDesc.readOnly = isGithubWork;
+  workImage.hidden = isGithubWork;
+  workImageUrl.hidden = isGithubWork;
+  if (workImageLabel) workImageLabel.hidden = isGithubWork;
+  if (workImageUrlLabel) workImageUrlLabel.hidden = isGithubWork;
+  workSourceNote.hidden = !isGithubWork;
+  workSourceNote.textContent = "";
+
+  if (!isGithubWork) return;
+
+  workSourceNote.append("GitHub から取り込んだ作品です。タイトル・説明・画像は取り込み時に更新されます。ここでは公開設定とタグを編集できます。");
+  if (work.source_url) {
+    const sourceLink = document.createElement("a");
+    sourceLink.href = work.source_url;
+    sourceLink.target = "_blank";
+    sourceLink.rel = "noopener noreferrer";
+    sourceLink.textContent = "リポジトリを見る";
+    workSourceNote.append(" ", sourceLink);
+  }
 }
 
 async function loadEditWork() {
@@ -36,6 +63,7 @@ async function loadEditWork() {
   workImageUrl.value = work.src.startsWith("http://") || work.src.startsWith("https://") ? work.src : "";
   workTags.value = (work.tags || []).join(", ");
   workVisibility.value = work.visibility;
+  applySourceMode(work);
 }
 
 workEditForm.addEventListener("submit", async (e) => {
@@ -43,15 +71,17 @@ workEditForm.addEventListener("submit", async (e) => {
   workEditError.hidden = true;
 
   const form = new FormData();
-  form.append("title", workTitle.value.trim());
-  form.append("desc", workDesc.value.trim());
   form.append("visibility", workVisibility.value);
   form.append("tags", workTags.value.trim());
-  if (workImage.files[0]) {
-    form.append("image", workImage.files[0]);
-  }
-  if (workImageUrl.value.trim()) {
-    form.append("image_url", workImageUrl.value.trim());
+  if (!loadedWork || loadedWork.source !== "github") {
+    form.append("title", workTitle.value.trim());
+    form.append("desc", workDesc.value.trim());
+    if (workImage.files[0]) {
+      form.append("image", workImage.files[0]);
+    }
+    if (workImageUrl.value.trim()) {
+      form.append("image_url", workImageUrl.value.trim());
+    }
   }
 
   const url = editId ? `/api/gallery.php?id=${encodeURIComponent(editId)}&_method=PATCH` : "/api/gallery.php";

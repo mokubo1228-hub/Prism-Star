@@ -60,6 +60,8 @@ $stmt = $pdo->prepare("
         g.title,
         g.src,
         g.description AS `desc`,
+        g.source,
+        g.source_url,
         COUNT(DISTINCT s.id) AS star_count,
         GROUP_CONCAT(DISTINCT t.name ORDER BY t.name SEPARATOR ',') AS tags
     FROM gallery g
@@ -89,7 +91,7 @@ $stmt = $pdo->prepare("
             WHERE gt3.gallery_id = g.id AND t3.name LIKE ?
         )
       )
-    GROUP BY g.id, g.user_id, u.name, g.title, g.src, g.description, g.created_at
+    GROUP BY g.id, g.user_id, u.name, g.title, g.src, g.description, g.source, g.source_url, g.created_at
     ORDER BY star_count DESC, g.created_at DESC, g.id DESC
     LIMIT 50
 ");

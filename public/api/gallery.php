@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/../../src/db.php';
+require_once __DIR__ . '/../../src/github_client.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -80,6 +81,16 @@ function validateImageUrl(string $url): bool
 {
     $parsed = parse_url($url);
     return $parsed && in_array($parsed['scheme'] ?? '', ['http', 'https'], true);
+}
+
+function findGithubRepoByName(array $repos, string $repoName): ?array
+{
+    foreach ($repos as $repo) {
+        if (($repo['name'] ?? '') === $repoName) {
+            return $repo;
+        }
+    }
+    return null;
 }
 
 // 画像アップロードの安全弁（[ADR-015]）。「偽装した実行可能ファイルの設置」を 3 段で防ぐ：
@@ -181,6 +192,8 @@ function baseSelectSql(string $where): string
             g.src,
             g.description AS `desc`,
             g.visibility,
+            g.source,
+            g.source_url,
             g.created_at,
             COUNT(DISTINCT s.id) AS star_count,
             MAX(CASE WHEN s.user_id = ? THEN 1 ELSE 0 END) AS starred,
@@ -192,7 +205,7 @@ function baseSelectSql(string $where): string
         LEFT JOIN gallery_tags gt ON gt.gallery_id = g.id
         LEFT JOIN tags t ON t.id = gt.tag_id
         {$where}
-        GROUP BY g.id, g.user_id, u.name, g.title, g.src, g.description, g.visibility, g.created_at
+        GROUP BY g.id, g.user_id, u.name, g.title, g.src, g.description, g.visibility, g.source, g.source_url, g.created_at
     ";
 }
 
@@ -231,6 +244,77 @@ if ($method === 'GET') {
 
 if ($method === 'POST') {
     $userId = requireLogin();
+    if (($_GET['action'] ?? '') === 'import-github') {
+        $data = readInput();
+        $repoName = trim((string)($data['repo'] ?? ''));
+        if ($repoName === '' || strlen($repoName) > 100) {
+            respondJson(['error' => 'リポジトリ名が不正です'], 400);
+        }
+
+        $stmt = $pdo->prepare("SELECT github_username FROM users WHERE id = ?");
+        $stmt->execute([$userId]);
+        $githubUsername = trim((string)$stmt->fetchColumn());
+        if ($githubUsername === '') {
+            respondJson(['error' => '先に GitHub ユーザー名を設定してください'], 400);
+        }
+
+        try {
+            $repos = fetchGithubRepos($githubUsername);
+        } catch (GithubClientException $e) {
+            respondJson(['error' => $e->getMessage()], $e->responseStatus());
+        }
+
+        $repo = findGithubRepoByName($repos, $repoName);
+        if ($repo === null) {
+            respondJson(['error' => 'リポジトリが見つかりません'], 404);
+        }
+        if (!empty($repo['fork'])) {
+            respondJson(['error' => 'fork は取り込めません'], 400);
+        }
+
+        $title = (string)$repo['name'];
+        $desc = (string)($repo['description'] ?? '');
+        $sourceUrl = (string)$repo['html_url'];
+        if ($title === '' || $sourceUrl === '') {
+            respondJson(['error' => 'GitHub リポジトリ情報が不完全です'], 502);
+        }
+        $src = 'https://opengraph.githubassets.com/prismstar/' . rawurlencode($githubUsername) . '/' . rawurlencode($title);
+
+        $pdo->beginTransaction();
+        try {
+            // de-dupe は server 確定の source_url とセッション user_id で限定する。
+            // visibility はユーザーの公開判断なので、再取り込みでは上書きしない。
+            $select = $pdo->prepare("SELECT id FROM gallery WHERE user_id = ? AND source_url = ? FOR UPDATE");
+            $select->execute([$userId, $sourceUrl]);
+            $galleryId = (int)$select->fetchColumn();
+
+            if ($galleryId > 0) {
+                $stmt = $pdo->prepare("
+                    UPDATE gallery
+                    SET title = ?, description = ?, src = ?, source = 'github'
+                    WHERE id = ? AND user_id = ?
+                ");
+                $stmt->execute([$title, $desc, $src, $galleryId, $userId]);
+            } else {
+                $stmt = $pdo->prepare("
+                    INSERT INTO gallery (user_id, title, src, description, visibility, source, source_url)
+                    VALUES (?, ?, ?, ?, 'public', 'github', ?)
+                ");
+                $stmt->execute([$userId, $title, $src, $desc, $sourceUrl]);
+                $galleryId = (int)$pdo->lastInsertId();
+            }
+            $pdo->commit();
+        } catch (Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
+
+        $stmt = $pdo->prepare(baseSelectSql("WHERE g.id = ?"));
+        $stmt->execute([$userId, $userId, $galleryId]);
+        echo json_encode(mapRows($stmt->fetchAll())[0], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
     $data = readInput();
     $title = trim((string)($data['title'] ?? ''));
     $desc = trim((string)($data['desc'] ?? $data['description'] ?? ''));
@@ -281,38 +365,44 @@ if ($method === 'PATCH') {
     $visibility = normalizeVisibility((string)($data['visibility'] ?? 'public'));
     $tags = normalizeTags($data['tags'] ?? '');
 
-    if ($title === '') {
-        respondJson(['error' => 'タイトルは必須です'], 400);
+    $stmt = $pdo->prepare("SELECT source FROM gallery WHERE id = ? AND user_id = ?");
+    $stmt->execute([$id, $userId]);
+    $source = $stmt->fetchColumn();
+    if ($source === false) {
+        respondJson(['error' => '対象の作品が見つかりません'], 404);
     }
 
-    $src = storeUpload('image');
-    $imageUrl = trim((string)($data['src'] ?? $data['image_url'] ?? ''));
-    if ($src === null && $imageUrl !== '') {
-        if (!validateImageUrl($imageUrl)) {
-            respondJson(['error' => '画像URLはhttp://またはhttps://で始まるURLを入力してください'], 400);
+    $src = null;
+    if ($source !== 'github') {
+        if ($title === '') {
+            respondJson(['error' => 'タイトルは必須です'], 400);
         }
-        $src = $imageUrl;
+
+        $src = storeUpload('image');
+        $imageUrl = trim((string)($data['src'] ?? $data['image_url'] ?? ''));
+        if ($src === null && $imageUrl !== '') {
+            if (!validateImageUrl($imageUrl)) {
+                respondJson(['error' => '画像URLはhttp://またはhttps://で始まるURLを入力してください'], 400);
+            }
+            $src = $imageUrl;
+        }
     }
 
     $pdo->beginTransaction();
     try {
-        // 更新条件に user_id を必ず含める＝他人の作品 ID を渡されても 0 行で弾く（IDOR 防止）。
-        // 画像を差し替えていない（$src === null）ときは src を更新せず既存画像を保持する。
-        if ($src === null) {
+        if ($source === 'github') {
+            // GitHub 由来の title/description/src は import endpoint だけが更新する。
+            // 編集では公開状態とタグだけを扱い、client 由来の repo メタ情報を保存しない。
+            $stmt = $pdo->prepare("UPDATE gallery SET visibility = ? WHERE id = ? AND user_id = ?");
+            $stmt->execute([$visibility, $id, $userId]);
+        } elseif ($src === null) {
+            // 更新条件に user_id を必ず含める＝他人の作品 ID を渡されても 0 行で弾く（IDOR 防止）。
+            // 画像を差し替えていない（$src === null）ときは src を更新せず既存画像を保持する。
             $stmt = $pdo->prepare("UPDATE gallery SET title = ?, description = ?, visibility = ? WHERE id = ? AND user_id = ?");
             $stmt->execute([$title, $desc, $visibility, $id, $userId]);
         } else {
             $stmt = $pdo->prepare("UPDATE gallery SET title = ?, src = ?, description = ?, visibility = ? WHERE id = ? AND user_id = ?");
             $stmt->execute([$title, $src, $desc, $visibility, $id, $userId]);
-        }
-
-        if ($stmt->rowCount() === 0) {
-            $check = $pdo->prepare("SELECT id FROM gallery WHERE id = ? AND user_id = ?");
-            $check->execute([$id, $userId]);
-            if (!$check->fetch()) {
-                $pdo->rollBack();
-                respondJson(['error' => '対象の作品が見つかりません'], 404);
-            }
         }
         syncTags($pdo, $id, $tags);
         $pdo->commit();

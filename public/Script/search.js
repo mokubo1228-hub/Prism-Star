@@ -31,6 +31,12 @@ function renderWork(work) {
   const tags = document.createElement("p");
   tags.className = "tag-list";
   tags.textContent = (work.tags || []).map(tag => `#${tag}`).join(" ");
+  if (work.source === "github") {
+    const badge = document.createElement("span");
+    badge.className = "source-badge";
+    badge.textContent = "GitHub";
+    tags.prepend(badge, " ");
+  }
 
   article.append(link, author, tags);
   searchResults.appendChild(article);

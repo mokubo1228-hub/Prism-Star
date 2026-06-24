@@ -2,6 +2,11 @@ const myWorks = document.getElementById("myWorks");
 const githubSettingsForm = document.getElementById("githubSettingsForm");
 const githubUsernameInput = document.getElementById("githubUsername");
 const githubSettingsMessage = document.getElementById("githubSettingsMessage");
+const githubImportPanel = document.getElementById("githubImportPanel");
+const githubImportMessage = document.getElementById("githubImportMessage");
+const githubImportRepos = document.getElementById("githubImportRepos");
+let currentWorks = [];
+let currentGithubUsername = "";
 
 function showGitHubMessage(message, isError = false) {
   githubSettingsMessage.textContent = message;
@@ -26,6 +31,12 @@ function renderWork(work) {
   const meta = document.createElement("p");
   meta.className = "mywork-meta";
   meta.textContent = `${work.visibility === "private" ? "非公開" : "公開"} / ⭐ ${work.star_count}`;
+  if (work.source === "github") {
+    const source = document.createElement("span");
+    source.className = "source-badge";
+    source.textContent = "GitHub";
+    meta.append(" / ", source);
+  }
 
   const tags = document.createElement("p");
   tags.className = "tag-list";
@@ -91,23 +102,117 @@ async function loadWorks() {
   const data = await res.json();
   if (!res.ok) {
     myWorks.innerHTML = `<p class="profile-error">${data.error || "読み込みに失敗しました"}</p>`;
-    return;
+    currentWorks = [];
+    return currentWorks;
   }
+  currentWorks = data;
   myWorks.innerHTML = "";
   if (data.length === 0) {
     myWorks.innerHTML = "<p class=\"profile-empty\">作品がありません。</p>";
-    return;
+    return currentWorks;
   }
   data.forEach(renderWork);
+  return currentWorks;
 }
 
 async function loadMe() {
   const status = await window.PrismAuth.refresh();
-  if (!status.loggedIn) return;
+  if (!status.loggedIn) return null;
   const res = await fetch(`/api/users.php?id=${status.user.id}`);
   const user = await res.json();
   if (res.ok) {
     githubUsernameInput.value = user.github_username || "";
+    currentGithubUsername = user.github_username || "";
+    return user;
+  }
+  return null;
+}
+
+function showImportMessage(message, isError = false) {
+  githubImportMessage.textContent = message;
+  githubImportMessage.classList.toggle("is-error", isError);
+}
+
+function importedSourceUrls() {
+  return new Set(currentWorks.filter(work => work.source === "github" && work.source_url).map(work => work.source_url));
+}
+
+async function importRepo(repo, button) {
+  button.disabled = true;
+  button.textContent = "取り込み中...";
+  try {
+    const res = await fetch("/api/gallery.php?action=import-github", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ repo: repo.name })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "取り込めませんでした");
+    showImportMessage("取り込みました。");
+    await loadWorks();
+    await loadGitHubImportPanel(currentGithubUsername);
+  } catch (err) {
+    showImportMessage(err.message, true);
+    button.disabled = false;
+    button.textContent = "取り込む";
+  }
+}
+
+function renderImportRepo(repo) {
+  const imported = importedSourceUrls().has(repo.html_url);
+  const card = document.createElement("article");
+  card.className = "github-import-card";
+
+  const title = document.createElement("a");
+  title.href = repo.html_url;
+  title.target = "_blank";
+  title.rel = "noopener noreferrer";
+  title.textContent = repo.name;
+
+  const desc = document.createElement("p");
+  desc.textContent = repo.description || "No description";
+
+  const meta = document.createElement("p");
+  meta.className = "github-repo-meta";
+  meta.textContent = `${repo.language || "No language"} / stars ${repo.stargazers_count}`;
+
+  const status = document.createElement("span");
+  status.className = "github-import-status";
+  status.textContent = imported ? "取り込み済み" : "未取り込み";
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = imported ? "再取り込み" : "取り込む";
+  button.addEventListener("click", () => importRepo(repo, button));
+
+  card.append(title, desc, meta, status, button);
+  githubImportRepos.appendChild(card);
+}
+
+async function loadGitHubImportPanel(username) {
+  githubImportPanel.hidden = false;
+  githubImportRepos.innerHTML = "";
+  if (!username) {
+    showImportMessage("GitHub username を保存するとリポジトリを取り込めます。");
+    return;
+  }
+
+  showImportMessage("GitHub repositories loading...");
+  try {
+    const res = await fetch(`/api/github.php?user=${encodeURIComponent(username)}`);
+    const repos = await res.json();
+    if (!res.ok) throw new Error(repos.error || "GitHubリポジトリを読み込めませんでした");
+    const importableRepos = repos.filter(repo => !repo.fork);
+    githubImportRepos.innerHTML = "";
+    if (importableRepos.length === 0) {
+      showImportMessage("取り込めるリポジトリがありません。");
+      return;
+    }
+    showImportMessage("");
+    importableRepos.forEach(renderImportRepo);
+  } catch (err) {
+    githubImportRepos.innerHTML = "";
+    showImportMessage(err.message, true);
   }
 }
 
@@ -124,6 +229,8 @@ githubSettingsForm.addEventListener("submit", async (e) => {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "保存できませんでした");
     showGitHubMessage("保存しました。");
+    currentGithubUsername = data.github_username || "";
+    await loadGitHubImportPanel(currentGithubUsername);
   } catch (err) {
     showGitHubMessage(err.message, true);
   }
@@ -137,6 +244,7 @@ async function initMypage() {
   }
   await loadMe();
   await loadWorks();
+  await loadGitHubImportPanel(currentGithubUsername);
 }
 
 initMypage();

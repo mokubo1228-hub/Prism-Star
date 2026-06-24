@@ -69,6 +69,12 @@ async function loadDetail() {
     const meta = clone.querySelector(".detail-meta");
     const tags = (work.tags || []).map(tag => `#${tag}`).join(" ");
     meta.textContent = `${work.visibility === "private" ? "非公開" : "公開"} ${tags}`;
+    if (work.source === "github") {
+      const badge = document.createElement("span");
+      badge.className = "source-badge";
+      badge.textContent = "GitHub";
+      meta.append(" ", badge);
+    }
 
     const starButton = clone.querySelector(".star-button");
     updateStarButton(starButton, work.star_count || 0, Boolean(work.starred));
@@ -79,6 +85,16 @@ async function loadDetail() {
       editLink.hidden = false;
       editLink.href = `work-edit.php?id=${work.id}`;
       editLink.textContent = "編集";
+    }
+
+    if (work.source === "github" && work.source_url) {
+      const sourceLink = document.createElement("a");
+      sourceLink.className = "source-link";
+      sourceLink.href = work.source_url;
+      sourceLink.target = "_blank";
+      sourceLink.rel = "noopener noreferrer";
+      sourceLink.textContent = "リポジトリを見る";
+      clone.querySelector(".detail-actions").insertBefore(sourceLink, editLink);
     }
 
     container.innerHTML = "";

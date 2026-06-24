@@ -106,10 +106,30 @@
     padding: 8px 14px;
   }
 
+  .source-link {
+    background: #111827;
+    border-radius: 8px;
+    color: #fff;
+    padding: 8px 14px;
+  }
+
   .detail-meta {
     color: #6b7280;
     font-size: 0.9rem;
     margin: 8px 0 0;
+  }
+
+  .source-badge {
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    border-radius: 999px;
+    color: #3730a3;
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1;
+    padding: 3px 7px;
+    vertical-align: middle;
   }
 
   .delete-work-btn {

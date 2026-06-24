@@ -56,6 +56,12 @@ function renderItem(item) {
 
   const tagList = clone.querySelector(".tag-list");
   tagList.textContent = (item.tags || []).map(tag => `#${tag}`).join(" ");
+  if (item.source === "github") {
+    const badge = document.createElement("span");
+    badge.className = "source-badge";
+    badge.textContent = "GitHub";
+    tagList.prepend(badge, " ");
+  }
 
   const starButton = clone.querySelector(".star-button");
   updateStarButton(starButton, item.star_count || 0, Boolean(item.starred));

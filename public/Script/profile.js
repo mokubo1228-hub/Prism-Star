@@ -22,6 +22,12 @@ function renderProfileWork(work) {
   img.alt = work.title;
   figcaption.textContent = work.title;
   tagList.textContent = (work.tags || []).map(tag => `#${tag}`).join(" ");
+  if (work.source === "github") {
+    const badge = document.createElement("span");
+    badge.className = "source-badge";
+    badge.textContent = "GitHub";
+    tagList.prepend(badge, " ");
+  }
 
   profileWorks.appendChild(clone);
 }

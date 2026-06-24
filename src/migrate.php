@@ -28,6 +28,19 @@ function tableExists(PDO $pdo, string $table): bool
     return (int)$stmt->fetchColumn() > 0;
 }
 
+function indexExists(PDO $pdo, string $table, string $index): bool
+{
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*)
+        FROM information_schema.STATISTICS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = ?
+          AND INDEX_NAME = ?
+    ");
+    $stmt->execute([$table, $index]);
+    return (int)$stmt->fetchColumn() > 0;
+}
+
 if (!columnExists($pdo, 'users', 'github_username')) {
     $pdo->exec("ALTER TABLE users ADD COLUMN github_username VARCHAR(100) NULL AFTER name");
     echo "Added users.github_username\n";
@@ -57,6 +70,27 @@ if (!columnExists($pdo, 'gallery', 'visibility')) {
     echo "Added gallery.visibility\n";
 } else {
     echo "gallery.visibility already exists\n";
+}
+
+if (!columnExists($pdo, 'gallery', 'source')) {
+    $pdo->exec("ALTER TABLE gallery ADD COLUMN source ENUM('manual','github') NOT NULL DEFAULT 'manual' AFTER visibility");
+    echo "Added gallery.source\n";
+} else {
+    echo "gallery.source already exists\n";
+}
+
+if (!columnExists($pdo, 'gallery', 'source_url')) {
+    $pdo->exec("ALTER TABLE gallery ADD COLUMN source_url VARCHAR(255) NULL AFTER source");
+    echo "Added gallery.source_url\n";
+} else {
+    echo "gallery.source_url already exists\n";
+}
+
+if (!indexExists($pdo, 'gallery', 'uniq_gallery_user_source')) {
+    $pdo->exec("ALTER TABLE gallery ADD UNIQUE KEY uniq_gallery_user_source (user_id, source_url)");
+    echo "Added uniq_gallery_user_source\n";
+} else {
+    echo "uniq_gallery_user_source already exists\n";
 }
 
 if (!tableExists($pdo, 'tags')) {

@@ -16,7 +16,10 @@ CREATE TABLE gallery (
     src VARCHAR(500) NOT NULL,
     description TEXT,
     visibility ENUM('public','private') NOT NULL DEFAULT 'public',
+    source ENUM('manual','github') NOT NULL DEFAULT 'manual',
+    source_url VARCHAR(255) NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_gallery_user_source (user_id, source_url),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
