@@ -52,6 +52,6 @@ include __DIR__ . '/includes/head.php';
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
 
-  <script src="Script/form.js"></script>
+  <script src="<?= htmlspecialchars(asset('Script/form.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </body>
 </html>

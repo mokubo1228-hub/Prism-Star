@@ -34,6 +34,6 @@ include __DIR__ . '/includes/head.php';
   </main>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
-  <script src="Script/gallery-detail.js"></script>
+  <script src="<?= htmlspecialchars(asset('Script/gallery-detail.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </body>
 </html>

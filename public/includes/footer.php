@@ -1,3 +1,5 @@
+<?php require_once __DIR__ . '/asset.php'; ?>
+
   <footer id="site-footer" class="site-footer">
     <div class="footer-info">
       <p class="footer-corporate">&copy; 2025 Miz..Kingdom</p>
@@ -29,4 +31,4 @@
     </div>
   </footer>
 
-  <script src="Script/common.js"></script>
+  <script src="<?= htmlspecialchars(asset('Script/common.js'), ENT_QUOTES, 'UTF-8') ?>"></script>

@@ -91,8 +91,8 @@ Codex 実装（`docs/phase-5-handoff.md`）・Claude Code review 済（冪等/40
 ## パスワードリセット（独立トラック・[ADR-021](decisions.md)）⬜
 認証の基本機能（再設定）を揃える。登録 double opt-in と同じメールトークン方式で `forgot.php`→メール（MailHog）→`reset.php?token=`→新パスワード→ログイン。`password_resets` テーブル追加、`auth.php` に reset-request / reset-complete、login の死にリンク（`href="#"`）を `forgot.php` へ。token は 256bit・sha256 hash・単回・**期限1h**、enumeration 対策。handoff：`docs/password-reset-handoff.md`。
 
-## 静的アセット cache-busting（独立トラック・[ADR-022](decisions.md)）⬜
-v2 で JS を全面刷新 → 再訪問ブラウザが古い JS を掴んで壊れる事象が発生。JS/CSS の URL に**バージョンクエリ（`?v=filemtime`）**＋ `Cache-Control` を付ける。`asset()` ヘルパーで `head.php`／各ページの `<script>` を置換。挙動不変。handoff：`docs/cache-busting-handoff.md`。
+## 静的アセット cache-busting（独立トラック・[ADR-022](decisions.md)）✅
+v2 で JS を全面刷新 → 再訪問ブラウザが古い JS を掴んで壊れる事象が発生。JS/CSS の URL に**バージョンクエリ（`?v=filemtime`）**を付ける。`asset()`（`public/includes/asset.php`）ヘルパーで `head.php`（共通 CSS＋`$pageStyles`）・`footer.php`（`common.js`）・各ページの `<script>` を置換。挙動不変。Codex 実装・Claude Code review 済（12 ページ＋common.js の結線網羅・生参照ゼロ・全ページ 200・`?v=` 出力を独立確認）。`Cache-Control` は Docker Apache に `mod_headers` が無く見送り、version クエリ単独で成立（[ADR-022](decisions.md) 実装メモ）。handoff：`docs/cache-busting-handoff.md`。
 
 ## 今後の発展（ロードマップ）⬜
 - 一覧のページネーション、ブランド表現（虹色テーマ）の作り込み。

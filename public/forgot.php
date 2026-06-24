@@ -37,6 +37,6 @@ include __DIR__ . '/includes/head.php';
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
 
-  <script src="Script/forgot.js"></script>
+  <script src="<?= htmlspecialchars(asset('Script/forgot.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </body>
 </html>

@@ -180,6 +180,7 @@
 - **決定**：`<script>`/`<link>` のアセット URL に**バージョンクエリ（`?v=…`）**を付け、内容が変わったら URL が変わって確実に再取得されるようにする。バージョンは `filemtime()` 由来など「内容が変われば変わる」値にする。あわせて静的アセットに適切な `Cache-Control` を付ける。
 - **理由**：内容を書き換えても URL が同じだと、ブラウザはヒューリスティックにキャッシュを使い続け、再訪問ユーザーが壊れる。URL を変えるのが最も確実なキャッシュ無効化。
 - **代替案**：(a) `Cache-Control` だけ付ける → 既にキャッシュ済みのクライアントには効きにくい。(b) 何もしない → 再訪問で壊れる（今回実際に発生）。→ バージョンクエリ＋`Cache-Control` を採用。
+- **実装メモ**：`asset()`（`public/includes/asset.php`）が `filemtime()` 由来の `?v=…` を返し、`head.php`（共通 CSS＋`$pageStyles`）・`footer.php`（`common.js`）・各ページの `<script>` が経由する。`Cache-Control` は Docker の Apache に `mod_headers` が無く付与できなかったため handoff の fallback どおり見送り、**cache-busting は version クエリ単独で成立**させた（内容が変われば `filemtime` が変わり URL が変わるので、再取得は保証される）。`mod_headers` を有効化できたら immutable な長期キャッシュを足す余地はある。
 - **関連**：`docs/cache-busting-handoff.md`、`docs/roadmap.md`。
 
 ## ADR-023 認証導線（パスワード再設定・新規登録）はログインが現れる全箇所で揃える ✅

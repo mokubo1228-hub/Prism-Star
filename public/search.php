@@ -24,6 +24,6 @@ include __DIR__ . '/includes/head.php';
   </main>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
-  <script src="Script/search.js"></script>
+  <script src="<?= htmlspecialchars(asset('Script/search.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </body>
 </html>
