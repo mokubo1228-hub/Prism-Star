@@ -30,7 +30,7 @@ function renderWork(work) {
 
   const meta = document.createElement("p");
   meta.className = "mywork-meta";
-  meta.textContent = `${work.visibility === "private" ? "非公開" : "公開"} / ⭐ ${work.star_count}`;
+  meta.textContent = `${work.visibility === "private" ? "非公開" : "公開"} / ★ ${work.star_count}`;
   if (work.source === "github") {
     const source = document.createElement("span");
     source.className = "source-badge";

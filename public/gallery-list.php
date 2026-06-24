@@ -23,7 +23,7 @@ include __DIR__ . '/includes/head.php';
             <a class="author-link" href="profile.php?id={USER_ID}" data-gated-link>by {AUTHOR}</a>
             <p class="tag-list"></p>
             <button type="button" class="star-button" data-gallery-id="{ID}" aria-pressed="false">
-              <span class="star-icon">⭐</span>
+              <span class="star-icon">★</span>
               <span class="star-count">0</span>
             </button>
           </article>

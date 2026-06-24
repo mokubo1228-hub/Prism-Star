@@ -70,6 +70,15 @@
     color: #92400e;
   }
 
+  /* 星アイコンは普段グレー、お気に入り（is-starred）で黄色。数字の色は据え置き。 */
+  .star-icon {
+    color: #9ca3af;
+  }
+
+  .star-button.is-starred .star-icon {
+    color: #f59e0b;
+  }
+
   .detail-star-button {
     margin: 12px auto 0;
   }

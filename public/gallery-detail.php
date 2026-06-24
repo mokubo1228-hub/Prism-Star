@@ -17,7 +17,7 @@ include __DIR__ . '/includes/head.php';
             <p class="detail-author">投稿者：<a href="profile.php?id={USER_ID}">{AUTHOR}</a></p>
             <p class="detail-meta"></p>
             <button type="button" class="star-button detail-star-button" aria-pressed="false">
-              <span class="star-icon">⭐</span>
+              <span class="star-icon">★</span>
               <span class="star-count">0</span>
             </button>
           </figcaption>
