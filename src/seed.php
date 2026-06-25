@@ -16,6 +16,16 @@ try {
         'aoi@example.com'  => ['name' => 'Aoi', 'github' => null],
         'ren@example.com'  => ['name' => 'Ren', 'github' => null],
         'mio@example.com'  => ['name' => 'Mio', 'github' => null],
+        'user05@example.com' => ['name' => 'Haru', 'github' => null],
+        'user06@example.com' => ['name' => 'Sora', 'github' => null],
+        'user07@example.com' => ['name' => 'Yui', 'github' => null],
+        'user08@example.com' => ['name' => 'Kaito', 'github' => null],
+        'user09@example.com' => ['name' => 'Nana', 'github' => null],
+        'user10@example.com' => ['name' => 'Riku', 'github' => null],
+        'user11@example.com' => ['name' => 'Akari', 'github' => null],
+        'user12@example.com' => ['name' => 'Toma', 'github' => null],
+        'user13@example.com' => ['name' => 'Mei', 'github' => null],
+        'user14@example.com' => ['name' => 'Itsuki', 'github' => null],
     ];
 
     $selectUser = $pdo->prepare("SELECT id FROM users WHERE email = ?");
@@ -52,6 +62,14 @@ try {
         ['aoi@example.com',  '作品14', 'https://placehold.jp/200x200.png', 'ミニマルな構成で描いた静物画。余白と形のバランスを重視したシンプルな一枚です。', 'public', ['静物']],
         ['ren@example.com',  '作品15', 'https://placehold.jp/320x180.png', '夜空をイメージした作品。小さな光の粒をちりばめ、静寂と広がりを感じさせる構成になっています。', 'public', ['夜', '空']],
         ['mio@example.com',  '作品16', 'https://placehold.jp/360x220.png', '公開前の構成案。色の重なりと視線誘導を検証している非公開作品です。', 'private', ['試作', '抽象']],
+        ['aoi@example.com',  '作品17', 'https://placehold.jp/300x210.png', '朝の商店街を切り取った作品。看板の色と人影のリズムで、歩き出す前の都市の空気を表現しました。', 'public', ['都市', '朝']],
+        ['ren@example.com',  '作品18', 'https://placehold.jp/360x240.png', '雨粒が水面に広がる瞬間を抽象化した作品。円の重なりで静かな波紋を描いています。', 'public', ['雨', '抽象']],
+        ['mio@example.com',  '作品19', 'https://placehold.jp/280x220.png', '夕方の海沿いをモチーフにした作品。遠くの雲と水平線を淡い色で重ねました。', 'public', ['海', '空']],
+        ['aoi@example.com',  '作品20', 'https://placehold.jp/260x300.png', '路地裏の鉢植えを題材にした小品。限られた光の中で花が立ち上がる様子を描いています。', 'public', ['花', '光']],
+        ['ren@example.com',  '作品21', 'https://placehold.jp/400x240.png', '夜の駅前を線と面で再構成した作品。反射する照明と人の流れを幾何学的に表現しました。', 'public', ['夜', '都市']],
+        ['mio@example.com',  '作品22', 'https://placehold.jp/300x260.png', '小さな窓から見える空を描いた作品。室内の静けさと外の広がりを対比させています。', 'public', ['空', '日常']],
+        ['aoi@example.com',  '作品23', 'https://placehold.jp/340x220.png', '公園の木漏れ日をテーマにした作品。緑の重なりと白い余白で風景の奥行きを作りました。', 'public', ['風景', '光']],
+        ['ren@example.com',  '作品24', 'https://placehold.jp/320x240.png', '夜明け前の雨雲をイメージした抽象作品。青と灰色の層で湿度のある空気を表現しています。', 'public', ['雨', '空', '抽象']],
     ];
 
     $selectWork = $pdo->prepare("SELECT id FROM gallery WHERE title = ? LIMIT 1");
@@ -61,6 +79,8 @@ try {
     $insertTag = $pdo->prepare("INSERT INTO tags (name) VALUES (?)");
     $deleteWorkTags = $pdo->prepare("DELETE FROM gallery_tags WHERE gallery_id = ?");
     $insertWorkTag = $pdo->prepare("INSERT IGNORE INTO gallery_tags (gallery_id, tag_id) VALUES (?, ?)");
+    $workIds = [];
+    $workAuthors = [];
 
     foreach ($works as $work) {
         [$email, $title, $src, $desc, $visibility, $tags] = $work;
@@ -75,6 +95,8 @@ try {
             $insertWork->execute([$userId, $title, $src, $desc, $visibility]);
             $workId = (int)$pdo->lastInsertId();
         }
+        $workIds[$title] = $workId;
+        $workAuthors[$title] = $email;
 
         $deleteWorkTags->execute([$workId]);
         foreach ($tags as $tagName) {
@@ -88,8 +110,46 @@ try {
         }
     }
 
+    // 人気ランキングを「人気順に見える」ようにするための星の作り込み（[ADR-029]）。星が無いと全作品が
+    // 同点で順位が出ないため、上位ほど多く付くよう降順で配分する。星は作者以外のユーザーから付け（自然）、
+    // INSERT IGNORE＋UNIQUE(user_id,gallery_id) で何度流しても増えない（冪等）。
+    $starTargets = [
+        '作品24' => 13,
+        '作品23' => 12,
+        '作品21' => 11,
+        '作品18' => 10,
+        '作品20' => 8,
+        '作品22' => 7,
+        '作品19' => 6,
+        '作品15' => 5,
+        '作品14' => 4,
+        '作品12' => 3,
+        '作品10' => 2,
+        '作品2'  => 1,
+    ];
+    $insertStar = $pdo->prepare("INSERT IGNORE INTO stars (user_id, gallery_id) VALUES (?, ?)");
+    $starFixtureCount = 0;
+    foreach ($starTargets as $title => $targetCount) {
+        if (!isset($workIds[$title], $workAuthors[$title])) {
+            continue;
+        }
+
+        $given = 0;
+        foreach ($users as $email => $_user) {
+            if ($email === $workAuthors[$title]) {
+                continue;
+            }
+            $insertStar->execute([$userIds[$email], $workIds[$title]]);
+            $given++;
+            if ($given >= $targetCount) {
+                break;
+            }
+        }
+        $starFixtureCount += $given;
+    }
+
     $pdo->commit();
-    echo "v2 fixtureを投入しました: users=" . count($users) . " works=" . count($works) . "（全員 password123）\n";
+    echo "v2 fixtureを投入しました: users=" . count($users) . " works=" . count($works) . " stars=" . $starFixtureCount . "（全員 password123）\n";
 } catch (Throwable $e) {
     $pdo->rollBack();
     throw $e;

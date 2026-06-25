@@ -219,7 +219,7 @@
   - **ヘッダー select の見切れ**：flex 内で `min-width:0` だと「キーワード」が潰れて切れた。`flex:0 0 auto`（内容幅・縮めない）で解消。
 - **関連**：`docs/search-consolidation-handoff.md`、[ADR-019](decisions.md)（検索バー常設・ゲート）、`public/includes/header.php`、`public/Script/common.js`、`public/search.php`。
 
-## ADR-026 セッション堅牢化＋CSRF 対策 ⬜（優先トラック①）
+## ADR-026 セッション堅牢化＋CSRF 対策 ✅（優先トラック①）
 - **背景**：マルチユーザーで状態変更 API（投稿/編集/削除・スター・GitHub 取り込み・ログイン/登録/再設定）があるのに、**CSRF 防御が無く、セッション Cookie の属性（SameSite/HttpOnly/Secure）も未設定**だった。`session_start()` は各 API（auth/gallery/users/stars/search）に素で散在。
 - **決定**：
   1. セッション開始を **`src/session.php` に共通化**し、`session_start()` の前に `SameSite=Lax＋HttpOnly＋Secure(https のとき)＋path=/` を設定（既に開始済みなら二重起動しない）。各 API と `head.php` はこれ経由でセッションを開く。
@@ -230,7 +230,7 @@
 - **影響**：`src/session.php` 新規、`api/{auth,gallery,users,stars,search,contact}.php` が `session.php` 経由＋状態変更ブランチで `requireCsrf()`、`head.php` に session boot＋meta、`common.js` に fetch ラッパ。挙動は変えない（トークンは透過的に付く）。`session_regenerate_id` 後もトークンは保持。
 - **関連**：`docs/security-hardening-handoff.md`、`src/session.php`、`public/includes/head.php`、`public/Script/common.js`、`docs/roadmap.md`（優先トラック①）。
 
-## ADR-027 発見系（おすすめ・検索）は自分の作品を除外／詳細は閲覧専用・編集はマイページ ⬜
+## ADR-027 発見系（おすすめ・検索）は自分の作品を除外／詳細は閲覧専用・編集はマイページ ✅
 - **背景**：検索は既に自分の作品を除外していた（[ADR-025]）のに、**おすすめ（一覧）はログイン中も自分の公開作品を出していた**。発見の場に自作が混じるのは不整合。あわせて作品詳細に所有者用「編集」リンクがあり、編集導線がマイページと詳細の2か所に散っていた。
 - **決定**：
   1. **おすすめ一覧もログイン中は自分の作品を除外**（検索と同じ `AND (? = 0 OR g.user_id <> ?)`）。**未ログインの teaser は全公開作品のまま**（除外対象が無い）。
@@ -241,7 +241,7 @@
 - **影響**：`gallery.php` 一覧に自分除外（未ログインは据え置き）、`gallery-detail.{php,js}` から `.edit-work-link` を撤去（GitHub「リポジトリを見る」リンクの挿入位置も append に変更）。詳細の所有者閲覧（`public OR owner`）と API の `is_owner` は維持（将来再利用可）。
 - **関連**：[ADR-025](decisions.md)（検索の自分除外）、[ADR-013](decisions.md)（マイページ＝管理画面）、`public/api/gallery.php`、`public/Script/gallery-detail.js`、`public/gallery-detail.php`。
 
-## ADR-028 アカウント設定（表示名・パスワード変更）⬜（優先トラック②）
+## ADR-028 アカウント設定（表示名・パスワード変更）✅（優先トラック②）
 - **背景**：ログイン中に**表示名・パスワードを変更する手段が無かった**（自己更新できるのは `github_username` のみ）。「プロフィールも変えられない SNS」は不自然で、基本機能の穴。パスワード再設定はメール経由（[ADR-021](decisions.md)）はあるが、ログイン済みユーザーがその場で変える導線が無い。
 - **決定**：マイページに「アカウント設定」を新設し、(1) **表示名変更**、(2) **パスワード変更（現行パスワード確認つき）**を足す。配置は責務で分ける：
   - 表示名は profile フィールドなので **`users.php` POST**（既存の自己更新）に同居。`name` と `github_username` を**独立に部分更新**（送られたフィールドだけ更新）。更新後は `$_SESSION['user_name']` も同期。
@@ -254,3 +254,29 @@
   - **②の CSRF はタダだった**：①（[ADR-026](decisions.md)）でセッション開始と `requireCsrf` を共通化済みだったので、新 action `change-password` も auth.php の POST 共通 `requireCsrf` で**自動的に CSRF 対象**になり、fetch ラッパが token を付ける。②側に CSRF 用のコードは一切書いていない＝**基盤を中央化した恩恵**。
   - **資格情報変更後のセッション**：パスワード更新後に `session_regenerate_id(true)`（固定化対策・古い ID の無効化）。
 - **関連**：`docs/account-settings-handoff.md`、[ADR-013](decisions.md)、[ADR-021](decisions.md)、[ADR-026](decisions.md)（CSRF）、`public/api/{users,auth}.php`、`public/mypage.php`。
+
+## ADR-029 発見系の役割分担：検索は「もっと見る」ページング／おすすめは新着・人気の2軸ランキング型トップ ✅（優先トラック③）
+- **背景**：おすすめ一覧（`gallery.php`）と作品検索（`search.php` works）は結果を**一度に全件返していた**（おすすめは LIMIT 無し、works は LIMIT 50）。当初は両方に「もっと見る」ページングを入れる設計だった（実際に一度実装した）。が、レビュー中に **おすすめ（トップ）と検索は仕事が違う**と気づいた：検索は「探した結果を網羅的に辿る」場、おすすめ（トップ）は「今の動きを一望する入口」。トップを網羅カタログ化してページングするより、**上位をキュレーションして見せる**方がプロダクトとして自然。
+- **決定**：発見系を2つの形に**役割分担**する。
+  1. **検索（`search.php` works）＝「もっと見る」ページング**。`PER_PAGE = 12`、レスポンスは `{type, results, hasMore, page}`、`hasMore` は **`PER_PAGE+1` 件取得で判定**（余り1件は捨て `COUNT(*)` を撃たない）、`LIMIT/OFFSET` は **int キャストして SQL に直接埋める**（`page` は `(int)$_GET['page']` を最小1にクランプ）。フロントは**追記描画＋「もっと見る」**、新規検索はページ再読込でリセット。**ユーザー検索（`type=users`）はページングしない**（`LIMIT 30` 据え置き）。
+  2. **おすすめ（トップ）＝新着・人気の2軸ランキング**（pixiv のランキング行イメージ）。`gallery.php` 一覧 branch を、**「新着 トップ5」（`ORDER BY created_at DESC, id DESC`）と「人気 トップ5」（`ORDER BY star_count DESC, created_at DESC, id DESC`）の2レーン**で返す。各レーン **`LIMIT 5`**、**横1列・均一サイズ・順位 #1〜#5**（人気は star 数も表示）。レスポンスは **`{ newest: [...5], popular: [...5] }`**（ページングしないので `hasMore`/`page` は無し）。網羅ブラウズは検索に任せ、トップは「鮮度（新着）と評価（人気）」を一望させる。**未ログインのトップは teaser として閲覧可、作品クリック（詳細）でログイン催促**（既存の `requireAuth` gated-link を踏襲＝新規実装ではない）。
+- **理由**：トップ（発見の入口）は網羅より**キュレーション**の方が価値が伝わり、ランキングという形が「全員が発信者・スターが共通通貨」（[ADR-009](decisions.md)）というコンセプトとも噛み合う。**2軸にするのは、人気順だけだと新規作品が埋もれ、新着順だけだと評価が見えない**ため。両方を小さく並べて「常に動きがある入口」にし、回遊を促す。pixiv 的な横1列レーンは一望性と省スペースを両立する。網羅的ブラウズは検索の仕事として明確に分け、**1機能1責務**にする。検索のページングは、ボタン式が実装単純で残量・ローディングを明示でき戻る操作とも相性が良く、`PER_PAGE+1` は総件数 `COUNT` を避けて「次があるか」を1クエリで判定できる。`LIMIT/OFFSET` の int 直埋めは、**PDO で `LIMIT` をプレースホルダ化するとエミュレートプリペア既定で文字列としてクォートされ構文エラーになりやすい**癖を避けるため（出所を int に限定し安全性を担保）。
+- **代替案・却下理由**：
+  - **おすすめにも「もっと見る」ページング**（当初実装）→ トップを網羅カタログにすると検索と役割が重複し、入口としての一望性が薄れる。**役割分担のため却下**（検索側のページングは残す）。
+  - **人気のみ／新着のみの1レーン** → 人気のみは新規が埋もれ、新着のみは質が見えない。2軸で補完する。
+  - **#1 ヒーロー大表示** → 検討したが、まず横1列・均一の pixiv 風レーンを採用（一望性優先・実装も軽い）。視覚的強弱は終盤の polish 余地。
+  - **無限スクロール／番号付きページ／cursor**（検索側）→ 本規模では過剰。**OFFSET の重複/抜け（読み込み中に件数が動くと境界が重複・脱落しうる）は許容範囲**なので OFFSET を採用。
+- **影響**：
+  - 検索：`search.php` works branch に `LIMIT/OFFSET`＋`hasMore`、`search.js` 追記描画、`search.php`（ページ）に「もっと見る」要素（実装済み・維持）。
+  - おすすめ：`gallery.php` 一覧 branch を **`{newest, popular}` の2レーン（各 `LIMIT 5`）に置換**（`mine`/`id` は据え置き、自分除外・公開のみは不変）、`gallery-list.{php,js,css}` を**新着/人気の2レーン（横1列・順位・star数）**に作り替え（「もっと見る」要素は撤去）。
+  - seed：**star を投入して人気順を可視化**（ユーザーを増やし star を傾斜配分。star=0 のままだと全作品同点で人気順が出ない）。公開作品の増量（作品17〜）はランキングの中身として維持。
+- **詰まりどころ・判断メモ**：
+  - **当初実装からの方針転換**：おすすめ・検索の両方にページングを入れて一度動かした後、「トップ＝キュレーション（2軸ランキング）／検索＝網羅」と役割を分けた。検索側のページング実装は活き、おすすめ側は2レーンに置換する（[dont-anchor-on-current-state] の判断＝実装済みを残す理由にしない）。
+  - **両レーンとも自分除外**：新着・人気の**両方ともログイン中は自分の作品を除外**する（[ADR-027](decisions.md)）。自分の作品はマイページ/プロフィールで見る。「自分に自分を薦めない」を維持。
+  - **レーン間の重複は許容**：同じ作品が新着と人気の両方に出てよい（独立ランキング）。
+  - **新着の並び安定化**：seed は一括投入で `created_at` が同秒に並びやすいので、`ORDER BY created_at DESC, id DESC` と **`id` を tiebreak に必ず入れる**（投入順＝新着順が安定）。
+  - **star=0 問題**：seed が star を 1 件も入れていないと全作品が同点で人気順が出ない。seed でユーザーを増やし star を傾斜配分する（seed ユーザー4人だと 1 作品最大 4 star で弱いため増やす）。
+  - **ログイン催促はトップでは既存挙動**：未ログインのトップ（teaser）で作品/詳細をクリックすると `requireAuth` がログインを促す。ランキング化でもこの gated-link 挙動を**維持するだけ**（新規ロジックを足さない）。
+  - **`LIMIT/OFFSET` の int 化（検索）**：`page=1 UNION SELECT` 等を渡しても `(int)` で無害化、負値は最小1にクランプ。SQL に外部文字列を連結しない。
+  - **レスポンス形の波及**：素の `/api/gallery.php`（おすすめ）を消費するのは `gallery-list.js` のみ（`?id`/`?mine`/`?action` は別 branch、プロフィールは `users.php` 経由）。検索の `results` も既存キーを維持。形変更の影響は両フロントに閉じる。
+- **関連**：`docs/pagination-handoff.md`、[ADR-027](decisions.md)（自分除外）、[ADR-025](decisions.md)（検索条件）、[ADR-009](decisions.md)（スター＝共通通貨）、[ADR-020](decisions.md)（seed の公開/非公開ミックス）、`public/api/{gallery,search}.php`、`public/Script/{gallery-list,search}.js`、`public/Style/gallery-list.css`、`src/seed.php`、`docs/roadmap.md`（優先トラック③）。

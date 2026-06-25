@@ -11,6 +11,9 @@ include __DIR__ . '/includes/head.php';
         <h2 id="searchHeading">検索</h2>
       </div>
       <section id="searchResults" class="gallery-grid search-results"></section>
+      <div class="load-more">
+        <button type="button" id="searchLoadMore" hidden>もっと見る</button>
+      </div>
     </div>
   </main>
 

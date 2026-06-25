@@ -9,26 +9,36 @@ include __DIR__ . '/includes/head.php';
     <div class="gallery-back">
       <div class="gallery-list-heading">
         <h2>おすすめ</h2>
-        <p>人気順</p>
+        <p>新着と人気</p>
       </div>
-      <section id="gallery" class="gallery-grid">
-        <template id="gallery-item-template">
-          <article class="gallery-card">
-            <a class="work-link" href="gallery-detail.php?id={ID}" data-gated-link>
-              <figure class="gallery-item">
-                <img src="{SRC}" alt="{TITLE}">
-                <figcaption>{TITLE}</figcaption>
-              </figure>
-            </a>
-            <a class="author-link" href="profile.php?id={USER_ID}" data-gated-link>by {AUTHOR}</a>
-            <p class="tag-list"></p>
-            <button type="button" class="star-button" data-gallery-id="{ID}" aria-pressed="false">
-              <span class="star-icon">★</span>
-              <span class="star-count">0</span>
-            </button>
-          </article>
-        </template>
+
+      <section class="rank-lane" aria-labelledby="newestHeading">
+        <h2 id="newestHeading">新着</h2>
+        <div id="newestLane" class="rank-row"></div>
       </section>
+
+      <section class="rank-lane" aria-labelledby="popularHeading">
+        <h2 id="popularHeading">人気</h2>
+        <div id="popularLane" class="rank-row"></div>
+      </section>
+
+      <template id="gallery-item-template">
+        <article class="gallery-card">
+          <span class="rank-badge"></span>
+          <a class="work-link" href="gallery-detail.php?id={ID}" data-gated-link>
+            <figure class="gallery-item">
+              <img src="{SRC}" alt="{TITLE}">
+              <figcaption>{TITLE}</figcaption>
+            </figure>
+          </a>
+          <a class="author-link" href="profile.php?id={USER_ID}" data-gated-link>by {AUTHOR}</a>
+          <p class="tag-list"></p>
+          <button type="button" class="star-button" data-gallery-id="{ID}" aria-pressed="false">
+            <span class="star-icon">★</span>
+            <span class="star-count">0</span>
+          </button>
+        </article>
+      </template>
     </div>
   </main>
 

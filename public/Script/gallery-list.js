@@ -1,5 +1,9 @@
+// トップ（おすすめ）の描画。/api/gallery.php の { newest, popular } を「新着」「人気」の2レーンに
+// 並べるランキング表示（順位 #1〜）。未ログインでも一覧は見えるが（teaser）、作品/作者リンクは
+// requireAuth でログインを促す（gated-link）＝[ADR-029]。
 const template = document.getElementById("gallery-item-template");
-const gallery = document.getElementById("gallery");
+const newestLane = document.getElementById("newestLane");
+const popularLane = document.getElementById("popularLane");
 
 function updateStarButton(button, starCount, starred) {
   button.querySelector(".star-count").textContent = starCount;
@@ -26,8 +30,19 @@ async function toggleStar(item, button) {
   }
 }
 
-function renderItem(item) {
+function showLaneMessage(lane, message, className = "profile-empty") {
+  lane.textContent = "";
+  const item = document.createElement("p");
+  item.className = className;
+  item.textContent = message;
+  lane.appendChild(item);
+}
+
+function renderItem(item, target, rank) {
   const clone = template.content.cloneNode(true);
+
+  const badge = clone.querySelector(".rank-badge");
+  badge.textContent = `#${rank}`;
 
   const link = clone.querySelector(".work-link");
   link.href = `gallery-detail.php?id=${item.id}`;
@@ -67,21 +82,31 @@ function renderItem(item) {
   updateStarButton(starButton, item.star_count || 0, Boolean(item.starred));
   starButton.addEventListener("click", () => toggleStar(item, starButton));
 
-  gallery.appendChild(clone);
+  target.appendChild(clone);
 }
 
-if (template && gallery) {
-  fetch("/api/gallery.php")
-    .then(res => res.json())
-    .then(data => {
-      gallery.innerHTML = "";
-      if (!Array.isArray(data) || data.length === 0) {
-        gallery.innerHTML = "<p class=\"profile-empty\">公開作品がありません。</p>";
-        return;
-      }
-      data.forEach(renderItem);
-    })
-    .catch(() => {
-      gallery.innerHTML = "<p class=\"profile-error\">作品の読み込みに失敗しました。</p>";
-    });
+function renderLane(lane, items) {
+  lane.textContent = "";
+  if (!items.length) {
+    showLaneMessage(lane, "作品がありません。");
+    return;
+  }
+  items.forEach((item, index) => renderItem(item, lane, index + 1));
+}
+
+async function loadRankings() {
+  try {
+    const res = await fetch("/api/gallery.php");
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "作品の読み込みに失敗しました。");
+    renderLane(newestLane, Array.isArray(data.newest) ? data.newest : []);
+    renderLane(popularLane, Array.isArray(data.popular) ? data.popular : []);
+  } catch (err) {
+    showLaneMessage(newestLane, err.message, "profile-error");
+    showLaneMessage(popularLane, err.message, "profile-error");
+  }
+}
+
+if (template && newestLane && popularLane) {
+  loadRankings();
 }

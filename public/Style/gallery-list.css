@@ -49,7 +49,43 @@
 }
 
 .gallery-card {
+  position: relative;
   width: var(--gallery-icon-w);
+}
+
+.rank-lane {
+  margin-top: 24px;
+}
+
+.rank-lane h2 {
+  color: #374151;
+  font-size: 1.1rem;
+  margin: 0 20px 10px;
+}
+
+.rank-row {
+  display: flex;
+  gap: var(--gap);
+  overflow-x: auto;
+  padding: 10px 20px 20px;
+}
+
+.rank-row .gallery-card {
+  flex: 0 0 var(--gallery-icon-w);
+}
+
+.rank-badge {
+  background: #111827;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  left: 8px;
+  line-height: 1;
+  padding: 5px 8px;
+  position: absolute;
+  top: 8px;
+  z-index: 1;
 }
 
 .work-link {
@@ -186,6 +222,26 @@
   grid-column: 1 / -1;
   margin: 0;
   text-align: center;
+}
+
+.load-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.load-more button {
+  background: royalblue;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  padding: 10px 18px;
+}
+
+.load-more button:disabled {
+  background: #9ca3af;
+  cursor: wait;
 }
 
 .github-settings {

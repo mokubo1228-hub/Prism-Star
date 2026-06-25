@@ -1,6 +1,9 @@
 const searchHeading = document.getElementById("searchHeading");
 const searchResults = document.getElementById("searchResults");
+const searchLoadMoreButton = document.getElementById("searchLoadMore");
 const initialParams = new URLSearchParams(window.location.search);
+let page = 1;
+let loading = false;
 
 function showSearchMessage(message, className = "profile-empty") {
   searchResults.textContent = "";
@@ -75,6 +78,51 @@ function renderUser(user) {
   searchResults.appendChild(article);
 }
 
+// 検索結果の段階読み込み。現在の検索条件（q/tag/type）を保ったまま page だけ増やして追記する。
+// 新規検索はヘッダーからの画面遷移＝ページ再読込で page=1 から引き直す（[ADR-029]）。
+async function loadSearchPage(targetPage) {
+  if (loading) return;
+  loading = true;
+  if (searchLoadMoreButton) {
+    searchLoadMoreButton.disabled = true;
+  }
+
+  const requestParams = new URLSearchParams(initialParams);
+  requestParams.set("page", String(targetPage));
+
+  try {
+    const res = await fetch(`/api/search.php?${requestParams.toString()}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "検索に失敗しました");
+    if (targetPage === 1) {
+      searchResults.textContent = "";
+    }
+    if (!data.results.length) {
+      if (targetPage === 1) {
+        showSearchMessage("結果がありません。");
+      }
+      if (searchLoadMoreButton) searchLoadMoreButton.hidden = true;
+      return;
+    }
+    data.results.forEach(data.type === "users" ? renderUser : renderWork);
+    page = targetPage;
+    if (searchLoadMoreButton) {
+      searchLoadMoreButton.hidden = data.type !== "works" || !data.hasMore;
+    }
+  } catch (err) {
+    if (targetPage === 1) {
+      showSearchMessage(err.message, "profile-error");
+    } else {
+      alert(err.message);
+    }
+  } finally {
+    loading = false;
+    if (searchLoadMoreButton) {
+      searchLoadMoreButton.disabled = false;
+    }
+  }
+}
+
 async function runSearch() {
   const search = currentSearchLabel(initialParams);
   if (searchHeading) {
@@ -86,25 +134,17 @@ async function runSearch() {
 
   await window.PrismAuth.ready;
   if (!await window.PrismAuth.requireAuth(window.location.href)) {
+    if (searchLoadMoreButton) searchLoadMoreButton.hidden = true;
     showSearchMessage("ログインすると検索結果を表示できます。");
     return;
   }
 
   showSearchMessage("検索中...");
-
-  try {
-    const res = await fetch(`/api/search.php?${initialParams.toString()}`);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "検索に失敗しました");
-    searchResults.textContent = "";
-    if (!data.results.length) {
-      showSearchMessage("結果がありません。");
-      return;
-    }
-    data.results.forEach(data.type === "users" ? renderUser : renderWork);
-  } catch (err) {
-    showSearchMessage(err.message, "profile-error");
-  }
+  await loadSearchPage(1);
 }
 
 runSearch();
+
+if (searchLoadMoreButton) {
+  searchLoadMoreButton.addEventListener("click", () => loadSearchPage(page + 1));
+}

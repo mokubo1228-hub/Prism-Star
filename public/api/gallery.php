@@ -240,9 +240,24 @@ if ($method === 'GET') {
     // おすすめは公開作品のみ。ログイン中は自分の作品を除外する（発見系＝他人の作品を見つける場。
     // 自作はマイページ/プロフィールで見る。検索と同じ方針＝[ADR-027]）。未ログイン（userId=0）は
     // (? = 0) が真になり除外をスキップ＝teaser には全公開作品が出る。
-    $stmt = $pdo->prepare(baseSelectSql("WHERE g.visibility = 'public' AND (? = 0 OR g.user_id <> ?)") . " ORDER BY star_count DESC, g.created_at DESC, g.id DESC");
-    $stmt->execute([$userId, $userId, $userId, $userId]);
-    echo json_encode(mapRows($stmt->fetchAll()), JSON_UNESCAPED_UNICODE);
+    //
+    // トップは「網羅」ではなく「今の動きの入口」。新着（鮮度）と人気（評価＝star数）の2軸を各5件だけ
+    // 見せ、続きを辿る網羅は検索に任せる（だからページングしない＝[ADR-029]）。2本のクエリは同じ
+    // WHERE（公開のみ・自分除外）を共有し、ORDER と LIMIT だけ替える。新着・人気で同じ作品が両方に
+    // 出るのは許容（独立したランキング）。
+    $where = "WHERE g.visibility = 'public' AND (? = 0 OR g.user_id <> ?)";
+    $params = [$userId, $userId, $userId, $userId];
+
+    $newestStmt = $pdo->prepare(baseSelectSql($where) . " ORDER BY g.created_at DESC, g.id DESC LIMIT 5");
+    $newestStmt->execute($params);
+
+    $popularStmt = $pdo->prepare(baseSelectSql($where) . " ORDER BY star_count DESC, g.created_at DESC, g.id DESC LIMIT 5");
+    $popularStmt->execute($params);
+
+    echo json_encode([
+        'newest' => mapRows($newestStmt->fetchAll()),
+        'popular' => mapRows($popularStmt->fetchAll()),
+    ], JSON_UNESCAPED_UNICODE);
     exit;
 }
 

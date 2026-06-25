@@ -7,6 +7,7 @@ bootSession();
 header('Content-Type: application/json; charset=utf-8');
 
 $pdo = getDb();
+const PER_PAGE = 12;
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
@@ -59,6 +60,12 @@ if ($type === 'users') {
 // tag はタグ検索。フロントは入力が # 始まりなら tag に、それ以外は q に振り分ける（[ADR-025]）。
 $like = '%' . $q . '%';
 $tagLike = '%' . $tag . '%';
+// 検索は網羅的に辿る場なので「もっと見る」で段階読み込みする（[ADR-029]）。総件数 COUNT は撃たず、
+// PER_PAGE+1 件取れたら「次がある（hasMore）」と判定して余り1件は捨てる。LIMIT/OFFSET は int 化した
+// 値だけを文字列に埋める＝外部入力を SQL に渡さない（page は最小1にクランプ）。
+$page = max(1, (int)($_GET['page'] ?? 1));
+$offset = ($page - 1) * PER_PAGE;
+$limit = PER_PAGE + 1;
 $stmt = $pdo->prepare("
     SELECT
         g.id,
@@ -94,15 +101,20 @@ $stmt = $pdo->prepare("
       )
     GROUP BY g.id, g.user_id, u.name, g.title, g.src, g.description, g.source, g.source_url, g.created_at
     ORDER BY star_count DESC, g.created_at DESC, g.id DESC
-    LIMIT 50
+    LIMIT {$limit} OFFSET {$offset}
 ");
 $stmt->execute([$currentUserId, $currentUserId, $q, $like, $like, $tag, $tagLike]);
+$rows = $stmt->fetchAll();
+$hasMore = count($rows) > PER_PAGE;
+if ($hasMore) {
+    $rows = array_slice($rows, 0, PER_PAGE);
+}
 $rows = array_map(static function (array $row): array {
     $row['id'] = (int)$row['id'];
     $row['user_id'] = (int)$row['user_id'];
     $row['star_count'] = (int)$row['star_count'];
     $row['tags'] = $row['tags'] === null || $row['tags'] === '' ? [] : explode(',', $row['tags']);
     return $row;
-}, $stmt->fetchAll());
+}, $rows);
 
-echo json_encode(['type' => 'works', 'results' => $rows], JSON_UNESCAPED_UNICODE);
+echo json_encode(['type' => 'works', 'results' => $rows, 'hasMore' => $hasMore, 'page' => $page], JSON_UNESCAPED_UNICODE);
