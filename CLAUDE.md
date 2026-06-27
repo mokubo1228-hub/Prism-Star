@@ -64,7 +64,7 @@ docker/          … Docker設定（Dockerfile, init.sql）
 ```bash
 docker compose up -d
 docker compose exec app php /var/www/html/src/seed.php   # 初回のみ
-# http://localhost:8080/gallery-list.html でアクセス
+# http://localhost:8080/ でアクセス（gallery-list.php にリダイレクト）
 ```
 
 デモユーザー: `demo@example.com` / `password123`

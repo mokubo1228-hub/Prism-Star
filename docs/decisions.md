@@ -190,7 +190,7 @@
 - **代替案**：モーダルは最小にして再設定は login.php だけに置く → モーダルから入ったユーザーが救済に届かず却下。
 - **関連**：`public/includes/header.php`、`public/login.php`、[ADR-019](decisions.md)、[ADR-021](decisions.md)。
 
-## ADR-024 GitHub リポジトリを「作品」として取り込み永続化する（表示レイヤーから昇格）⬜（handoff 済）
+## ADR-024 GitHub リポジトリを「作品」として取り込み永続化する（表示レイヤーから昇格）✅（実装・review 済）
 - **背景**：看板は「全員が発信者 ＋ GitHub 取り込み」だが、取り込みは長く**表示レイヤーだけ**だった（[ADR-016](decisions.md)）。`github.php` が GitHub API を叩いてプロフィールに repo を並べるのみで、リポジトリを PrismStar 側に保存する経路が無く、⭐・検索・おすすめに乗らない＝看板機能が外側に閉じていた。v2 の機能が出揃い、次に差別化へ最も効くのがここ。
 - **決定**：リポジトリを **`gallery` の行（作品）として保存**し、以後ふつうの作品として扱う。`gallery` に `source ENUM('manual','github')` と `source_url`（repo の `html_url`）を足し、取り込み作品には「GitHub」印とリポジトリへのリンクを持たせる。取り込みは**マイページ（管理画面）**の操作。サムネは GitHub の **OG カード画像**（repo に画像が無いため）。
 - **理由**：
@@ -203,7 +203,7 @@
 - **編集の扱い**：取り込み作品の title/説明/画像は **import が唯一の writer**。PATCH は github 作品では **visibility とタグだけ**反映し、client 由来の repo メタ情報を保存しない（メタ注入を防ぎ、GitHub を正とする）。UI も揃え、`work-edit` では github 作品の title/説明/画像を**読み取り専用**にして「GitHub 由来は取り込みで更新」と明示する（サーバが黙って無視する状態＝紛らわしい UI を残さない）。
 - **関連**：`docs/github-import-handoff.md`、[ADR-016](decisions.md)、`docs/roadmap.md`（次の本命）。
 
-## ADR-025 検索の入口をヘッダーの検索バーに一本化（対象プルダウン＋ # でタグ）⬜（handoff 済）
+## ADR-025 検索の入口をヘッダーの検索バーに一本化（対象プルダウン＋ # でタグ）✅（実装・review 済）
 - **背景**：`search.php` が独自の検索フォーム（キーワード／タグ／種別）を持ち、**全ページ常設のヘッダー検索**（キーワードのみ）と二重になっていた。1つの画面に検索入力が2つあり、どちらで検索するか紛らわしい。
 - **決定**：検索の入口を**ヘッダーの検索バーに一本化**する。バーは **対象プルダウン（作品／ユーザー）＋入力**。作品では **普通の語＝キーワード（タイトル/説明）、`#` 始まり＝タグ検索**。ユーザーは文字列（表示名/GitHub）検索。`search.php` は**結果表示専用**にし、ページ内の検索フォームは撤去。
 - **理由**：入口が1つになり「検索はバーから」で一貫。**対象（作品/ユーザー）はプルダウン**で選び、**検索の種類（キーワード/タグ）は `#` の有無で自然に切り替わる**（タグは表示が `#雨` なので入力も `#` で揃い、別途モードを選ばせなくてよい）。バックエンド（`api/search.php` の `type`/`q`/`tag`）は対応済みで、**q はタイトル/説明、tag はタグ**と役割を分ける。
@@ -281,7 +281,7 @@
   - **レスポンス形の波及**：素の `/api/gallery.php`（おすすめ）を消費するのは `gallery-list.js` のみ（`?id`/`?mine`/`?action` は別 branch、プロフィールは `users.php` 経由）。検索の `results` も既存キーを維持。形変更の影響は両フロントに閉じる。
 - **関連**：`docs/pagination-handoff.md`、[ADR-027](decisions.md)（自分除外）、[ADR-025](decisions.md)（検索条件）、[ADR-009](decisions.md)（スター＝共通通貨）、[ADR-020](decisions.md)（seed の公開/非公開ミックス）、`public/api/{gallery,search}.php`、`public/Script/{gallery-list,search}.js`、`public/Style/gallery-list.css`、`src/seed.php`、`docs/roadmap.md`（優先トラック③）。
 
-## ADR-030 マイページを「作品管理」と「設定」の2ページに分離 ⬜（handoff 済）
+## ADR-030 マイページを「作品管理」と「設定」の2ページに分離 ✅（実装・コミット済）
 - **背景**：マイページ（管理画面・[ADR-013](decisions.md)）が成長の過程で**性質の違う3関心を1ページに縦積み**するようになった：(1) コンテンツ管理（作品一覧・新規作成・編集/削除/公開切替）、(2) アカウント認証情報（表示名・パスワード変更＝[ADR-028](decisions.md)）、(3) GitHub 連携（username 設定＋リポジトリ取り込み＝[ADR-024](decisions.md)）。`mypage.js` も単一 `initMypage()` ＋ グローバル変数9個でこの3関心が密結合し、レイアウトも単一カラム（`.gallery-back` `max-width:1180px`）にフォーム・取り込み・作品リストが雑多に並んで**中央が窮屈**（ユーザー指摘）。1画面が「自分の作品をどうにかする」と「自分のアカウントをどうにかする」を兼ねていて、操作モデルがぼやけていた。
 - **決定**：マイページを**2ページに分離**する。
   1. **`mypage.php`＝作品管理ハブに純化**：自分の全作品一覧（非公開含む・編集/削除/公開切替）＋「新規作成」＋「GitHub から取り込み」。
@@ -307,7 +307,7 @@
 
 > ※ 入口（ナビ配置）の方針は、個人系ページの拡張（お気に入り・プロフィール拡充）に伴い [ADR-031](decisions.md) で更新する（「設定をマイページのサブページにする」→「個人系をハンバーガーに集約」）。
 
-## ADR-031 個人系ページをハンバーガーに集約し「マイページ」総称を廃止 ⬜（handoff 済）
+## ADR-031 個人系ページをハンバーガーに集約し「マイページ」総称を廃止 ✅（実装・コミット済）
 - **背景**：個人系の画面が `mypage`（作品管理）・`settings`（設定＝[ADR-030](decisions.md)）・`profile`（公開プロフィール＝Phase 3/8）に加えて「お気に入り」（[ADR-032](decisions.md)）まで増え、**「マイページ」という言葉が複数の関心を指す総称として曖昧**になった（ユーザー指摘＝「マイページが広い」）。さらに `profile.php` は作者名クリックでしか辿れず**メニュー導線が無い**、`settings` は [ADR-030](decisions.md) でマイページのサブページ扱い、と個人系の入口が散在していた。
 - **決定**：**「作品」と「人となり」を分ける**ユーザーの分節に沿い、ログイン中のみハンバーガーの `header-nav` に個人系を**兄弟として並列**で出す：**作品管理**（`mypage.php`）／**お気に入り**（`favorites.php`＝[ADR-032](decisions.md)）／**プロフィール**（`profile.php?id=<自分>`）／**設定**（`settings.php`）。グローバル項目（おすすめ・検索・Contact・Privacy）とは区切りで視覚的に分ける。「マイページ」という総称ラベルは廃止し、作品の場は**「作品管理」**に narrow する。**[ADR-030](decisions.md) のナビ判断（設定をサブページに）を更新**：主たる入口はハンバーガーの個人メニュー（mypage⇄settings の in-page 相互リンクは補助として残してよい）。
 - **理由**：一般的なアカウントメニュー（プロフィール／自分の作品／お気に入り／設定／ログアウト）の形に倣うのが学習コストゼロで、総称の曖昧さも消える。`profile.php` を**メニューから到達可能**にして「自分の公開ページを確認する」動線を与える（従来は他人のページ経由でしか自分を見られなかった）。グローバルと個人系を区切ることで、ナビが増えても情報の格が混ざらない。
@@ -319,7 +319,7 @@
   - **格を混ぜない**：個人系（要ログイン）とグローバル（公開）を区切りで分ける。auth 項目には `data-require-auth` が付く（`bindAuthLinks` がゲート）ので、未ログインのクリックはログイン催促になる。
 - **関連**：`docs/personal-area-handoff.md`、[ADR-030](decisions.md)（マイページ分割・ナビ判断を本 ADR で更新）、[ADR-032](decisions.md)（お気に入り）、[ADR-013](decisions.md)（マイページ＝管理画面）、[ADR-019](decisions.md)（ゲート型）、`public/Script/common.js`、`public/includes/header.php`、`docs/roadmap.md`。
 
-## ADR-032 お気に入り作品（自分がスターした作品の一覧）⬜（handoff 済）
+## ADR-032 お気に入り作品（自分がスターした作品の一覧）✅（実装・コミット済）
 - **背景**：スター（⭐＝[ADR-009](decisions.md)・Phase 5）は**付与/解除はできるが「自分がスターした作品を見返す場所」が無い**＝評価の片側だけ実装した状態だった。`stars` テーブルはあるが、一覧取得の口が無い（`stars.php` は POST/DELETE のトグルのみ、`gallery.php` の `?mine=1` は自作限定）。「スターできるのに本棚が無い」のは基本機能の穴（死にUI放置をしない方針）。
 - **決定**：(1) `gallery.php` GET に **`?starred=1` ブランチ**を追加：**要ログイン**、**現在ユーザーが star した作品**を、**スターした順（`stars.created_at DESC`）**で返す。**可視性ガード**＝返すのは `visibility='public' OR g.user_id = <自分>` のみ（被スター作品が後で非公開化されても他人の非公開は返さない＝既存の安全不変条件を踏襲）。**発見系の「自分除外」は適用しない**（お気に入りは「探す場」ではなく「自分の本棚」なので、自作にスターしていれば出てよい）。(2) **`favorites.php`＋`favorites.js`（新規）**：`requireAuth` の上で `?starred=1` を取得し、**既存の作品カード描画（`gallery-card`）を流用**して並べる。
 - **理由**：整形（`star_count`／`starred`／タグ／owner 判定）は既に `gallery.php` の `baseSelectSql` に集約されているので、**`stars.php` に別系統の一覧を作るより `gallery.php` に filter を1本足す方が DRY**。可視性ガードを既存と同じ式にすることで「非公開を所有者以外に出さない」を機械的に保てる。本棚なので自分除外を外すのは観点の違い（[ADR-027](decisions.md) の自分除外は発見系＝他人の作品を見つける場の方針で、お気に入りには当てはまらない）。
@@ -332,7 +332,7 @@
   - **解除の即時反映**（任意）：一覧でスターを外したらカードを消す／グレーアウトは UX 余地。最小実装は再読込で消える。
 - **関連**：`docs/personal-area-handoff.md`、[ADR-009](decisions.md)（スター＝共通通貨）、Phase 5（スター機能）、[ADR-027](decisions.md)（自分除外＝発見系のみ）、[ADR-031](decisions.md)（入口）、`public/api/gallery.php`、`public/{favorites.php,Script/favorites.js}`。
 
-## ADR-033 プロフィール拡充①：自己紹介(bio) ＋ 表示名をプロフィールへ移設 ⬜（設計のみ・handoff は後続）
+## ADR-033 プロフィール拡充①：自己紹介(bio) ＋ 表示名をプロフィールへ移設 ✅（実装・コミット済）
 - **背景**：ユーザーの分節は「**作品＝マイページ／人となり＝プロフィール**」。だが現状 `profile.php` は表示名・獲得スター・公開作品・GitHub リポの**公開表示だけ**で、**自己紹介(bio)が無く**「人となり」が薄い。さらに表示名の*編集*は [ADR-028](decisions.md)/[ADR-030](decisions.md) で**設定**側に置かれているが、表示名は資格情報ではなく**公開の顔**なので、分節に従えばプロフィール側が筋。
 - **決定**：(1) `users.bio`（自己紹介・複数行）を**冪等 migration**で追加。(2) `profile.php` に bio を表示。(3) **本人が自分のプロフィールを編集**できる面を `profile.php` に owner 限定で持たせ、**表示名・bio を編集**（`users.php` POST の部分更新＝[ADR-028](decisions.md) の `array_key_exists` 方式に `bio` を追加）。(4) **`settings.php` から表示名フォームを撤去**し、設定は**パスワード＋GitHub username（連携）**に純化。
 - **理由**：「人となり」を1か所（プロフィール）に集約すると操作モデルが分節と一致する。表示名と bio は**同じ公開アイデンティティ**なので同居が自然。設定は資格情報・連携に絞られ責務が明確になる。編集は専用ページを新設せず `profile.php` の owner inline にして画面を増やさない。
@@ -364,3 +364,19 @@
   - **`?u=` と `?id=` 併存**：どちらでも引けるが、`username` 未設定（移行直後）には `?id=` フォールバック。
   - **enumeration 非対象**：username は元来公開情報なので、存在の有無を隠す neutral 応答は不要（パスワード/メールと性質が違う）。
 - **関連**：[ADR-018](decisions.md)（double opt-in・採番箇所）、[ADR-033](decisions.md)（プロフィール拡充）、roadmap「今後の発展（username/slug 昇格）」、`docker/init.sql`、`src/migrate.php`、`public/api/{auth,users}.php`、`public/profile.{php,js}`、`src/seed.php`。
+
+## ADR-035 作品詳細の「戻る」は固定リンクでなく直前の画面に返す ⬜（handoff 済）
+- **背景**：作品詳細（`gallery-detail.php`）の「戻る」が **`gallery-list.php`（おすすめ）へハードコード**（テンプレート `:29` とエラー時 `gallery-detail.js` の `showError` の2箇所）。だが詳細へは **おすすめ／検索／プロフィール／お気に入り／マイページの5箇所**から来る。検索結果から作品を開いて「戻る」を押すと**おすすめに飛ばされ、検索条件（`?q=`/`?tag=`）やスクロール位置を失う**（ユーザー指摘）。
+- **決定**：戻るを「**直前の画面**」に返す＝**ブラウザ履歴**を使う。アプリ内（**same-origin の `document.referrer`**）から遷移してきた場合は `history.back()` で直前ページ（検索結果ならクエリ状態ごと）に戻る。直接アクセス・外部流入・履歴が無い場合は **`gallery-list.php` にフォールバック**。`href="gallery-list.php"` は no-JS／フォールバックの既定として**残す**（progressive enhancement）。
+- **理由**：「直前の画面」はまさにブラウザ履歴そのもの。`history.back()` なら検索のクエリ・スクロール位置・プロフィール/お気に入り/マイページ等**あらゆる遷移元に正しく戻り**、状態も保てる。遷移元ごとの分岐や戻り先 URL の持ち回りが要らず、変更は詳細ページ1枚に閉じる。
+- **代替案・却下理由**：
+  - **`from`/`return_to` クエリで戻り先 URL を持ち回る** → 詳細へリンクする5+箇所すべての改修に加え、**open-redirect を防ぐ検証（戻り先を同一オリジンの内部パスに限定する whitelist）が必須**で攻撃面が増える。refresh/共有に強い利点はあるが、戻るボタンにそこまで要らないため却下。
+  - **`document.referrer` へ直接遷移（href 差し替え）** → 履歴ではなく referrer 任せで、戻り先のスクロール状態を失いやすい。`history.back()` の方が状態保持に優れる。
+  - **現状維持（常におすすめ）** → 検索からの回遊が壊れるので却下（ユーザー指摘の核）。
+- **影響**：`public/Script/gallery-detail.js`（`a.back-menu` の click を委譲処理＝same-origin referrer かつ履歴ありなら `preventDefault()`＋`history.back()`、それ以外は既定 href へ）。`gallery-detail.php` のテンプレートと `showError` の `href="gallery-list.php"` は**フォールバックとして維持**。他ページの「戻る」（`settings.php` の「← マイページ」、`work-edit.php`）は戻り先が一意なので**触らない**。
+- **詰まりどころ・判断メモ**：
+  - **直接アクセス時のフォールバック**：共有リンク・新規タブ・リロード後で referrer が無いと履歴も辿れない → おすすめへ（現状維持の挙動）。
+  - **detail→detail を辿った場合**：作者プロフィール→作品→詳細のように辿ると、戻るは「直前＝プロフィール」に返る（履歴どおりで正しい）。
+  - **委譲で2箇所をまとめる**：戻るリンクはテンプレート clone と `showError` の innerHTML の双方に出るので、`document` への委譲 click（`a.back-menu`）1本で両方を拾う（再 wiring 不要）。`common.js` の `bindAuthLinks`（`data-require-auth`）とはセレクタが別で衝突しない。
+  - **安全**：外部 URL へは飛ばさない（`history.back()` か固定 href のみ）＝open-redirect を作らない。戻るは GET 遷移で CSRF 無関係。
+- **関連**：`docs/detail-back-handoff.md`、[ADR-029](decisions.md)（おすすめ/検索の役割分担）、[ADR-019](decisions.md)（ゲート型回遊）、`public/gallery-detail.php`、`public/Script/gallery-detail.js`。
