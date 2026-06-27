@@ -57,6 +57,20 @@ if ($method === 'POST') {
         $response['github_username'] = $value;
     }
 
+    if (array_key_exists('bio', $data)) {
+        $bio = trim((string)$data['bio']);
+        $bioLength = function_exists('mb_strlen') ? mb_strlen($bio) : strlen($bio);
+        if ($bioLength > 1000) {
+            usersJson(['error' => '自己紹介は1000文字以下で入力してください'], 400);
+        }
+
+        // 公開プロフィールの編集も対象はセッション user_id に固定し、client の id では他人を書き換えない。
+        $value = $bio === '' ? null : $bio;
+        $stmt = $pdo->prepare("UPDATE users SET bio = ? WHERE id = ?");
+        $stmt->execute([$value, $userId]);
+        $response['bio'] = $value;
+    }
+
     usersJson($response);
 }
 
@@ -69,7 +83,7 @@ if ($id <= 0) {
     usersJson(['error' => 'IDが不正です'], 400);
 }
 
-$stmt = $pdo->prepare("SELECT id, name, github_username FROM users WHERE id = ?");
+$stmt = $pdo->prepare("SELECT id, name, github_username, bio FROM users WHERE id = ?");
 $stmt->execute([$id]);
 $user = $stmt->fetch();
 
@@ -119,6 +133,7 @@ usersJson([
     'id' => (int)$user['id'],
     'name' => $user['name'],
     'github_username' => $user['github_username'],
+    'bio' => $user['bio'],
     'total_stars' => $totalStars,
     'works' => $works,
 ]);

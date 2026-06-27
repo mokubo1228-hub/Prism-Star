@@ -48,6 +48,13 @@ if (!columnExists($pdo, 'users', 'github_username')) {
     echo "users.github_username already exists\n";
 }
 
+if (!columnExists($pdo, 'users', 'bio')) {
+    $pdo->exec("ALTER TABLE users ADD COLUMN bio TEXT NULL AFTER github_username");
+    echo "Added users.bio\n";
+} else {
+    echo "users.bio already exists\n";
+}
+
 if (!tableExists($pdo, 'stars')) {
     $pdo->exec("
         CREATE TABLE stars (

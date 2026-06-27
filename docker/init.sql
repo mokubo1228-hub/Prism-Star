@@ -6,6 +6,7 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL,
     name VARCHAR(100) NOT NULL,
     github_username VARCHAR(100) NULL,
+    bio TEXT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

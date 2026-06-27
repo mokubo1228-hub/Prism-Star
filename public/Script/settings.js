@@ -1,6 +1,3 @@
-const accountNameForm = document.getElementById("accountNameForm");
-const accountNameInput = document.getElementById("accountName");
-const accountNameMessage = document.getElementById("accountNameMessage");
 const passwordChangeForm = document.getElementById("passwordChangeForm");
 const currentPasswordInput = document.getElementById("currentPassword");
 const newPasswordInput = document.getElementById("newPassword");
@@ -27,33 +24,11 @@ async function loadMe() {
   const res = await fetch(`/api/users.php?id=${status.user.id}`);
   const user = await res.json();
   if (res.ok) {
-    accountNameInput.value = user.name || "";
     githubUsernameInput.value = user.github_username || "";
     return user;
   }
   return null;
 }
-
-// CSRF は common.js の fetch ラッパに集約済み。ここで手動付与しないことで状態変更の実装を一箇所に保つ。
-accountNameForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  accountNameMessage.hidden = true;
-  const name = accountNameInput.value.trim();
-  try {
-    const res = await fetch("/api/users.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "表示名を保存できませんでした");
-    accountNameInput.value = data.name || name;
-    await window.PrismAuth.refresh();
-    showAccountMessage(accountNameMessage, "保存しました。");
-  } catch (err) {
-    showAccountMessage(accountNameMessage, err.message, true);
-  }
-});
 
 passwordChangeForm.addEventListener("submit", async (e) => {
   e.preventDefault();

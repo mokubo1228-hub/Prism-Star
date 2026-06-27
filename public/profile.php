@@ -9,7 +9,19 @@ include __DIR__ . '/includes/head.php';
   <main class="gallery-list">
     <div class="gallery-back">
       <h2 id="profileName" class="profile-heading"></h2>
+      <p id="profileBio" class="profile-bio" hidden></p>
       <p id="profileStars" class="profile-stars"></p>
+      <section id="profileEditPanel" class="profile-edit-panel" hidden>
+        <h3>プロフィール編集</h3>
+        <form id="profileEditForm" class="github-settings">
+          <label for="profileEditName">表示名</label>
+          <input id="profileEditName" type="text" name="name" autocomplete="name" maxlength="100" required>
+          <label for="profileEditBio">自己紹介</label>
+          <textarea id="profileEditBio" name="bio" rows="5" maxlength="1000"></textarea>
+          <button type="submit">保存</button>
+          <p id="profileEditMessage" class="github-message" hidden></p>
+        </form>
+      </section>
       <section id="profileWorks" class="gallery-grid">
         <template id="profile-item-template">
           <article class="gallery-card">

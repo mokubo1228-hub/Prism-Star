@@ -15,14 +15,6 @@ include __DIR__ . '/includes/head.php';
 
       <section class="account-settings settings-section">
         <h3>アカウント</h3>
-        <form id="accountNameForm" class="github-settings">
-          <label for="accountName">表示名</label>
-          <div class="github-settings-row">
-            <input id="accountName" type="text" name="name" autocomplete="name" maxlength="100" required>
-            <button type="submit">保存</button>
-          </div>
-          <p id="accountNameMessage" class="github-message" hidden></p>
-        </form>
         <form id="passwordChangeForm" class="github-settings">
           <label for="currentPassword">現在のパスワード</label>
           <input id="currentPassword" type="password" name="current_password" autocomplete="current-password" required>

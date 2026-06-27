@@ -1,13 +1,50 @@
 const profileParams = new URLSearchParams(window.location.search);
 const profileId = profileParams.get("id");
 const profileName = document.getElementById("profileName");
+const profileBio = document.getElementById("profileBio");
 const profileStars = document.getElementById("profileStars");
 const profileWorks = document.getElementById("profileWorks");
 const profileTemplate = document.getElementById("profile-item-template");
 const githubRepos = document.getElementById("githubRepos");
+const profileEditPanel = document.getElementById("profileEditPanel");
+const profileEditForm = document.getElementById("profileEditForm");
+const profileEditName = document.getElementById("profileEditName");
+const profileEditBio = document.getElementById("profileEditBio");
+const profileEditMessage = document.getElementById("profileEditMessage");
+let currentProfileUser = null;
 
 function showProfileMessage(message, className = "profile-error") {
-  profileWorks.innerHTML = `<p class="${className}">${message}</p>`;
+  profileWorks.textContent = "";
+  const item = document.createElement("p");
+  item.className = className;
+  item.textContent = message;
+  profileWorks.appendChild(item);
+}
+
+function showProfileEditMessage(message, isError = false) {
+  profileEditMessage.textContent = message;
+  profileEditMessage.hidden = false;
+  profileEditMessage.classList.toggle("is-error", isError);
+}
+
+function renderProfileIdentity(user) {
+  profileName.textContent = `${user.name} の作品`;
+  if (user.bio) {
+    profileBio.textContent = user.bio;
+    profileBio.hidden = false;
+  } else {
+    profileBio.textContent = "";
+    profileBio.hidden = true;
+  }
+}
+
+function applyOwnerControls(user) {
+  const owner = Number(window.PrismAuth.status.user?.id) === Number(profileId);
+  profileEditPanel.hidden = !owner;
+  if (!owner) return;
+
+  profileEditName.value = user.name || "";
+  profileEditBio.value = user.bio || "";
 }
 
 function renderProfileWork(work) {
@@ -92,7 +129,9 @@ async function loadProfile() {
     const user = await res.json();
     if (!res.ok) throw new Error(user.error || "ユーザーが見つかりません");
 
-    profileName.textContent = `${user.name} の作品`;
+    currentProfileUser = user;
+    renderProfileIdentity(user);
+    applyOwnerControls(user);
     profileStars.textContent = `獲得スター ${user.total_stars || 0}`;
 
     if (user.works.length === 0) {
@@ -114,3 +153,31 @@ async function loadProfile() {
 }
 
 loadProfile();
+
+profileEditForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  profileEditMessage.hidden = true;
+
+  try {
+    const res = await fetch("/api/users.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: profileEditName.value.trim(),
+        bio: profileEditBio.value.trim()
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "プロフィールを保存できませんでした");
+    currentProfileUser = {
+      ...currentProfileUser,
+      name: data.name || profileEditName.value.trim(),
+      bio: data.bio || ""
+    };
+    renderProfileIdentity(currentProfileUser);
+    await window.PrismAuth.refresh();
+    showProfileEditMessage("保存しました。");
+  } catch (err) {
+    showProfileEditMessage(err.message, true);
+  }
+});
