@@ -10,6 +10,26 @@ function showError(message = "指定された作品が見つかりません。")
   `;
 }
 
+document.addEventListener("click", (e) => {
+  const back = e.target.closest("a.back-menu");
+  if (!back) return;
+
+  let fromApp = false;
+  try {
+    fromApp = Boolean(document.referrer) &&
+      new URL(document.referrer).origin === window.location.origin;
+  } catch {
+    fromApp = false;
+  }
+
+  // 詳細は検索・プロフィール等からも開くため、同一アプリ内なら履歴で直前画面の状態ごと戻す。
+  // 直接アクセスや外部流入では固定 href（おすすめ）をフォールバックとして使い、referrer 自体へは遷移しない。
+  if (fromApp && window.history.length > 1) {
+    e.preventDefault();
+    window.history.back();
+  }
+});
+
 function updateStarButton(button, starCount, starred) {
   button.querySelector(".star-count").textContent = starCount;
   button.classList.toggle("is-starred", starred);
