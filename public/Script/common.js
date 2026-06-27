@@ -22,11 +22,14 @@
 })();
 
 const navItems = [
-  { href: "gallery-list.php", label: "おすすめ" },
-  { href: "search.php", label: "検索" },
-  { href: "mypage.php", label: "マイページ", auth: true },
-  { href: "form.php", label: "Contact" },
-  { href: "policy.php", label: "Privacy Policy" }
+  { href: "gallery-list.php", label: "おすすめ", group: "global" },
+  { href: "search.php", label: "検索", group: "global" },
+  { href: "mypage.php", label: "作品管理", auth: true, group: "personal" },
+  { href: "favorites.php", label: "お気に入り", auth: true, group: "personal" },
+  { href: "profile.php", label: "プロフィール", auth: true, group: "personal", selfProfile: true },
+  { href: "settings.php", label: "設定", auth: true, group: "personal" },
+  { href: "form.php", label: "Contact", group: "support" },
+  { href: "policy.php", label: "Privacy Policy", group: "support" }
 ];
 
 const PrismAuth = {
@@ -56,16 +59,39 @@ function renderNavigation() {
 
   templates.forEach(template => {
     const container = template.parentElement;
+    const isHeaderNav = container.classList.contains("header-nav");
+    let previousGroup = null;
+
     navItems.forEach(item => {
+      if (isHeaderNav && previousGroup !== null && previousGroup !== item.group) {
+        const separator = document.createElement("li");
+        separator.className = "nav-separator";
+        separator.setAttribute("aria-hidden", "true");
+        if (previousGroup === "personal" || item.group === "personal") {
+          separator.dataset.authNav = "true";
+          separator.hidden = true;
+        }
+        container.appendChild(separator);
+      }
+
       const clone = template.content.cloneNode(true);
+      const listItem = clone.querySelector("li");
       const link = clone.querySelector("a");
 
       link.href = item.href;
       link.textContent = item.label;
       if (item.auth) {
         link.dataset.requireAuth = "true";
+        if (listItem) {
+          listItem.dataset.authNav = "true";
+          listItem.hidden = true;
+        }
+      }
+      if (item.selfProfile) {
+        link.dataset.navProfile = "self";
       }
       container.appendChild(clone);
+      previousGroup = item.group;
     });
   });
 }
@@ -77,6 +103,14 @@ function applyAuthState(status) {
   const guestActions = document.querySelector(".auth-guest-actions");
   const logoutButton = document.querySelector(".auth-action-logout");
   const mypageLink = document.querySelector(".auth-action-mypage");
+  const profileHref = loggedIn && status.user?.id ? `profile.php?id=${status.user.id}` : "profile.php";
+
+  document.querySelectorAll("[data-auth-nav]").forEach(item => {
+    item.hidden = !loggedIn;
+  });
+  document.querySelectorAll("[data-nav-profile=\"self\"]").forEach(link => {
+    link.href = profileHref;
+  });
 
   if (guestActions) guestActions.hidden = loggedIn;
   if (mypageLink) mypageLink.hidden = !loggedIn;

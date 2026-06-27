@@ -223,6 +223,19 @@ if ($method === 'GET') {
         exit;
     }
 
+    if (isset($_GET['starred'])) {
+        $userId = requireLogin();
+        // お気に入りは「今このユーザーが閲覧できる本棚」。絞り込み用の stars は star_count 用の s と
+        // 別名にし、後から非公開化された他人の作品は返さない（public OR owner）。
+        $stmt = $pdo->prepare(baseSelectSql("
+            INNER JOIN stars s2 ON s2.gallery_id = g.id AND s2.user_id = ?
+            WHERE (g.visibility = 'public' OR g.user_id = ?)
+        ") . " ORDER BY MAX(s2.created_at) DESC, g.id DESC");
+        $stmt->execute([$userId, $userId, $userId, $userId]);
+        echo json_encode(mapRows($stmt->fetchAll()), JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
     // 詳細：公開は誰でも、非公開は所有者だけ。条件に合致しない非公開作品はそもそも行が返らず、
     // 「非公開」とも「存在しない」とも区別させずに一律 404（safety invariant：非公開を所有者以外に返さない）。
     if (isset($_GET['id'])) {

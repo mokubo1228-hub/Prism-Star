@@ -288,6 +288,12 @@ a {
     margin-bottom: 18px;
   }
 
+  .header-nav .nav-separator {
+    border-top: 1px solid rgba(255, 255, 255, 0.42);
+    height: 1px;
+    margin: 18px 0;
+  }
+
   .header-nav a {
     color: #fff;
     text-decoration: none;

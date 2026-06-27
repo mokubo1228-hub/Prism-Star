@@ -304,3 +304,63 @@
   - **設定ページも要 `requireAuth`**：認証情報を編集するので、ページが分かれても本人ログイン必須を必ず通す（未ログインはゲート/リダイレクト）。
   - **移設漏れ・二重定義の検査**：`grep accountNameForm` が `mypage.{php,js}` 側で空になることを完了条件に含める（旧要素の取りこぼし・id 重複を防ぐ）。
 - **関連**：`docs/mypage-split-handoff.md`、[ADR-013](decisions.md)（マイページ＝管理画面）、[ADR-028](decisions.md)（アカウント設定）、[ADR-024](decisions.md)（GitHub 取り込み）、[ADR-026](decisions.md)（CSRF）、`public/{mypage,settings}.php`、`public/Script/{mypage,settings}.js`、`public/Style/gallery-list.css`、`docs/roadmap.md`。
+
+> ※ 入口（ナビ配置）の方針は、個人系ページの拡張（お気に入り・プロフィール拡充）に伴い [ADR-031](decisions.md) で更新する（「設定をマイページのサブページにする」→「個人系をハンバーガーに集約」）。
+
+## ADR-031 個人系ページをハンバーガーに集約し「マイページ」総称を廃止 ⬜（handoff 済）
+- **背景**：個人系の画面が `mypage`（作品管理）・`settings`（設定＝[ADR-030](decisions.md)）・`profile`（公開プロフィール＝Phase 3/8）に加えて「お気に入り」（[ADR-032](decisions.md)）まで増え、**「マイページ」という言葉が複数の関心を指す総称として曖昧**になった（ユーザー指摘＝「マイページが広い」）。さらに `profile.php` は作者名クリックでしか辿れず**メニュー導線が無い**、`settings` は [ADR-030](decisions.md) でマイページのサブページ扱い、と個人系の入口が散在していた。
+- **決定**：**「作品」と「人となり」を分ける**ユーザーの分節に沿い、ログイン中のみハンバーガーの `header-nav` に個人系を**兄弟として並列**で出す：**作品管理**（`mypage.php`）／**お気に入り**（`favorites.php`＝[ADR-032](decisions.md)）／**プロフィール**（`profile.php?id=<自分>`）／**設定**（`settings.php`）。グローバル項目（おすすめ・検索・Contact・Privacy）とは区切りで視覚的に分ける。「マイページ」という総称ラベルは廃止し、作品の場は**「作品管理」**に narrow する。**[ADR-030](decisions.md) のナビ判断（設定をサブページに）を更新**：主たる入口はハンバーガーの個人メニュー（mypage⇄settings の in-page 相互リンクは補助として残してよい）。
+- **理由**：一般的なアカウントメニュー（プロフィール／自分の作品／お気に入り／設定／ログアウト）の形に倣うのが学習コストゼロで、総称の曖昧さも消える。`profile.php` を**メニューから到達可能**にして「自分の公開ページを確認する」動線を与える（従来は他人のページ経由でしか自分を見られなかった）。グローバルと個人系を区切ることで、ナビが増えても情報の格が混ざらない。
+- **代替案・却下理由**：(a) **「マイページ」をハブ着地ページ化**して4つへ振り分け → 1クッション増えるだけで、現代的なアカウントメニューは直接並列が普通。却下。(b) **現状維持＋お気に入りだけ追加** → 「マイページ」総称の曖昧さ（ユーザーの当初違和感）が残る。却下。(c) **グローバル `navItems` に素朴に混ぜる** → おすすめ/検索と個人系が同列になり情報の格が混ざる。区切り（auth グループ）で分ける。
+- **影響**：`public/Script/common.js`（`navItems` に個人系の auth 項目を追加、または auth グループとして描画。`applyAuthState` で**プロフィール項目の href を `profile.php?id=<status.user.id>` に動的差し込み**＝自分の公開ページへ）、`public/includes/header.php`（区切りの markup が要れば）、`public/Style/*.css`（区切り・auth 項目の見た目）。**API・スキーマは不変**（純フロントの IA 再編）。
+- **詰まりどころ・判断メモ**：
+  - **プロフィール自己リンクは id が動的**：`navItems` は静的配列なので「自分の id」を直接書けない。`applyAuthState(status)`（ログイン状態確定時）で当該リンクの href を `profile.php?id=${status.user.id}` に書き換える（純フロント・`profile.js` を触らない）。未ログイン時は個人系項目ごと非表示。
+  - **[ADR-030](decisions.md) との整合**：ADR-030 は2ページ時点で「設定＝サブページ・ナビ非追加」と決めたが、個人系が4面に増えたため**入口をハンバーガーに集約する方が一貫**する。サブページ用の in-page リンク（mypage→settings 等）は補助として残す。
+  - **格を混ぜない**：個人系（要ログイン）とグローバル（公開）を区切りで分ける。auth 項目には `data-require-auth` が付く（`bindAuthLinks` がゲート）ので、未ログインのクリックはログイン催促になる。
+- **関連**：`docs/personal-area-handoff.md`、[ADR-030](decisions.md)（マイページ分割・ナビ判断を本 ADR で更新）、[ADR-032](decisions.md)（お気に入り）、[ADR-013](decisions.md)（マイページ＝管理画面）、[ADR-019](decisions.md)（ゲート型）、`public/Script/common.js`、`public/includes/header.php`、`docs/roadmap.md`。
+
+## ADR-032 お気に入り作品（自分がスターした作品の一覧）⬜（handoff 済）
+- **背景**：スター（⭐＝[ADR-009](decisions.md)・Phase 5）は**付与/解除はできるが「自分がスターした作品を見返す場所」が無い**＝評価の片側だけ実装した状態だった。`stars` テーブルはあるが、一覧取得の口が無い（`stars.php` は POST/DELETE のトグルのみ、`gallery.php` の `?mine=1` は自作限定）。「スターできるのに本棚が無い」のは基本機能の穴（死にUI放置をしない方針）。
+- **決定**：(1) `gallery.php` GET に **`?starred=1` ブランチ**を追加：**要ログイン**、**現在ユーザーが star した作品**を、**スターした順（`stars.created_at DESC`）**で返す。**可視性ガード**＝返すのは `visibility='public' OR g.user_id = <自分>` のみ（被スター作品が後で非公開化されても他人の非公開は返さない＝既存の安全不変条件を踏襲）。**発見系の「自分除外」は適用しない**（お気に入りは「探す場」ではなく「自分の本棚」なので、自作にスターしていれば出てよい）。(2) **`favorites.php`＋`favorites.js`（新規）**：`requireAuth` の上で `?starred=1` を取得し、**既存の作品カード描画（`gallery-card`）を流用**して並べる。
+- **理由**：整形（`star_count`／`starred`／タグ／owner 判定）は既に `gallery.php` の `baseSelectSql` に集約されているので、**`stars.php` に別系統の一覧を作るより `gallery.php` に filter を1本足す方が DRY**。可視性ガードを既存と同じ式にすることで「非公開を所有者以外に出さない」を機械的に保てる。本棚なので自分除外を外すのは観点の違い（[ADR-027](decisions.md) の自分除外は発見系＝他人の作品を見つける場の方針で、お気に入りには当てはまらない）。
+- **代替案・却下理由**：(a) **`stars.php` に GET 一覧を生やす** → 作品整形ロジックの二重持ちになる。`gallery.php` 集約を再利用するため却下。(b) **お気に入りをプロフィールのタブに置く** → プロフィールは「**人に見せる公開の顔**」、お気に入りは「**自分が見る本棚**」で観点が違ううえ、「お気に入りを他人に公開するか」という別論点を呼ぶ。今回は**本人専用の独立ページ**にし、公開可否は将来判断。
+- **影響**：`public/api/gallery.php`（GET に `starred` ブランチ＝`requireLogin`＋stars 絞り込み JOIN/EXISTS＋可視性ガード＋スター順）、`public/favorites.php`／`public/Script/favorites.js`（新規・カード描画流用）、入口は [ADR-031](decisions.md)。**スキーマ変更なし**（`stars` 既存）。
+- **詰まりどころ・判断メモ**：
+  - **可視性 × スター**：star は `visibility='public' OR 自分` の作品に付けられる（`stars.php` の付与ガード）。一覧では「今見られるもの」だけ返すため**返却時にも同じ可視性式でフィルタ**（被スター後に非公開化された他人作品は除外）。
+  - **並び**：スターした新しい順（`stars.created_at DESC` を tiebreak に `g.id`）。`baseSelectSql` は集計用に `LEFT JOIN stars s`（カウント）を既に持つので、**絞り込みは別エイリアス**（`INNER JOIN stars s2 ON s2.gallery_id=g.id AND s2.user_id=?`）か `EXISTS` で行い、`GROUP BY` と衝突させない。
+  - **自分除外を入れない**：発見系（[ADR-027](decisions.md)）と違い、お気に入りは自作も対象。「自分に薦めない」はここには効かせない。
+  - **解除の即時反映**（任意）：一覧でスターを外したらカードを消す／グレーアウトは UX 余地。最小実装は再読込で消える。
+- **関連**：`docs/personal-area-handoff.md`、[ADR-009](decisions.md)（スター＝共通通貨）、Phase 5（スター機能）、[ADR-027](decisions.md)（自分除外＝発見系のみ）、[ADR-031](decisions.md)（入口）、`public/api/gallery.php`、`public/{favorites.php,Script/favorites.js}`。
+
+## ADR-033 プロフィール拡充①：自己紹介(bio) ＋ 表示名をプロフィールへ移設 ⬜（設計のみ・handoff は後続）
+- **背景**：ユーザーの分節は「**作品＝マイページ／人となり＝プロフィール**」。だが現状 `profile.php` は表示名・獲得スター・公開作品・GitHub リポの**公開表示だけ**で、**自己紹介(bio)が無く**「人となり」が薄い。さらに表示名の*編集*は [ADR-028](decisions.md)/[ADR-030](decisions.md) で**設定**側に置かれているが、表示名は資格情報ではなく**公開の顔**なので、分節に従えばプロフィール側が筋。
+- **決定**：(1) `users.bio`（自己紹介・複数行）を**冪等 migration**で追加。(2) `profile.php` に bio を表示。(3) **本人が自分のプロフィールを編集**できる面を `profile.php` に owner 限定で持たせ、**表示名・bio を編集**（`users.php` POST の部分更新＝[ADR-028](decisions.md) の `array_key_exists` 方式に `bio` を追加）。(4) **`settings.php` から表示名フォームを撤去**し、設定は**パスワード＋GitHub username（連携）**に純化。
+- **理由**：「人となり」を1か所（プロフィール）に集約すると操作モデルが分節と一致する。表示名と bio は**同じ公開アイデンティティ**なので同居が自然。設定は資格情報・連携に絞られ責務が明確になる。編集は専用ページを新設せず `profile.php` の owner inline にして画面を増やさない。
+- **代替案・却下理由**：(a) **bio も設定に置く** → 公開の顔は profile が筋・表示名と同居が自然。(b) **表示名は設定のまま** → 「作品/人となり」の分節（ユーザー方針）とずれる。(c) **`profile-edit.php` を新設** → 編集項目が表示名・bio の少数なので専用ページは過剰、owner inline で足りる。
+- **影響**：`docker/init.sql`＋`src/migrate.php`（`users.bio` 追加・冪等）、`public/api/users.php`（GET で bio 返す・POST で bio を部分更新）、`public/profile.{php,js}`（bio 表示＋owner 編集 UI）、`public/settings.{php,js}`（表示名フォーム撤去）。
+- **詰まりどころ・判断メモ**：
+  - **[ADR-030](decisions.md) 未コミットとの順序**：表示名は ADR-030 実装で `settings` に入れたばかり。本 ADR で `profile` へ移す。**コミット粒度は User 判断**（030 を building block として先にコミット→033 で移設／030 コミット前に表示名を settings から抜いて履歴を綺麗にする、のどちらか）。
+  - **部分更新の踏襲**：`bio` も `array_key_exists` で「送られたキーだけ更新」（[ADR-028](decisions.md)）。更新対象は常にセッションの `user_id`（client の id 非信頼）。
+  - **bio の出力安全**：bio は公開表示なので**出力は `textContent`/エスケープ**（`profile.js` の DOM 生成で innerHTML を使わない）。長さ上限・改行（`white-space: pre-wrap` 程度）を決める。
+  - **GitHub username は設定に残す**：username は「連携設定」なので settings 側のまま（人となりではない）。
+- **関連**：[ADR-028](decisions.md)（部分更新・session 同期）、[ADR-030](decisions.md)（表示名の現位置）、[ADR-013](decisions.md)、[ADR-034](decisions.md)（ハンドル）、`docker/init.sql`、`src/migrate.php`、`public/api/users.php`、`public/profile.{php,js}`、`public/settings.{php,js}`。
+
+## ADR-034 ユーザーネーム（一意ハンドル @username）⬜（設計のみ・handoff は後続）
+- **背景**：「人となり」に、表示名（呼び名）とは別の**一意ハンドル `@username`**（URL・メンション・検索に使える識別子）を持たせたい。現状ユーザー識別子は数値 `id` のみで、公開 URL は `profile.php?id=N`。roadmap「今後の発展：username/slug」を昇格。
+- **決定**：`users.username`（**UNIQUE・大文字小文字を無視した一意**）を**冪等 migration**で追加。
+  - **形式**：`^[a-z0-9_]{3,20}$`（小文字に正規化して保存・比較）、**予約語除外**（`admin`/`api`/`login`/`mypage`/`settings`/`favorites`/`profile` 等）。
+  - **既存・seed**：**backfill で自動採番**（例：`user{id}` か email ローカル部の slug 化＋衝突回避サフィックス）。
+  - **登録フロー**：**自動採番＋後で編集**（既定方針）。double opt-in（[ADR-018](decisions.md)）の **`register-complete` で username を自動生成**（email 一意の最終チェックと同じ箇所）。**登録 UI は必須入力にしない**（フロー増改築・離脱増を避ける）。
+  - **編集**：`profile.php` の owner 編集に username を追加。保存時に**形式・予約語・一意（UNIQUE 違反→409/文言）**を**サーバ側で検証**。空き確認のリアルタイム表示は後回し可。
+  - **URL**：`profile.php?u=<username>` で引けるよう `users.php` GET に **username ルックアップ**を追加（**既存 `?id=` も維持**＝既存リンク無傷）。プロフィール導線は `@username` 優先に差し替えてよい。**見た目の綺麗な `/@username`（Apache rewrite＝`.htaccess`）は polish として後回し**（`?u=` で機能は満たす）。
+- **理由**：ハンドルは「全員が発信者」プラットフォームの一般的な識別子で、覚えやすい URL・メンション余地・検索性を与える。**自動採番＋後編集**にするのは、[ADR-018](decisions.md) の double opt-in（安全不変条件を含む領域）を極力触らず、登録の離脱を増やさないため。**`?u=` ルックアップ**で機能要件は満たせるので、`/@handle` の rewrite は後回しにして既存 `?id=` リンクの貼り替えコスト・ルーティング追加を避ける。
+- **代替案・却下理由**：(a) **登録時に username 必須入力** → register/verify（[ADR-018](decisions.md) の安全領域）を増改築する必要があり重く、登録離脱も増える。自動採番＋編集が軽い。(b) **数値 id のまま（ハンドル無し）** → 覚えやすい URL・メンションが無く、SNS 的プラットフォームとして弱い。(c) **`/@handle` の rewrite を今やる** → `.htaccess`・ルーティング・全リンク差し替えで重い。`?u=` で機能は足り、pretty URL は polish。
+- **影響**：`docker/init.sql`＋`src/migrate.php`（`username` 列・UNIQUE・冪等＋backfill）、`public/api/auth.php`（`register-complete` で自動採番）、`src/seed.php`（seed ユーザーに username）、`public/api/users.php`（GET `?u=` ルックアップ・POST で username 部分更新＋形式/予約語/一意検証）、`public/profile.{php,js}`（@username 表示＋owner 編集）、（任意）作品カード/詳細の投稿者表示に `@username`。
+- **詰まりどころ・判断メモ**：
+  - **backfill の衝突**：自動採番は UNIQUE 衝突時にサフィックスで回避（`user12`, `aoi`, `aoi2`…）。NULL 許容で導入→backfill→必要なら NOT NULL 化の順が安全。
+  - **大文字小文字無視の一意**：保存時 `lower()` 正規化、もしくは照合順序/関数インデックスで一意を担保（MySQL の collation に依存しすぎない）。
+  - **採番タイミング**：`register-complete`（本登録）で id 確定後に採番＝email 一意の最終チェックと同じ流れ。
+  - **検証はサーバ側必須**：形式・予約語・一意は `users.php` POST で必ず検証（クライアント検証は補助）。更新対象は常にセッション `user_id`。
+  - **`?u=` と `?id=` 併存**：どちらでも引けるが、`username` 未設定（移行直後）には `?id=` フォールバック。
+  - **enumeration 非対象**：username は元来公開情報なので、存在の有無を隠す neutral 応答は不要（パスワード/メールと性質が違う）。
+- **関連**：[ADR-018](decisions.md)（double opt-in・採番箇所）、[ADR-033](decisions.md)（プロフィール拡充）、roadmap「今後の発展（username/slug 昇格）」、`docker/init.sql`、`src/migrate.php`、`public/api/{auth,users}.php`、`public/profile.{php,js}`、`src/seed.php`。
