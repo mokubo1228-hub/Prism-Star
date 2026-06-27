@@ -282,6 +282,11 @@
   margin: 8px 0 0;
 }
 
+.github-message a {
+  color: royalblue;
+  font-weight: 700;
+}
+
 .github-message.is-error {
   color: #b91c1c;
 }
@@ -408,8 +413,13 @@
 
 .mypage-actions {
   display: flex;
+  gap: 10px;
   justify-content: center;
   margin: 0 0 20px;
+}
+
+.mypage-back {
+  width: min(1180px, 96vw);
 }
 
 .mywork-list {
@@ -464,6 +474,44 @@
   color: #fff;
 }
 
+.secondary-action {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  color: #374151;
+  cursor: pointer;
+  padding: 10px 14px;
+  text-align: center;
+}
+
+.settings-back {
+  max-width: min(640px, 94vw);
+  width: 100%;
+}
+
+.settings-back-link {
+  color: royalblue;
+  display: inline-block;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+
+.settings-section {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-top: 18px;
+  padding: 22px;
+}
+
+.settings-section h3 {
+  color: #374151;
+  margin: 0 0 16px;
+}
+
+.settings-section .github-settings {
+  margin: 18px 0 0;
+  max-width: none;
+}
+
 .github-repo-card a {
   color: royalblue;
   font-weight: 700;
@@ -503,6 +551,10 @@
 
   .mywork-card img {
     width: 100%;
+  }
+
+  .github-settings-row {
+    display: grid;
   }
 }
 

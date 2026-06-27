@@ -280,3 +280,27 @@
   - **`LIMIT/OFFSET` の int 化（検索）**：`page=1 UNION SELECT` 等を渡しても `(int)` で無害化、負値は最小1にクランプ。SQL に外部文字列を連結しない。
   - **レスポンス形の波及**：素の `/api/gallery.php`（おすすめ）を消費するのは `gallery-list.js` のみ（`?id`/`?mine`/`?action` は別 branch、プロフィールは `users.php` 経由）。検索の `results` も既存キーを維持。形変更の影響は両フロントに閉じる。
 - **関連**：`docs/pagination-handoff.md`、[ADR-027](decisions.md)（自分除外）、[ADR-025](decisions.md)（検索条件）、[ADR-009](decisions.md)（スター＝共通通貨）、[ADR-020](decisions.md)（seed の公開/非公開ミックス）、`public/api/{gallery,search}.php`、`public/Script/{gallery-list,search}.js`、`public/Style/gallery-list.css`、`src/seed.php`、`docs/roadmap.md`（優先トラック③）。
+
+## ADR-030 マイページを「作品管理」と「設定」の2ページに分離 ⬜（handoff 済）
+- **背景**：マイページ（管理画面・[ADR-013](decisions.md)）が成長の過程で**性質の違う3関心を1ページに縦積み**するようになった：(1) コンテンツ管理（作品一覧・新規作成・編集/削除/公開切替）、(2) アカウント認証情報（表示名・パスワード変更＝[ADR-028](decisions.md)）、(3) GitHub 連携（username 設定＋リポジトリ取り込み＝[ADR-024](decisions.md)）。`mypage.js` も単一 `initMypage()` ＋ グローバル変数9個でこの3関心が密結合し、レイアウトも単一カラム（`.gallery-back` `max-width:1180px`）にフォーム・取り込み・作品リストが雑多に並んで**中央が窮屈**（ユーザー指摘）。1画面が「自分の作品をどうにかする」と「自分のアカウントをどうにかする」を兼ねていて、操作モデルがぼやけていた。
+- **決定**：マイページを**2ページに分離**する。
+  1. **`mypage.php`＝作品管理ハブに純化**：自分の全作品一覧（非公開含む・編集/削除/公開切替）＋「新規作成」＋「GitHub から取り込み」。
+  2. **`settings.php`（新規）＝設定**：アカウント（表示名変更・パスワード変更）／連携（GitHub username 編集）。
+  - **取り込み（import）はマイページ側に残す**＝「作品を増やす日常操作」。一方 username の*登録*は「めったに変えない構成情報」なので設定側に置く。両者を別ページにしても、未登録時はマイページの取り込みパネルが「設定で GitHub username を登録すると取り込めます」リンク（→`settings.php`）を出して導線でつなぐ。
+  - **入口**：グローバルナビ（`common.js` の `navItems`）には設定を足さない（クラッタ回避）。`mypage.php` のアクション域に「設定」リンク、`settings.php` に「← マイページ」戻りリンクを置き、**設定をマイページのサブページ**として扱う（`work-edit.php` がモーダルから専用ページへ格上げされた前例に倣う）。
+- **理由**：操作モデルの分節＝**「日常的に触る作品管理」と「たまに触る設定」を分ける**のが SaaS の管理画面として自然（"連携を設定で接続し、本体で使う" は一般的なパターン）。密結合した単一 JS をページ単位に割ることで、各画面が**自分のAPIだけを呼ぶ独立した初期化**になり、見通しと保守性が上がる。設定を絞った単一カラムにすることで、窮屈さ（フォームが広いカタログ枠に散る）も同時に解消できる。**API・スキーマは一切変えず、同一 API を呼ぶ画面を2枚に並べ替えるだけ**なので、安全不変条件への影響が無い。
+- **代替案・却下理由**：
+  - **ページ内タブ（mypage 1枚のまま作品/連携/アカウントを切替）** → URL 据え置き・ナビ非増という利点はあるが、既存にタブ基盤が無く、密結合の `mypage.js` を状態管理つきタブ制御に作り替える方が重い。**最小摩擦は既存の「専用ページ」前例（work-edit）に乗ること**なので却下。
+  - **3ページに分割（作品／GitHub連携／アカウント）** → 関心は最も明確に割れるが、GitHub の *設定（username）* と *使用（取り込み）* を引き離しすぎ、画面/導線が増える。連携の*構成情報*は設定へ、*取り込み操作*は作品側へ、という2分が実利用に即している。
+  - **取り込みを設定側に置く** → import は作品を生む操作で、作品一覧の隣にある方が「作って・取り込んで・並べる」が地続き。設定に置くと作った後に画面移動が要る。**取り込みは作品側**に。
+- **影響**：
+  - 新規：`public/settings.php`（`account-settings` セクション＝表示名・パスワードの2フォーム＋ GitHub username フォームを移設）、`public/Script/settings.js`（`showAccountMessage`/`showGitHubMessage`・3フォームの submit ハンドラ・`loadMe`〔name と github_username を入力欄に充填〕・`requireAuth` 初期化）。**`githubSettingsForm` ハンドラから取り込みパネル再描画呼び出しを外す**（設定ページに取り込みは無い）。
+  - 変更：`public/mypage.php` から `account-settings` と `githubSettingsForm` を撤去（heading・`mypage-actions`〔新規作成＋設定リンク〕・`githubImportPanel`・`myWorks` を残す）。`public/Script/mypage.js` から account/github-setting 系の変数・関数・ハンドラを削除、`loadMe` は **github_username を read-only に取得**して取り込みパネルを駆動するだけに縮小（username 空時の文言を設定への導線に変更）。
+  - レイアウト：`public/Style/gallery-list.css`（または `settings.css` を新設）で設定を**焦点を絞った単一カラム**（アカウント／連携のセクションカード・`max-width` 560–640・余白多め）に、マイページは作品中心に整理。既存 `.github-settings` の見た目は流用。
+  - スキーマ・migration・API エンドポイントは**変更なし**。
+- **詰まりどころ・判断メモ**：
+  - **GitHub を2ページに割る整合**：username（設定）と取り込み（作品）を別ページにしたため、取り込みパネルは username を**読み取りで**取得して挙動を決める（編集は設定側）。未設定時に設定へ誘導するリンクで「設定→使用」の順路を明示する。
+  - **CSRF はタダ**：状態変更系は [ADR-026](decisions.md) の fetch ラッパ＋`requireCsrf` で自動的に効く。ページを分けても `settings.js` の各 POST に CSRF コードは書かない（`mypage.js:253` の方針を踏襲）。
+  - **設定ページも要 `requireAuth`**：認証情報を編集するので、ページが分かれても本人ログイン必須を必ず通す（未ログインはゲート/リダイレクト）。
+  - **移設漏れ・二重定義の検査**：`grep accountNameForm` が `mypage.{php,js}` 側で空になることを完了条件に含める（旧要素の取りこぼし・id 重複を防ぐ）。
+- **関連**：`docs/mypage-split-handoff.md`、[ADR-013](decisions.md)（マイページ＝管理画面）、[ADR-028](decisions.md)（アカウント設定）、[ADR-024](decisions.md)（GitHub 取り込み）、[ADR-026](decisions.md)（CSRF）、`public/{mypage,settings}.php`、`public/Script/{mypage,settings}.js`、`public/Style/gallery-list.css`、`docs/roadmap.md`。

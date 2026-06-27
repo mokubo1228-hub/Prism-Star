@@ -1,31 +1,9 @@
 const myWorks = document.getElementById("myWorks");
-const githubSettingsForm = document.getElementById("githubSettingsForm");
-const githubUsernameInput = document.getElementById("githubUsername");
-const githubSettingsMessage = document.getElementById("githubSettingsMessage");
 const githubImportPanel = document.getElementById("githubImportPanel");
 const githubImportMessage = document.getElementById("githubImportMessage");
 const githubImportRepos = document.getElementById("githubImportRepos");
-const accountNameForm = document.getElementById("accountNameForm");
-const accountNameInput = document.getElementById("accountName");
-const accountNameMessage = document.getElementById("accountNameMessage");
-const passwordChangeForm = document.getElementById("passwordChangeForm");
-const currentPasswordInput = document.getElementById("currentPassword");
-const newPasswordInput = document.getElementById("newPassword");
-const passwordChangeMessage = document.getElementById("passwordChangeMessage");
 let currentWorks = [];
 let currentGithubUsername = "";
-
-function showGitHubMessage(message, isError = false) {
-  githubSettingsMessage.textContent = message;
-  githubSettingsMessage.hidden = false;
-  githubSettingsMessage.classList.toggle("is-error", isError);
-}
-
-function showAccountMessage(element, message, isError = false) {
-  element.textContent = message;
-  element.hidden = false;
-  element.classList.toggle("is-error", isError);
-}
 
 function renderWork(work) {
   const article = document.createElement("article");
@@ -134,8 +112,6 @@ async function loadMe() {
   const res = await fetch(`/api/users.php?id=${status.user.id}`);
   const user = await res.json();
   if (res.ok) {
-    accountNameInput.value = user.name || "";
-    githubUsernameInput.value = user.github_username || "";
     currentGithubUsername = user.github_username || "";
     return user;
   }
@@ -145,6 +121,16 @@ async function loadMe() {
 function showImportMessage(message, isError = false) {
   githubImportMessage.textContent = message;
   githubImportMessage.classList.toggle("is-error", isError);
+}
+
+function showGitHubSettingsPrompt() {
+  githubImportMessage.textContent = "";
+  githubImportMessage.classList.remove("is-error");
+  githubImportMessage.append("設定で GitHub username を登録すると取り込めます。");
+  const link = document.createElement("a");
+  link.href = "settings.php";
+  link.textContent = "設定へ";
+  githubImportMessage.append(" ", link);
 }
 
 function importedSourceUrls() {
@@ -207,7 +193,7 @@ async function loadGitHubImportPanel(username) {
   githubImportPanel.hidden = false;
   githubImportRepos.innerHTML = "";
   if (!username) {
-    showImportMessage("GitHub username を保存するとリポジトリを取り込めます。");
+    showGitHubSettingsPrompt();
     return;
   }
 
@@ -229,70 +215,6 @@ async function loadGitHubImportPanel(username) {
     showImportMessage(err.message, true);
   }
 }
-
-githubSettingsForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  githubSettingsMessage.hidden = true;
-  const github_username = githubUsernameInput.value.trim();
-  try {
-    const res = await fetch("/api/users.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ github_username })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "保存できませんでした");
-    showGitHubMessage("保存しました。");
-    currentGithubUsername = data.github_username || "";
-    await loadGitHubImportPanel(currentGithubUsername);
-  } catch (err) {
-    showGitHubMessage(err.message, true);
-  }
-});
-
-// アカウント設定の2フォーム。CSRF トークンは common.js の fetch ラッパが自動付与するので手動で付けない。
-// 表示名は保存後 PrismAuth.refresh() でヘッダ等の表示と同期、パスワードは成功時に入力欄をクリアする。
-accountNameForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  accountNameMessage.hidden = true;
-  const name = accountNameInput.value.trim();
-  try {
-    const res = await fetch("/api/users.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "表示名を保存できませんでした");
-    accountNameInput.value = data.name || name;
-    await window.PrismAuth.refresh();
-    showAccountMessage(accountNameMessage, "保存しました。");
-  } catch (err) {
-    showAccountMessage(accountNameMessage, err.message, true);
-  }
-});
-
-passwordChangeForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  passwordChangeMessage.hidden = true;
-  try {
-    const res = await fetch("/api/auth.php?action=change-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        current_password: currentPasswordInput.value,
-        new_password: newPasswordInput.value
-      })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "パスワードを変更できませんでした");
-    currentPasswordInput.value = "";
-    newPasswordInput.value = "";
-    showAccountMessage(passwordChangeMessage, data.message || "パスワードを変更しました。");
-  } catch (err) {
-    showAccountMessage(passwordChangeMessage, err.message, true);
-  }
-});
 
 async function initMypage() {
   await window.PrismAuth.ready;
