@@ -345,7 +345,7 @@
   - **GitHub username は設定に残す**：username は「連携設定」なので settings 側のまま（人となりではない）。
 - **関連**：[ADR-028](decisions.md)（部分更新・session 同期）、[ADR-030](decisions.md)（表示名の現位置）、[ADR-013](decisions.md)、[ADR-034](decisions.md)（ハンドル）、`docker/init.sql`、`src/migrate.php`、`public/api/users.php`、`public/profile.{php,js}`、`public/settings.{php,js}`。
 
-## ADR-034 ユーザーネーム（一意ハンドル @username）⬜（設計のみ・handoff は後続）
+## ADR-034 ユーザーネーム（一意ハンドル @username）✅（実装・コミット済）
 - **背景**：「人となり」に、表示名（呼び名）とは別の**一意ハンドル `@username`**（URL・メンション・検索に使える識別子）を持たせたい。現状ユーザー識別子は数値 `id` のみで、公開 URL は `profile.php?id=N`。roadmap「今後の発展：username/slug」を昇格。
 - **決定**：`users.username`（**UNIQUE・大文字小文字を無視した一意**）を**冪等 migration**で追加。
   - **形式**：`^[a-z0-9_]{3,20}$`（小文字に正規化して保存・比較）、**予約語除外**（`admin`/`api`/`login`/`mypage`/`settings`/`favorites`/`profile` 等）。
@@ -363,9 +363,9 @@
   - **検証はサーバ側必須**：形式・予約語・一意は `users.php` POST で必ず検証（クライアント検証は補助）。更新対象は常にセッション `user_id`。
   - **`?u=` と `?id=` 併存**：どちらでも引けるが、`username` 未設定（移行直後）には `?id=` フォールバック。
   - **enumeration 非対象**：username は元来公開情報なので、存在の有無を隠す neutral 応答は不要（パスワード/メールと性質が違う）。
-- **関連**：[ADR-018](decisions.md)（double opt-in・採番箇所）、[ADR-033](decisions.md)（プロフィール拡充）、roadmap「今後の発展（username/slug 昇格）」、`docker/init.sql`、`src/migrate.php`、`public/api/{auth,users}.php`、`public/profile.{php,js}`、`src/seed.php`。
+- **関連**：`docs/username-handle-handoff.md`、[ADR-018](decisions.md)（double opt-in・採番箇所）、[ADR-033](decisions.md)（プロフィール拡充）、roadmap「今後の発展（username/slug 昇格）」、`docker/init.sql`、`src/migrate.php`、`src/username.php`（新規・共有ヘルパー）、`public/api/{auth,users}.php`、`public/profile.{php,js}`、`src/seed.php`。
 
-## ADR-035 作品詳細の「戻る」は固定リンクでなく直前の画面に返す ⬜（handoff 済）
+## ADR-035 作品詳細の「戻る」は固定リンクでなく直前の画面に返す ✅（実装・コミット済）
 - **背景**：作品詳細（`gallery-detail.php`）の「戻る」が **`gallery-list.php`（おすすめ）へハードコード**（テンプレート `:29` とエラー時 `gallery-detail.js` の `showError` の2箇所）。だが詳細へは **おすすめ／検索／プロフィール／お気に入り／マイページの5箇所**から来る。検索結果から作品を開いて「戻る」を押すと**おすすめに飛ばされ、検索条件（`?q=`/`?tag=`）やスクロール位置を失う**（ユーザー指摘）。
 - **決定**：戻るを「**直前の画面**」に返す＝**ブラウザ履歴**を使う。アプリ内（**same-origin の `document.referrer`**）から遷移してきた場合は `history.back()` で直前ページ（検索結果ならクエリ状態ごと）に戻る。直接アクセス・外部流入・履歴が無い場合は **`gallery-list.php` にフォールバック**。`href="gallery-list.php"` は no-JS／フォールバックの既定として**残す**（progressive enhancement）。
 - **理由**：「直前の画面」はまさにブラウザ履歴そのもの。`history.back()` なら検索のクエリ・スクロール位置・プロフィール/お気に入り/マイページ等**あらゆる遷移元に正しく戻り**、状態も保てる。遷移元ごとの分岐や戻り先 URL の持ち回りが要らず、変更は詳細ページ1枚に閉じる。

@@ -8,12 +8,15 @@ include __DIR__ . '/includes/head.php';
 
   <main class="gallery-list">
     <div class="gallery-back">
+      <p id="profileUsername" class="profile-username" hidden></p>
       <h2 id="profileName" class="profile-heading"></h2>
       <p id="profileBio" class="profile-bio" hidden></p>
       <p id="profileStars" class="profile-stars"></p>
       <section id="profileEditPanel" class="profile-edit-panel" hidden>
         <h3>プロフィール編集</h3>
         <form id="profileEditForm" class="github-settings">
+          <label for="profileEditUsername">ユーザーネーム</label>
+          <input id="profileEditUsername" type="text" name="username" autocomplete="username" maxlength="20" required>
           <label for="profileEditName">表示名</label>
           <input id="profileEditName" type="text" name="name" autocomplete="name" maxlength="100" required>
           <label for="profileEditBio">自己紹介</label>

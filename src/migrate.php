@@ -41,6 +41,23 @@ function indexExists(PDO $pdo, string $table, string $index): bool
     return (int)$stmt->fetchColumn() > 0;
 }
 
+if (!columnExists($pdo, 'users', 'username')) {
+    $pdo->exec("ALTER TABLE users ADD COLUMN username VARCHAR(30) NULL AFTER name");
+    echo "Added users.username\n";
+} else {
+    echo "users.username already exists\n";
+}
+
+$backfilledUsernames = $pdo->exec("UPDATE users SET username = CONCAT('user', id) WHERE username IS NULL");
+echo "Backfilled users.username rows: " . (int)$backfilledUsernames . "\n";
+
+if (!indexExists($pdo, 'users', 'uniq_users_username')) {
+    $pdo->exec("ALTER TABLE users ADD UNIQUE KEY uniq_users_username (username)");
+    echo "Added uniq_users_username\n";
+} else {
+    echo "uniq_users_username already exists\n";
+}
+
 if (!columnExists($pdo, 'users', 'github_username')) {
     $pdo->exec("ALTER TABLE users ADD COLUMN github_username VARCHAR(100) NULL AFTER name");
     echo "Added users.github_username\n";

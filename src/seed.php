@@ -12,35 +12,35 @@ $pdo->beginTransaction();
 try {
     $hash = password_hash('password123', PASSWORD_DEFAULT);
     $users = [
-        'demo@example.com' => ['name' => 'Demo User', 'github' => 'octocat'],
-        'aoi@example.com'  => ['name' => 'Aoi', 'github' => null],
-        'ren@example.com'  => ['name' => 'Ren', 'github' => null],
-        'mio@example.com'  => ['name' => 'Mio', 'github' => null],
-        'user05@example.com' => ['name' => 'Haru', 'github' => null],
-        'user06@example.com' => ['name' => 'Sora', 'github' => null],
-        'user07@example.com' => ['name' => 'Yui', 'github' => null],
-        'user08@example.com' => ['name' => 'Kaito', 'github' => null],
-        'user09@example.com' => ['name' => 'Nana', 'github' => null],
-        'user10@example.com' => ['name' => 'Riku', 'github' => null],
-        'user11@example.com' => ['name' => 'Akari', 'github' => null],
-        'user12@example.com' => ['name' => 'Toma', 'github' => null],
-        'user13@example.com' => ['name' => 'Mei', 'github' => null],
-        'user14@example.com' => ['name' => 'Itsuki', 'github' => null],
+        'demo@example.com' => ['name' => 'Demo User', 'username' => 'demo', 'github' => 'octocat'],
+        'aoi@example.com'  => ['name' => 'Aoi', 'username' => 'aoi', 'github' => null],
+        'ren@example.com'  => ['name' => 'Ren', 'username' => 'ren', 'github' => null],
+        'mio@example.com'  => ['name' => 'Mio', 'username' => 'mio', 'github' => null],
+        'user05@example.com' => ['name' => 'Haru', 'username' => 'haru', 'github' => null],
+        'user06@example.com' => ['name' => 'Sora', 'username' => 'sora', 'github' => null],
+        'user07@example.com' => ['name' => 'Yui', 'username' => 'yui', 'github' => null],
+        'user08@example.com' => ['name' => 'Kaito', 'username' => 'kaito', 'github' => null],
+        'user09@example.com' => ['name' => 'Nana', 'username' => 'nana', 'github' => null],
+        'user10@example.com' => ['name' => 'Riku', 'username' => 'riku', 'github' => null],
+        'user11@example.com' => ['name' => 'Akari', 'username' => 'akari', 'github' => null],
+        'user12@example.com' => ['name' => 'Toma', 'username' => 'toma', 'github' => null],
+        'user13@example.com' => ['name' => 'Mei', 'username' => 'mei', 'github' => null],
+        'user14@example.com' => ['name' => 'Itsuki', 'username' => 'itsuki', 'github' => null],
     ];
 
     $selectUser = $pdo->prepare("SELECT id FROM users WHERE email = ?");
-    $insertUser = $pdo->prepare("INSERT INTO users (email, password_hash, name, github_username) VALUES (?, ?, ?, ?)");
-    $updateUser = $pdo->prepare("UPDATE users SET name = ?, github_username = COALESCE(github_username, ?) WHERE id = ?");
+    $insertUser = $pdo->prepare("INSERT INTO users (email, password_hash, name, username, github_username) VALUES (?, ?, ?, ?, ?)");
+    $updateUser = $pdo->prepare("UPDATE users SET name = ?, username = ?, github_username = COALESCE(github_username, ?) WHERE id = ?");
     $userIds = [];
 
     foreach ($users as $email => $user) {
         $selectUser->execute([$email]);
         $id = $selectUser->fetchColumn();
         if ($id) {
-            $updateUser->execute([$user['name'], $user['github'], $id]);
+            $updateUser->execute([$user['name'], $user['username'], $user['github'], $id]);
             $userIds[$email] = (int)$id;
         } else {
-            $insertUser->execute([$email, $hash, $user['name'], $user['github']]);
+            $insertUser->execute([$email, $hash, $user['name'], $user['username'], $user['github']]);
             $userIds[$email] = (int)$pdo->lastInsertId();
         }
     }

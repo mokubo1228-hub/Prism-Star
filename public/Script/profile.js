@@ -1,5 +1,7 @@
 const profileParams = new URLSearchParams(window.location.search);
 const profileId = profileParams.get("id");
+const profileHandle = profileParams.get("u");
+const profileUsername = document.getElementById("profileUsername");
 const profileName = document.getElementById("profileName");
 const profileBio = document.getElementById("profileBio");
 const profileStars = document.getElementById("profileStars");
@@ -8,6 +10,7 @@ const profileTemplate = document.getElementById("profile-item-template");
 const githubRepos = document.getElementById("githubRepos");
 const profileEditPanel = document.getElementById("profileEditPanel");
 const profileEditForm = document.getElementById("profileEditForm");
+const profileEditUsername = document.getElementById("profileEditUsername");
 const profileEditName = document.getElementById("profileEditName");
 const profileEditBio = document.getElementById("profileEditBio");
 const profileEditMessage = document.getElementById("profileEditMessage");
@@ -28,6 +31,13 @@ function showProfileEditMessage(message, isError = false) {
 }
 
 function renderProfileIdentity(user) {
+  if (user.username) {
+    profileUsername.textContent = `@${user.username}`;
+    profileUsername.hidden = false;
+  } else {
+    profileUsername.textContent = "";
+    profileUsername.hidden = true;
+  }
   profileName.textContent = `${user.name} の作品`;
   if (user.bio) {
     profileBio.textContent = user.bio;
@@ -39,10 +49,11 @@ function renderProfileIdentity(user) {
 }
 
 function applyOwnerControls(user) {
-  const owner = Number(window.PrismAuth.status.user?.id) === Number(profileId);
+  const owner = Number(window.PrismAuth.status.user?.id) === Number(user.id);
   profileEditPanel.hidden = !owner;
   if (!owner) return;
 
+  profileEditUsername.value = user.username || "";
   profileEditName.value = user.name || "";
   profileEditBio.value = user.bio || "";
 }
@@ -118,14 +129,17 @@ async function loadProfile() {
     return;
   }
 
-  if (!profileId || !profileTemplate || !profileWorks) {
+  if ((!profileId && !profileHandle) || !profileTemplate || !profileWorks) {
     if (profileName) profileName.textContent = "ユーザーが見つかりません";
     showProfileMessage("ユーザーが見つかりません。");
     return;
   }
 
   try {
-    const res = await fetch(`/api/users.php?id=${encodeURIComponent(profileId)}`);
+    const query = profileHandle
+      ? `u=${encodeURIComponent(profileHandle)}`
+      : `id=${encodeURIComponent(profileId)}`;
+    const res = await fetch(`/api/users.php?${query}`);
     const user = await res.json();
     if (!res.ok) throw new Error(user.error || "ユーザーが見つかりません");
 
@@ -163,6 +177,7 @@ profileEditForm?.addEventListener("submit", async (e) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        username: profileEditUsername.value.trim(),
         name: profileEditName.value.trim(),
         bio: profileEditBio.value.trim()
       })
@@ -171,6 +186,7 @@ profileEditForm?.addEventListener("submit", async (e) => {
     if (!res.ok) throw new Error(data.error || "プロフィールを保存できませんでした");
     currentProfileUser = {
       ...currentProfileUser,
+      username: data.username || profileEditUsername.value.trim().toLowerCase(),
       name: data.name || profileEditName.value.trim(),
       bio: data.bio || ""
     };

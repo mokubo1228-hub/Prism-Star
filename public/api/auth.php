@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../../src/session.php';
 require_once __DIR__ . '/../../src/db.php';
+require_once __DIR__ . '/../../src/username.php';
 
 bootSession();
 
@@ -268,6 +269,9 @@ if ($action === 'register-complete') {
         $insert = $pdo->prepare("INSERT INTO users (email, password_hash, name) VALUES (?, ?, ?)");
         $insert->execute([$pending['email'], $passwordHash, $name]);
         $userId = (int)$pdo->lastInsertId();
+        $username = generateUniqueUsername($pdo, $userId, $pending['email']);
+        $updateUsername = $pdo->prepare("UPDATE users SET username = ? WHERE id = ?");
+        $updateUsername->execute([$username, $userId]);
         $pdo->prepare("DELETE FROM pending_registrations WHERE id = ?")->execute([$pending['id']]);
         $pdo->commit();
     } catch (Throwable $e) {
@@ -286,6 +290,7 @@ if ($action === 'register-complete') {
             'id' => $userId,
             'email' => $pending['email'],
             'name' => $name,
+            'username' => $username,
         ],
     ]);
 }

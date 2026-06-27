@@ -216,6 +216,13 @@
   text-align: center;
 }
 
+.profile-username {
+  color: #4b5563;
+  font-weight: 700;
+  margin: 0 0 6px;
+  text-align: center;
+}
+
 .profile-bio {
   color: #374151;
   line-height: 1.7;
