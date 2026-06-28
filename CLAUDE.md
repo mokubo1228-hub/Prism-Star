@@ -30,32 +30,40 @@ safety invariants（壊さない不変条件）と検証コマンドは正本 §
 
 | ページ | ファイル | 概要 |
 |---|---|---|
-| ギャラリー一覧 | public/gallery-list.html | 作品サムネイルのグリッド表示 + モーダル投稿 |
-| 作品詳細 | public/gallery-detail.html | URLパラメータ(id)で作品を表示 |
-| ログイン | public/login.html | メール/パスワード認証（セッション管理） |
-| お問い合わせ | public/form.html | 名前・メール・メッセージの送信フォーム |
-| プライバシーポリシー | public/policy.html | 個人情報保護方針 |
-| ベースレイアウト | public/base.html | ヘッダー/フッター付きの基本構造 |
+| おすすめ一覧 | public/gallery-list.php | 新着・人気の作品グリッド + モーダル投稿 |
+| 作品詳細 | public/gallery-detail.php | id 指定で作品表示・スター・タグ・戻る |
+| 検索結果 | public/search.php | 作品 / ユーザー / タグ検索 |
+| 公開プロフィール | public/profile.php | ?id= / ?u=@handle・bio・その人の作品 |
+| マイページ | public/mypage.php | 自分の作品管理（作成/編集/公開切替/GitHub取込） |
+| お気に入り | public/favorites.php | スターした作品一覧 |
+| アカウント設定 | public/settings.php | 表示名・パスワード 等 |
+| 作品 作成/編集 | public/work-edit.php | 専用フォーム |
+| ログイン/登録/確認 | public/login.php / register.php / verify.php | 認証（登録は double opt-in） |
+| パスワード再設定 | public/forgot.php / reset.php | メールトークン方式 |
+| お問い合わせ/ポリシー | public/form.php / policy.php | 送信フォーム / 個人情報保護方針 |
 
 ## API
 
 | エンドポイント | 機能 |
 |---|---|
-| GET/POST/DELETE /api/gallery.php | ギャラリーCRUD |
-| POST /api/auth.php?action=login | ログイン |
-| POST /api/auth.php?action=logout | ログアウト |
-| GET /api/auth.php?action=status | ログイン状態確認 |
+| GET/POST/PATCH/DELETE /api/gallery.php | 作品 CRUD（?action=import-github で GitHub 取込） |
+| GET /api/search.php | 作品 / ユーザー / タグ検索 |
+| POST/DELETE /api/stars.php | スター付与 / 解除 |
+| GET /api/users.php | プロフィール＋その人の作品（?id= / ?u=） |
+| GET /api/github.php | GitHub リポジトリ取得（サーバ側 token） |
+| /api/auth.php（login/logout/register/verify/reset・?action=status） | 認証（登録 double opt-in・パスワード再設定） |
 | POST /api/contact.php | お問い合わせ送信 |
 
 ## ディレクトリ
 
 ```
 public/          … Apache ドキュメントルート
-  api/           … PHP API（gallery.php, auth.php, contact.php）
+  api/           … PHP API（gallery, auth, contact, github, stars, users, search）
+  includes/      … head/header/footer/asset の partial（共通化）
   Script/        … JS（common.js で共通ナビ生成）
   Style/         … CSS（ページごとに分割、sanitize.css でリセット）
   Image/         … SNSアイコン画像
-src/             … PHP共通処理（db.php, seed.php）
+src/             … PHP共通処理（db, seed, migrate, session, username, github_client）
 docker/          … Docker設定（Dockerfile, init.sql）
 ```
 
