@@ -9,11 +9,12 @@
 
 ---
 
-## ADR-001 作業ベースは `develop` ブランチ ✅
+## ADR-001 作業ベースは `develop` ブランチ 🔄（[ADR-039](decisions.md) で改訂：main を正本に戻す）
 - **背景**：当初 `main` を見ていたが、`develop` に PHP + MySQL + Docker のバックエンドが既に実装済みだった。
 - **決定**：今後の作業は `develop` を基点にする。
 - **理由**：develop が本体で大幅に先行（マルチユーザー認証・ギャラリー CRUD・お問い合わせが実際に動作）。`main` は古い。
 - **代替案**：`main` で進める → 既存の動く実装を捨てることになり却下。
+- **更新（[ADR-039](decisions.md)）**：その後 `main` は `develop` 直前まで追いつき、差は数コミットのみ（ff 可能）になった。「main は古い」前提が解消したため、**`main` を正本（default・安定）に戻し、`develop` は役目を終えたので廃止（main 一本化）**する。
 
 ## ADR-002 バックエンドは PHP + MySQL + Docker を維持（Node に書き換えない）✅
 - **背景**：当初 Node + Express を検討した。しかし develop は既に PHP で実装済み。
@@ -421,3 +422,12 @@
 - **代替案・却下理由**：(a) 現状維持（バラバラ）→ 遷移時のガタつき・`work-edit` の窮屈さが残る。(b) 全ページ同一幅 → グリッドが狭く・フォームが間延びで両立しない。(c) `work-edit` に専用幅(820)を足す → 幅の種類が増えるだけ。トークン体系へ集約する方が一貫。
 - **影響**：`public/Style/body.css`（`:root` トークン）、`gallery-list / gallery-detail / login-main / form-main / modal / header / policy` の各 CSS が `var(--w-*)` を参照、`public/work-edit.php`（2カラム化・**JS 依存の id / label[for] / name は維持**）、`public/form.php`（コンテンツ内ロゴ重複削除）、`public/includes/header.php`（並び替え）。挙動・API・スキーマは不変（見た目のみ）。
 - **関連**：`docs/page-shell-consistency-handoff.md`、`docs/page-width-tokens-handoff.md`、[ADR-019](decisions.md)（ゲートモーダル）、[ADR-013](decisions.md)（マイページ）。
+
+## ADR-039 ブランチ運用を `main` 一本化する（`develop` を廃止）✅
+- **背景**：[ADR-001](decisions.md) では「`main` が古く `develop` が大幅先行」だったため develop を実質の本体として運用してきた。現在は両者の差が**数コミットのみ**（ff 可能）でその前提は解消。本プロジェクトは個人開発であり、`develop`（統合ブランチ）を挟む運用は単独作業ではオーバーヘッドで、default が古く見える原因にもなる。
+- **決定**：**`main` を唯一の正本・default・安定ブランチにする**。`develop` は役目を終えたので、内容を `main` に取り込んだ上で**廃止**する。以後は `main` で作業し、必要なときだけ短命の feature ブランチを切って `main` にマージする。
+- **手順（概略）**：① `develop` の内容を `main` に反映（ff）→ ② GitHub の default を `main` に（develop が default の場合は先に変更しないと削除できない）→ ③ `develop` を削除（local + remote）。古い `dev-back` / `dev-front` も merge 済みなら整理。
+- **理由**：個人ポートフォリオでは `main = default/安定` の単純構成が最も分かりやすく慣習にも合う。統合ブランチの恩恵（並行リリース管理等）は単独開発では不要。
+- **代替案・却下理由**：(a) develop を本体のまま継続（ADR-001）→ default が古く見え慣習に反する。(b) `main` 正本＋`develop` を統合ブランチとして残す → 単独開発には過剰。一本化が簡潔。
+- **影響**：ブランチ運用のみ（コード不変）。[ADR-001](decisions.md) を supersede。
+- **状態**：✅ 採用（`main` 一本化）。
