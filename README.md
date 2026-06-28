@@ -13,7 +13,7 @@ Shine in every color.
 ```bash
 # 1. リポジトリをクローン
 git clone <リポジトリURL>
-cd prismstar
+cd Prism-Star
 
 # 2. 環境変数ファイルを用意（必須・ローカル用の既定値入り）
 cp .env.example .env
