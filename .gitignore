@@ -18,5 +18,6 @@ db_data/
 # 個人作業メモ（repo に出さない・運用側で管理）
 開発者メモ.md
 
-# 将来: ユーザーアップロード（Phase 6 で有効化）
-# public/uploads/
+# ユーザーアップロード: 実体はコミットしない（.htaccess の security 設定だけ追跡）
+public/uploads/*
+!public/uploads/.htaccess
