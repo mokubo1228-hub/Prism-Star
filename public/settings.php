@@ -25,6 +25,17 @@ include __DIR__ . '/includes/head.php';
         </form>
       </section>
 
+      <section class="settings-section danger-zone">
+        <h3>アカウントの削除</h3>
+        <p class="danger-zone-warning">削除すると作品・スター・プロフィールがすべて消え、元に戻せません。</p>
+        <form id="accountDeleteForm" class="github-settings">
+          <label for="deleteCurrentPassword">現在のパスワード</label>
+          <input id="deleteCurrentPassword" type="password" name="current_password" autocomplete="current-password" required>
+          <button type="submit" class="danger-button">アカウントを削除</button>
+          <p id="accountDeleteMessage" class="github-message" hidden></p>
+        </form>
+      </section>
+
       <section class="settings-section">
         <h3>連携</h3>
         <form id="githubSettingsForm" class="github-settings">

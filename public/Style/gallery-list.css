@@ -569,6 +569,25 @@
   max-width: none;
 }
 
+.danger-zone {
+  border-color: #fecaca;
+  background: #fff7f7;
+}
+
+.danger-zone-warning {
+  color: #991b1b;
+  margin: 0;
+}
+
+.github-settings .danger-button {
+  background: #dc2626;
+}
+
+.github-settings .danger-button:hover,
+.github-settings .danger-button:focus-visible {
+  background: #b91c1c;
+}
+
 .github-repo-card a {
   color: royalblue;
   font-weight: 700;

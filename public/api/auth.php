@@ -162,6 +162,67 @@ if ($action === 'change-password') {
     authJson(['ok' => true, 'message' => 'パスワードを変更しました。']);
 }
 
+if ($action === 'delete-account') {
+    if (empty($_SESSION['user_id'])) {
+        authJson(['error' => 'ログインが必要です'], 401);
+    }
+
+    $data = readJsonBody();
+    $currentPassword = (string)($data['current_password'] ?? '');
+    $userId = (int)$_SESSION['user_id'];
+
+    $pdo->beginTransaction();
+    try {
+        // 削除対象はセッションの本人だけ。リクエストから user_id を受けず、他人を消す経路を作らない。
+        $stmt = $pdo->prepare("SELECT email, password_hash FROM users WHERE id = ? FOR UPDATE");
+        $stmt->execute([$userId]);
+        $user = $stmt->fetch();
+
+        if (!$user) {
+            $pdo->rollBack();
+            authJson(['error' => 'ログインが必要です'], 401);
+        }
+
+        if (!password_verify($currentPassword, $user['password_hash'])) {
+            $pdo->rollBack();
+            authJson(['error' => '現在のパスワードが正しくありません'], 403);
+        }
+
+        $deletePending = $pdo->prepare("DELETE FROM pending_registrations WHERE email = ?");
+        $deletePending->execute([$user['email']]);
+
+        $galleryIdsStmt = $pdo->prepare("SELECT id FROM gallery WHERE user_id = ?");
+        $galleryIdsStmt->execute([$userId]);
+        $galleryIds = array_map('intval', $galleryIdsStmt->fetchAll(PDO::FETCH_COLUMN));
+
+        $pdo->prepare("DELETE FROM password_resets WHERE user_id = ?")->execute([$userId]);
+
+        if ($galleryIds) {
+            // 本番想定は FK cascade だが、古いローカル DB でも退会が詰まらないよう同一 transaction で明示削除する。
+            $placeholders = implode(',', array_fill(0, count($galleryIds), '?'));
+            $pdo->prepare("DELETE FROM gallery_tags WHERE gallery_id IN ($placeholders)")->execute($galleryIds);
+            $pdo->prepare("DELETE FROM stars WHERE user_id = ? OR gallery_id IN ($placeholders)")
+                ->execute(array_merge([$userId], $galleryIds));
+            $pdo->prepare("DELETE FROM gallery WHERE user_id = ?")->execute([$userId]);
+        } else {
+            $pdo->prepare("DELETE FROM stars WHERE user_id = ?")->execute([$userId]);
+        }
+
+        $deleteUser = $pdo->prepare("DELETE FROM users WHERE id = ?");
+        $deleteUser->execute([$userId]);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $e;
+    }
+
+    $_SESSION = [];
+    session_destroy();
+    authJson(['ok' => true]);
+}
+
 if ($action === 'login') {
     $data = readJsonBody();
     $email = trim((string)($data['email'] ?? ''));

@@ -397,7 +397,7 @@
   - **ゲート**：tag リンク先 `search.php` は自前で `requireAuth`。未ログイン teaser からのクリックも遷移先で促せる（work-link と同方針）。
 - **関連**：`docs/discovery-polish-handoff.md`、[ADR-035](decisions.md)（戻る）、[ADR-025](decisions.md)（`?tag=` 検索）、[ADR-017](decisions.md)（タグ）、[ADR-019](decisions.md)（ゲート型）、`public/Script/common.js` ほか描画各所、`public/profile.php`。
 
-## ADR-037 アカウント削除（退会）を実装する ⬜（handoff 済）
+## ADR-037 アカウント削除（退会）を実装する ✅（実装・コミット済）
 - **背景**：認証ライフサイクルは登録（double opt-in・[ADR-018](decisions.md)）/ ログイン / パスワード再設定（[ADR-021](decisions.md)）/ 設定まで揃っているのに、**自分のアカウントを消す手段（退会）が無い**。マルチユーザー＝発信者プラットフォームで「自分のデータを消せない」のは基本機能の穴（[ADR-013](decisions.md) マイページ＝自分の管理面）。退会導線が無いためユーザー検索にも残り続ける。
 - **決定**：ログイン中ユーザーが**現在パスワード再入力**のうえ自分のアカウントを削除できるようにする。`settings.php` に danger zone セクション、`auth.php?action=delete-account`。**`users` 行の削除は `docker/init.sql` の FK `ON DELETE CASCADE` により gallery / stars（付与・被付与）/ gallery_tags / password_resets を自動削除**＝トランザクション1発。削除対象は常に session の `user_id`。
 - **理由**：認証ライフサイクルを閉じる基本機能。データ所有権・cascade 削除を扱えることを示す。スキーマは既に FK cascade 済なので追加コストが小さい。確認はパスワード再入力で誤操作・乗っ取りを防ぐ。

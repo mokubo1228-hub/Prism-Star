@@ -5,6 +5,9 @@ const passwordChangeMessage = document.getElementById("passwordChangeMessage");
 const githubSettingsForm = document.getElementById("githubSettingsForm");
 const githubUsernameInput = document.getElementById("githubUsername");
 const githubSettingsMessage = document.getElementById("githubSettingsMessage");
+const accountDeleteForm = document.getElementById("accountDeleteForm");
+const deleteCurrentPasswordInput = document.getElementById("deleteCurrentPassword");
+const accountDeleteMessage = document.getElementById("accountDeleteMessage");
 
 function showAccountMessage(element, message, isError = false) {
   element.textContent = message;
@@ -68,6 +71,28 @@ githubSettingsForm.addEventListener("submit", async (e) => {
     showGitHubMessage("保存しました。");
   } catch (err) {
     showGitHubMessage(err.message, true);
+  }
+});
+
+accountDeleteForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  accountDeleteMessage.hidden = true;
+
+  if (!confirm("アカウントを削除します。作品・スター・プロフィールは元に戻せません。よろしいですか？")) {
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/auth.php?action=delete-account", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ current_password: deleteCurrentPasswordInput.value })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "アカウントを削除できませんでした");
+    window.location.href = "login.php";
+  } catch (err) {
+    showAccountMessage(accountDeleteMessage, err.message, true);
   }
 });
 
