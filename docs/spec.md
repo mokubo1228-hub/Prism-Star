@@ -133,7 +133,7 @@ docs/              spec / roadmap / decisions / roles / handoff
 
 | 画面 | ファイル | 状態 |
 |---|---|---|
-| おすすめ一覧（新着・人気 / モーダル投稿） | `public/gallery-list.php` | ✅ |
+| おすすめ一覧（新着・人気） | `public/gallery-list.php` | ✅ |
 | 作品詳細（`?id=`・スター・タグ・戻る） | `public/gallery-detail.php` | ✅ |
 | 検索結果（作品 / ユーザー / タグ） | `public/search.php` | ✅ |
 | 公開プロフィール（`?id=` / `?u=@handle`） | `public/profile.php` | ✅ |

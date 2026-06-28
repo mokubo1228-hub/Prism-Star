@@ -30,7 +30,7 @@ safety invariants（壊さない不変条件）と検証コマンドは正本 §
 
 | ページ | ファイル | 概要 |
 |---|---|---|
-| おすすめ一覧 | public/gallery-list.php | 新着・人気の作品グリッド + モーダル投稿 |
+| おすすめ一覧 | public/gallery-list.php | 新着・人気の作品グリッド（投稿は work-edit.php） |
 | 作品詳細 | public/gallery-detail.php | id 指定で作品表示・スター・タグ・戻る |
 | 検索結果 | public/search.php | 作品 / ユーザー / タグ検索 |
 | 公開プロフィール | public/profile.php | ?id= / ?u=@handle・bio・その人の作品 |
