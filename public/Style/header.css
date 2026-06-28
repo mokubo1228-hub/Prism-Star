@@ -13,7 +13,6 @@ a {
     display: flex;
     align-items: center;
     gap: 16px;
-    justify-content: space-between;
     position: relative;
     padding: 10px 14px;
   }
@@ -40,14 +39,15 @@ a {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-left: auto;
+    margin-left: 0;
   }
 
   .header-search {
     display: flex;
-    flex: 1 1 420px;
+    flex: 0 1 520px;
     max-width: 520px;
     min-width: 220px;
+    margin: 0 auto;
   }
 
   .header-search select,

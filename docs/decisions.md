@@ -405,3 +405,19 @@
 - **影響**：`public/api/auth.php`（`delete-account`）、`public/settings.php`（danger zone）、`public/Script/settings.js`、CSS。スキーマ不変。
 - **安全**：削除は session の `user_id` のみ・`password_verify` 再確認・トランザクション・成功後 session 破棄。
 - **関連**：`docs/account-deletion-handoff.md`、[ADR-018](decisions.md)（登録 double opt-in）、[ADR-021](decisions.md)（パスワード再設定）、[ADR-013](decisions.md)（マイページ）、`docker/init.sql`（FK cascade）。
+
+## ADR-038 ページ幅を4トークンに集約し、レイアウトの不整合を解消する ✅（実装済）
+- **背景**：コンテンツ幅がページごとにバラバラ（1180 / 60% / clamp / 500 / 450 / 820 / policy の 60〜90% と6種以上、px と % が混在）で、ページ遷移のたびに中央の表示幅がガタつく。各ページが歴史的に独自の幅を持ち、設計トークンが無かったのが原因。加えて作品作成/編集（`work-edit`）が認証カード（`login-box`）を間借りして狭く、戻る系リンクの色や header の並びにも不整合があった。
+- **決定**：コンテンツ幅を **4トークン**に集約する（`body.css` の `:root`）。「全ページ同一」ではなく **コンテンツの種類＝最適な行長/一覧性で割る**：
+  - `--w-modal` `min(420px,92vw)`：集中させるオーバーレイ（認証ゲート、[ADR-019](decisions.md)）
+  - `--w-wide` `min(1180px,96vw)`：一覧・閲覧・作成（グリッド/多カラムを見せる面）
+  - `--w-read` `min(760px,92vw)`：長文・本文（読みやすい行長＝ポリシー）
+  - `--w-form` `min(640px,92vw)`：単一フォームの中央カード（設定・問合せ・認証）
+  - 構造は **背景レイヤー＝全幅 / 白カード＝トークン幅** に全ページ統一。
+  - `work-edit` は認証カード流用をやめ管理ページ構造＋**ワイド2カラム**（左:画像／右:項目）に。
+  - 戻る系リンク（`.back-menu` / `.settings-back-link`）の色を `royalblue` に統一。
+  - ヘッダーは **タイトル左／検索 中央／認証＋ハンバーガー 右** に整理。
+- **理由**：長文・グリッド・フォームで読みやすい/使いやすい幅は異なる（measure）。実機確認で policy は 640=細すぎ・1180=読めない → **760 が最適**と確定。トークン化で幅を1箇所管理し、ad-hoc な幅の再発を防ぐ。種類が違うときだけ幅が変わる＝「意味のある変化」にすることで遷移時の違和感を消す。
+- **代替案・却下理由**：(a) 現状維持（バラバラ）→ 遷移時のガタつき・`work-edit` の窮屈さが残る。(b) 全ページ同一幅 → グリッドが狭く・フォームが間延びで両立しない。(c) `work-edit` に専用幅(820)を足す → 幅の種類が増えるだけ。トークン体系へ集約する方が一貫。
+- **影響**：`public/Style/body.css`（`:root` トークン）、`gallery-list / gallery-detail / login-main / form-main / modal / header / policy` の各 CSS が `var(--w-*)` を参照、`public/work-edit.php`（2カラム化・**JS 依存の id / label[for] / name は維持**）、`public/form.php`（コンテンツ内ロゴ重複削除）、`public/includes/header.php`（並び替え）。挙動・API・スキーマは不変（見た目のみ）。
+- **関連**：`docs/page-shell-consistency-handoff.md`、`docs/page-width-tokens-handoff.md`、[ADR-019](decisions.md)（ゲートモーダル）、[ADR-013](decisions.md)（マイページ）。

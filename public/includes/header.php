@@ -1,9 +1,5 @@
   <header id="site-header" class="site-header">
     <div class="header-inner">
-      <button id="hamburger" class="hamburger">
-        <span></span><span></span><span></span>
-      </button>
-
       <div class="site-brand">
         <h1 class="site-title"><a href="gallery-list.php">PrismStar</a></h1>
         <p class="site-tagline">Shine in every color.</p>
@@ -38,6 +34,10 @@
         <a class="auth-action auth-action-mypage" href="mypage.php" hidden>マイページ</a>
         <button type="button" class="auth-action auth-action-logout" hidden>ログアウト</button>
       </div>
+
+      <button id="hamburger" class="hamburger">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </header>
 
