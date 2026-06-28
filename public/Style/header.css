@@ -149,12 +149,12 @@ a {
   .auth-gate-dialog {
     background: #fff;
     border-radius: 8px;
+    box-sizing: border-box;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
     color: #111827;
-    max-width: 380px;
     padding: 24px;
     position: relative;
-    width: min(100%, 380px);
+    width: var(--w-modal);
   }
 
   .auth-gate-dialog h2 {

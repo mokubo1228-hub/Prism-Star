@@ -1,3 +1,10 @@
+:root {
+    --w-modal: min(420px, 92vw);
+    --w-wide: min(1180px, 96vw);
+    --w-read: min(760px, 92vw);  /* 長文・本文用の読みやすい行長（ポリシー等） */
+    --w-form: min(640px, 92vw);
+  }
+
 .site-body {
     display: grid;
     grid-template-rows: auto 1fr auto;

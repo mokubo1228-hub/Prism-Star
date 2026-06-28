@@ -14,19 +14,18 @@
     -webkit-backdrop-filter: blur(6px); /* Safari対応 */
     transition: opacity 0.3s ease;
   }
-  
+
   /* ===== モーダル本体 ===== */
   .modal-dialog {
     background: #fff;
     border-radius: 10px;
-    width: 90%;
-    max-width: 400px;
+    box-sizing: border-box;
+    width: var(--w-modal);
     padding: 24px;
     box-shadow: 0 4px 18px rgba(0,0,0,0.3);
     position: relative;
     animation: fadeIn 0.3s ease;
   }
-  
   /* ===== 閉じるボタン ===== */
   .modal-close {
     position: absolute;
@@ -38,7 +37,6 @@
     color: #666;
     cursor: pointer;
   }
-  
   /* ===== 投稿フォーム ===== */
   #postForm {
     display: flex;
@@ -81,4 +79,3 @@
     from { transform: scale(0.95); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
   }
-  

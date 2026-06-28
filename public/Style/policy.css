@@ -1,16 +1,16 @@
 .privacy-main {
   display: flex;
   justify-content: center;
-  max-width: 100%;
-  margin: 0 auto;
+  box-sizing: border-box;
   padding: 10px 20px;
   line-height: 1.8;
   color: #333;
-  background:#f5f7fa; 
+  background:#f5f7fa;
 }
 
 .privacy-article {
-  width: 60%;
+  box-sizing: border-box;
+  width: var(--w-read);
   background-color: #fff;
   border: 1px solid #ddd;
   border-radius: 12px;
@@ -56,14 +56,12 @@
 
 @media (max-width: 1024px) {
   .privacy-article {
-    width: 80%;
     padding: 32px;
   }
 }
 
 @media (max-width: 768px) {
   .privacy-article {
-    width: 90%;
     padding: 28px;
   }
 
@@ -82,7 +80,6 @@
   }
 
   .privacy-article {
-    width: 100%;
     padding: 20px;
     border-radius: 8px;
   }

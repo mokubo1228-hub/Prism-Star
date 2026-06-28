@@ -5,11 +5,12 @@
     display:flex;
     justify-content: center;
     align-items: flex-start;
-    padding:24px;
+    padding:24px 0;
 }
 
 .detail-page {
-    width: 60%;
+    box-sizing: border-box;
+    width: var(--w-wide);
     background:#fff; border:1px solid #e5e7eb; border-radius:14px;
     box-shadow:0 10px 30px rgba(0,0,0,.06);
     padding:32px 50px 24px;
@@ -103,9 +104,10 @@
   .back-menu {
     display: inline-block;
     text-align: center;
+    font-weight: 700;
     padding: 8px 14px;
-    text-decoration:none; 
-    color:#374151;
+    text-decoration:none;
+    color:royalblue;
   }
 
   .edit-work-link {
@@ -172,14 +174,12 @@
   }
   @media (max-width: 1024px) {
     .detail-page { 
-      width: clamp(320px, 70%, 880px);
       padding:28px 36px 20px;
     }
   }
   
   @media (max-width: 768px) {
     .detail-page { 
-      width: min(92vw, 640px);
       padding:24px 20px 18px;
     }
   }

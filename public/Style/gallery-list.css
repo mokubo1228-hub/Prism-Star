@@ -16,11 +16,12 @@
   background-color: #fff;
   border: 1px solid #ddd;
   border-radius: 8px;
+  box-sizing: border-box;
   padding: 40px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   margin-top: 30px;
   margin-bottom: 30px;
-  max-width: min(1180px, 96vw);
+  width: var(--w-wide);
 }
 
 .gallery-list-heading {
@@ -40,8 +41,9 @@
 }
 
 .back-menu {
-  color: #374151;
+  color: royalblue;
   display: inline-block;
+  font-weight: 700;
   margin-bottom: 12px;
   padding: 8px 14px;
   text-decoration: none;
@@ -318,11 +320,20 @@
   gap: 8px;
 }
 
-.github-settings input {
+.github-settings input,
+.github-settings textarea,
+.github-settings select {
   border: 1px solid #d1d5db;
   border-radius: 8px;
+  box-sizing: border-box;
   flex: 1;
+  font: inherit;
   padding: 10px 12px;
+  width: 100%;
+}
+
+.github-settings textarea {
+  resize: vertical;
 }
 
 .github-settings button {
@@ -476,7 +487,7 @@
 }
 
 .mypage-back {
-  width: min(1180px, 96vw);
+  width: var(--w-wide);
 }
 
 .mywork-list {
@@ -541,8 +552,7 @@
 }
 
 .settings-back {
-  max-width: min(640px, 94vw);
-  width: 100%;
+  width: var(--w-form);
 }
 
 .settings-back-link {
@@ -588,6 +598,51 @@
   background: #b91c1c;
 }
 
+.work-edit-form {
+  margin-bottom: 0;
+}
+
+.work-edit-layout {
+  display: grid;
+  gap: 28px;
+  grid-template-columns: minmax(260px, 0.9fr) minmax(320px, 1.1fr);
+}
+
+.work-edit-visual,
+.work-edit-fields {
+  min-width: 0;
+}
+
+.work-edit-visual {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.work-edit-visual label:not(:first-child),
+.work-edit-fields label:not(:first-child) {
+  margin-top: 16px;
+}
+
+.form-note {
+  color: #4b5563;
+  line-height: 1.7;
+  margin: 0 0 18px;
+}
+
+.work-edit-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.work-edit-actions button[type="submit"] {
+  flex: 1 1 160px;
+}
+
 .github-repo-card a {
   color: royalblue;
   font-weight: 700;
@@ -631,6 +686,10 @@
 
   .github-settings-row {
     display: grid;
+  }
+
+  .work-edit-layout {
+    grid-template-columns: 1fr;
   }
 }
 

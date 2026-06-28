@@ -9,10 +9,6 @@ include __DIR__ . '/includes/head.php';
 
 	<main class="form-main">
         <section class="form-page">
-            <div class="site-title">
-                <h1>PrismStar</h1>
-                <p class="card-tagline">Shine in every color.</p>
-            </div>
             <div>
                 <h1 class="page-title">お問合せフォーム</h1>
             </div>
