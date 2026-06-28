@@ -39,6 +39,14 @@
   margin: 6px 0 0;
 }
 
+.back-menu {
+  color: #374151;
+  display: inline-block;
+  margin-bottom: 12px;
+  padding: 8px 14px;
+  text-decoration: none;
+}
+
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(var(--cols), var(--gallery-icon-w));
@@ -188,6 +196,17 @@
   text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.tag-link {
+  color: #2563eb;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.tag-link:hover,
+.tag-link:focus-visible {
+  color: #1d4ed8;
 }
 
 .source-badge {

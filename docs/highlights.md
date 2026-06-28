@@ -66,4 +66,3 @@ ADR は「点の決定」、ここはその**底に流れている原則**。新
 - **意思決定ログ**（ADR-001〜035、`背景 / 決定 / 理由 / 代替案`）：`docs/decisions.md`
 - **AI 役割分担とワークフロー**（設計・handoff・safety invariants）：`docs/ai-roles-and-workflow.md`
 - **実装計画と進捗**（フェーズ分割）：`docs/roadmap.md`
-- **既存コードのロジック詳細**：`PROJECT.md`

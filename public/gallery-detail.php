@@ -9,6 +9,7 @@ include __DIR__ . '/includes/head.php';
   <main class="gallery-detail-page">
     <article id="work-detail" class="detail-page">
       <template id="detail-template">
+        <a class="back-menu" href="gallery-list.php">← 戻る</a>
         <h1 class="gallery-title">{TITLE}</h1>
         <figure class="detail-img">
           <img src="{SRC}" alt="{TITLE}">
@@ -25,9 +26,7 @@ include __DIR__ . '/includes/head.php';
         <section>
           <p class="detail-txt">{DESC}</p>
         </section>
-        <div class="detail-actions">
-          <a class="back-menu" href="gallery-list.php">戻る</a>
-        </div>
+        <div class="detail-actions"></div>
       </template>
     </article>
   </main>

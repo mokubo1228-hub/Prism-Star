@@ -16,7 +16,6 @@
 - **AI 開発の役割・フロー**（User / Claude Code / Codex の3者）：`docs/ai-roles-and-workflow.md`
 - **実装者（Codex）向け repo 規則**：`AGENTS.md`
 - **各フェーズの Codex 実装指示**：`docs/phase-*-handoff.md`
-- **既存コードのロジック詳細**：`PROJECT.md`
 - **使い方 / 起動**：`README.md`
 
 ## 現在地（2026-06-23 時点）

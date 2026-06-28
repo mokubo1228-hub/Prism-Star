@@ -69,7 +69,7 @@ function renderProfileWork(work) {
   img.src = work.src;
   img.alt = work.title;
   figcaption.textContent = work.title;
-  tagList.textContent = (work.tags || []).map(tag => `#${tag}`).join(" ");
+  renderTagLinks(tagList, work.tags || []);
   if (work.source === "github") {
     const badge = document.createElement("span");
     badge.className = "source-badge";

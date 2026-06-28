@@ -59,4 +59,5 @@ docker compose down -v
 - バックエンド: PHP 8.2 / MySQL 8.0
 - 開発環境: Docker Compose
 
-選定理由・設計のこだわり・判断軸は **[docs/highlights.md](docs/highlights.md)** を参照。
+選定理由・設計のこだわり・判断軸は **[docs/highlights.md](docs/highlights.md)**、
+各意思決定の経緯（なぜそう決めたか／何を却下したか）は **[docs/decisions.md](docs/decisions.md)**（ADR）を参照。

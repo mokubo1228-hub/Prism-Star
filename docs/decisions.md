@@ -24,7 +24,7 @@
 ## ADR-003 GitHub API はバックエンド経由（フロント直叩きにしない）✅
 - **背景**：GitHub 連携で API をどこから呼ぶか（フロント直叩き vs サーバ経由）。
 - **決定**：サーバ側 PHP（`api/github.php`）から呼び、token は環境変数に隠す。
-- **理由**：フロントに token を置くとソースに丸見えで漏洩する。認証付き（5000 req/h）の安定アクセスを「**安全に**」得るには token をサーバ側に隠すしかない。「両者を比較して安全な方を選んだ」という意思決定自体がポートフォリオ価値になる。
+- **理由**：フロントに token を置くとソースに丸見えで漏洩する。認証付き（5000 req/h）の安定アクセスを「**安全に**」得るには token をサーバ側に隠すしかない。
 - **代替案**：フロント直叩き（未認証 60 req/h、または token 漏洩）→ 却下。
 - **関連**：`docs/ai-roles-and-workflow.md` §4 safety invariants。
 
@@ -93,9 +93,9 @@
 - **関連**：`docs/phase-4-handoff.md` の検証コマンド、`docs/spec.md` §8（safety invariants の検証）。
 
 ## ADR-012 ページを PHP 化し header/footer をサーバ側 partial で共通化 ✅（実装は Phase 6）
-- **背景**：「PHP 8.2」採用なのに、ページは静的 `.html` で header/footer が全8ページに**コピペ**（DRY 違反。`PROJECT.md`「ヘッダー/フッター共通化」課題）。PHP は API 層だけで、サーバ側テンプレートを活かせていない。
+- **背景**：「PHP 8.2」採用なのに、ページは静的 `.html` で header/footer が全8ページに**コピペ**（DRY 違反＝ヘッダー/フッター共通化の課題）。PHP は API 層だけで、サーバ側テンプレートを活かせていない。
 - **決定**：静的 `.html` ページを `.php` に変え、header/footer（と head）を `public/includes/*.php` の **partial に1箇所化**して各ページが `include` する。**挙動は変えない構造リファクタ**。`base.html` はなごりとして `.html` のまま残す。
-- **理由**：コピペ重複を解消し、ヘッダー/フッターを1箇所で管理できる。サーバ側テンプレート（`include`）という PHP らしい実装になり、ポートフォリオの説得力が増す。
+- **理由**：コピペ重複を解消し、ヘッダー/フッターを1箇所で管理できる。サーバ側テンプレート（`include`）という PHP らしい実装になる。
 - **代替案**：
   - `.html` のまま Apache に PHP 処理させる → 非標準・不自然で却下。
   - JS で header/footer を動的挿入 → クライアント依存・初期表示で崩れうる・堅牢性で劣るため却下（nav 生成は既存どおり JS でよいが、骨格はサーバ側に）。
@@ -171,7 +171,7 @@
 - **背景**：login.php に「パスワードをお忘れの場合」リンクがあるが `href="#"` の飾りで未実装だった。ポートフォリオとして出す以上、認証の基本機能（登録・ログイン・**再設定**）が揃っていないのは外せず、`href="#"` の死にリンクを残すのも不可。実装しないなら理由を docs に残す必要があるが、これは基本機能なので実装する。
 - **決定**：登録の double opt-in と同じメールトークン方式で実装する。① email 入力 → ② リセット token をメール送信（ローカルは MailHog）→ ③ `reset.php?token=…` で新パスワード設定 → ④ 完了（ログイン画面へ）。token は使い捨て・期限付き（登録の 24h より短く **1h** 目安＝乗っ取りリスクが高いため）。
 - **理由**：認証ライフサイクルを一通り揃えるのは基本要件。token＋MailHog の送信基盤（[ADR-018](decisions.md)）が既にあり、登録フローのパターンをそのまま流用できるので追加コストが小さい。
-- **代替案**：(a) リンクを撤去して未実装のまま → 基本機能の欠落で portfolio として弱い。(b)「準備中」表示 → 作りかけに見える。→ 基盤がある以上、実装が妥当。
+- **代替案**：(a) リンクを撤去して未実装のまま → 認証の基本機能が欠ける。(b)「準備中」表示 → 作りかけに見える。→ 基盤がある以上、実装が妥当。
 - **影響（safety invariant 追加）**：reset token は 256bit・**sha256 hash 保存・単回・期限（1h）**。enumeration 対策＝メール存在の有無で応答を変えない。リセット完了で当該 token 行を削除。
 - **関連**：`docs/password-reset-handoff.md`、[ADR-018](decisions.md)、`docs/roadmap.md`。
 
@@ -380,3 +380,19 @@
   - **委譲で2箇所をまとめる**：戻るリンクはテンプレート clone と `showError` の innerHTML の双方に出るので、`document` への委譲 click（`a.back-menu`）1本で両方を拾う（再 wiring 不要）。`common.js` の `bindAuthLinks`（`data-require-auth`）とはセレクタが別で衝突しない。
   - **安全**：外部 URL へは飛ばさない（`history.back()` か固定 href のみ）＝open-redirect を作らない。戻るは GET 遷移で CSRF 無関係。
 - **関連**：`docs/detail-back-handoff.md`、[ADR-029](decisions.md)（おすすめ/検索の役割分担）、[ADR-019](decisions.md)（ゲート型回遊）、`public/gallery-detail.php`、`public/Script/gallery-detail.js`。
+
+## ADR-036 回遊性の仕上げ：作品タグをクリックでタグ検索／戻る動線を共通化 ✅（実装・コミット済）
+- **背景**：テストで2つの回遊の穴に気づいた（ユーザー指摘）。① **作品のタグが全画面で `textContent`（ただの文字列）描画**で、`search.php?tag=` の経路（ヘッダー検索が使用＝[ADR-025](decisions.md)）があるのに**クリックしてもタグ検索に飛ばない**（gallery-list / search / profile / favorites / detail / mypage の6箇所）。② **公開プロフィール（`profile.php`）に「戻る」が無い**ため、ユーザー検索や作者名クリックで profile に入ると**ブラウザの戻るしか手段がない**（作品詳細には [ADR-035](decisions.md) で履歴ベースの戻るを入れた）。
+- **決定**：
+  1. **タグをリンク化**：各タグを `<a class="tag-link" href="search.php?tag=<enc>">#tag</a>` にする。描画は `common.js` の**共有ヘルパー `renderTagLinks(container, tags)`** に集約し、6箇所の `textContent` 描画を差し替える（source-badge の prepend 挙動は維持）。
+  2. **戻る動線を共通化**：[ADR-035](decisions.md) の `a.back-menu` 履歴戻りハンドラを **`common.js` に昇格**（全ページ共通の委譲）し、`gallery-detail.js` からは撤去。`profile.php` に「戻る」リンク（`back-menu`・fallback href＝`gallery-list.php`）を追加。`settings.php` の「← マイページ」・`work-edit.php` の戻る（戻り先が一意）は対象外。さらに**戻るの位置を全 leaf で「カード左上の `← 戻る`」に統一**（作品詳細は下中央→左上へ移動・review 時の User 判断）＝作品とユーザーで戻る位置が違う違和感を解消。
+- **理由**：タグは発見のプリミティブ。ヘッダーの `#タグ` 検索と地続きにすれば、作品からタグで回遊できる（死んでいた導線を活かす）。戻る動線はページごとに重複実装せず `common.js` に集約（DRY）し、leaf ページ（profile / detail）から直前画面に戻れるようにして回遊を閉じる。**純フロント・API/スキーマ不変。**
+- **代替案・却下理由**：(a) タグごとに JS で `click→requireAuth→遷移` を組む → カードの work-link/author-link が素の `<a href>`（遷移先ページがゲート）なのと不整合・冗長。素の `<a href>`＋遷移先のゲートで十分。(b) 戻るを各ページ個別実装 → 重複。`common.js` 集約が筋。(c) detail の戻るだけで profile は据え置き → ユーザー検索からの回遊が閉じない（指摘の核）。
+- **影響**：`public/Script/common.js`（`renderTagLinks` ヘルパー＋`back-menu` 委譲を集約）、`public/Script/{gallery-list,search,profile,favorites,gallery-detail,mypage}.js`（タグ描画差し替え）、`public/Script/gallery-detail.js`（back-menu ハンドラを common.js へ移して撤去）、`public/profile.php`（戻る追加）、CSS（`.tag-link`／profile での `.back-menu`）。
+- **詰まりどころ・判断メモ**：
+  - **detail の meta はタグと visibility が1行に混在**（`meta.textContent = "公開 #a #b"`）。visibility テキストを置いてから `renderTagLinks` でタグリンクを**追記**する形に再構成（ヘルパーは container をクリアせず追記＝呼び側が先頭テキストを制御）。
+  - **source-badge 維持**：カードは tag リンクを入れた後に badge を `prepend`（[GitHub] #a #b の順）＝従来挙動。
+  - **二重バインド回避**：`back-menu` を common.js に移すとき gallery-detail.js 側のハンドラは必ず消す（同一クリックで2回 history.back() しない）。
+  - **安全**：tag の href は `encodeURIComponent`、リンク文字は `textContent`（XSS なし）。back-menu の挙動は [ADR-035](decisions.md) のまま（open-redirect なし）＝置き場所を common.js に移すだけ。
+  - **ゲート**：tag リンク先 `search.php` は自前で `requireAuth`。未ログイン teaser からのクリックも遷移先で促せる（work-link と同方針）。
+- **関連**：`docs/discovery-polish-handoff.md`、[ADR-035](decisions.md)（戻る）、[ADR-025](decisions.md)（`?tag=` 検索）、[ADR-017](decisions.md)（タグ）、[ADR-019](decisions.md)（ゲート型）、`public/Script/common.js` ほか描画各所、`public/profile.php`。

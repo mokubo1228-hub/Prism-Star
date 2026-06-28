@@ -2,7 +2,6 @@
 
 このファイルは PrismStar（通称 Prism）の **実装計画（フェーズ分割と進捗状態）** を固定する。
 
-- 粒度の細かいタスク：`PROJECT.md`「今後の課題」
 - 各フェーズの Codex 向け実装指示：`docs/phase-*-handoff.md`
 - 重要な意思決定と理由：`docs/decisions.md`
 - 技術仕様（v1 現状）：`docs/spec.md`

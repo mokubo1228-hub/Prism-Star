@@ -128,6 +128,17 @@
     margin: 8px 0 0;
   }
 
+  .tag-link {
+    color: #2563eb;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .tag-link:hover,
+  .tag-link:focus-visible {
+    color: #1d4ed8;
+  }
+
   .source-badge {
     background: #eef2ff;
     border: 1px solid #c7d2fe;

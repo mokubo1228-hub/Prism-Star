@@ -51,7 +51,7 @@ function renderFavorite(item) {
   authorLink.textContent = `by ${item.author || "Unknown"}`;
 
   const tagList = clone.querySelector(".tag-list");
-  tagList.textContent = (item.tags || []).map(tag => `#${tag}`).join(" ");
+  renderTagLinks(tagList, item.tags || []);
   if (item.source === "github") {
     const badge = document.createElement("span");
     badge.className = "source-badge";

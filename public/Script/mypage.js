@@ -31,7 +31,7 @@ function renderWork(work) {
 
   const tags = document.createElement("p");
   tags.className = "tag-list";
-  tags.textContent = (work.tags || []).map(tag => `#${tag}`).join(" ");
+  renderTagLinks(tags, work.tags || []);
 
   const actions = document.createElement("div");
   actions.className = "mywork-actions";

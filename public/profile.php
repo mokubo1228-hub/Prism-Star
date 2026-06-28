@@ -8,6 +8,7 @@ include __DIR__ . '/includes/head.php';
 
   <main class="gallery-list">
     <div class="gallery-back">
+      <a class="back-menu" href="gallery-list.php">← 戻る</a>
       <p id="profileUsername" class="profile-username" hidden></p>
       <h2 id="profileName" class="profile-heading"></h2>
       <p id="profileBio" class="profile-bio" hidden></p>

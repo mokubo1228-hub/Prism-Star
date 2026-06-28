@@ -13,6 +13,10 @@ db_data/
 # editor / IDE
 .vscode/
 .idea/
+.obsidian/
+
+# 個人作業メモ（repo に出さない・運用側で管理）
+開発者メモ.md
 
 # 将来: ユーザーアップロード（Phase 6 で有効化）
 # public/uploads/

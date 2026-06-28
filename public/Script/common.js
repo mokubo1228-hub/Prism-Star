@@ -54,6 +54,20 @@ const PrismAuth = {
 
 window.PrismAuth = PrismAuth;
 
+function renderTagLinks(container, tags) {
+  tags.forEach((tag, index) => {
+    if (index > 0) {
+      container.append(" ");
+    }
+
+    const link = document.createElement("a");
+    link.className = "tag-link";
+    link.href = `search.php?tag=${encodeURIComponent(tag)}`;
+    link.textContent = `#${tag}`;
+    container.appendChild(link);
+  });
+}
+
 function renderNavigation() {
   const templates = document.querySelectorAll("#nav-item-template");
 
@@ -237,11 +251,33 @@ function bindAuthLinks() {
   });
 }
 
+function bindBackMenu() {
+  document.addEventListener("click", (e) => {
+    const back = e.target.closest("a.back-menu");
+    if (!back) return;
+
+    let fromApp = false;
+    try {
+      fromApp = Boolean(document.referrer) &&
+        new URL(document.referrer).origin === window.location.origin;
+    } catch {
+      fromApp = false;
+    }
+
+    // referrer は同一アプリ判定にだけ使い、遷移先は履歴か固定 href に限定する。
+    if (fromApp && window.history.length > 1) {
+      e.preventDefault();
+      window.history.back();
+    }
+  });
+}
+
 async function initCommon() {
   renderNavigation();
   bindAuthGate();
   bindHeaderSearch();
   bindAuthLinks();
+  bindBackMenu();
 
   const hamburger = document.getElementById("hamburger");
   const nav = document.querySelector(".header-nav");

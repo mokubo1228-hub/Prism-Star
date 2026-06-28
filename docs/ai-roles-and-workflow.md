@@ -84,8 +84,7 @@ User  ⇄  Claude Code                 →   Codex
 
 ## 4. このプロジェクトの safety invariants（変えてはいけない不変条件）
 
-handoff / 実装で壊してはいけない前提。これが PrismStar の安全性の核であり、
-ポートフォリオ上のアピールポイントでもある。
+handoff / 実装で壊してはいけない前提。これが PrismStar の安全性の核である。
 
 - ギャラリーの **POST / DELETE はログイン必須**（`$_SESSION['user_id']` が無ければ 401）。
 - **SQL は必ずプリペアドステートメント**。文字列連結でクエリを組まない。
@@ -138,7 +137,6 @@ git diff --check                                              # 余分な空白 
 - `docs/roadmap.md`: **実装計画**（フェーズ分割と進捗状態）。
 - `docs/decisions.md`: **意思決定ログ**（ADR-lite。背景 / 決定 / 理由 / 代替案）。
 - `docs/phase-*-handoff.md`: 各フェーズの Codex 向け実装指示（§5 の handoff contract に従う）。
-- `PROJECT.md`: バックエンド/フロントのロジック詳細・DB スキーマ・今後の課題。
 - `README.md`: セットアップと使い方（Docker 起動・デモユーザー）。
 
 ---

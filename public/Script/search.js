@@ -48,7 +48,7 @@ function renderWork(work) {
 
   const tags = document.createElement("p");
   tags.className = "tag-list";
-  tags.textContent = (work.tags || []).map(tag => `#${tag}`).join(" ");
+  renderTagLinks(tags, work.tags || []);
   if (work.source === "github") {
     const badge = document.createElement("span");
     badge.className = "source-badge";
