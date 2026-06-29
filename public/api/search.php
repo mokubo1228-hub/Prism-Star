@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../../src/session.php';
 require_once __DIR__ . '/../../src/db.php';
+require_once __DIR__ . '/../../src/upload.php';
 
 bootSession();
 
@@ -71,12 +72,14 @@ $stmt = $pdo->prepare("
         g.id,
         g.user_id,
         u.name AS author,
+        u.avatar_path AS author_avatar,
         g.title,
         g.src,
         g.description AS `desc`,
         g.source,
         g.source_url,
         COUNT(DISTINCT s.id) AS star_count,
+        EXISTS(SELECT 1 FROM stars s2 WHERE s2.gallery_id = g.id AND s2.user_id = ?) AS starred,
         GROUP_CONCAT(DISTINCT t.name ORDER BY t.name SEPARATOR ',') AS tags
     FROM gallery g
     INNER JOIN users u ON u.id = g.user_id
@@ -99,11 +102,11 @@ $stmt = $pdo->prepare("
             WHERE gt3.gallery_id = g.id AND t3.name LIKE ?
         )
       )
-    GROUP BY g.id, g.user_id, u.name, g.title, g.src, g.description, g.source, g.source_url, g.created_at
+    GROUP BY g.id, g.user_id, u.name, u.avatar_path, g.title, g.src, g.description, g.source, g.source_url, g.created_at
     ORDER BY star_count DESC, g.created_at DESC, g.id DESC
     LIMIT {$limit} OFFSET {$offset}
 ");
-$stmt->execute([$currentUserId, $currentUserId, $q, $like, $like, $tag, $tagLike]);
+$stmt->execute([$currentUserId, $currentUserId, $currentUserId, $q, $like, $like, $tag, $tagLike]);
 $rows = $stmt->fetchAll();
 $hasMore = count($rows) > PER_PAGE;
 if ($hasMore) {
@@ -113,6 +116,8 @@ $rows = array_map(static function (array $row): array {
     $row['id'] = (int)$row['id'];
     $row['user_id'] = (int)$row['user_id'];
     $row['star_count'] = (int)$row['star_count'];
+    $row['starred'] = (bool)$row['starred'];
+    $row['author_avatar'] = avatarUrl($row['author_avatar']);
     $row['tags'] = $row['tags'] === null || $row['tags'] === '' ? [] : explode(',', $row['tags']);
     return $row;
 }, $rows);

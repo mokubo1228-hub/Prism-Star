@@ -68,6 +68,31 @@ function renderTagLinks(container, tags) {
   });
 }
 
+function updateStarButton(button, starCount, starred) {
+  button.querySelector(".star-count").textContent = starCount;
+  button.classList.toggle("is-starred", starred);
+  button.setAttribute("aria-pressed", String(starred));
+  button.dataset.starred = String(starred);
+}
+
+async function toggleStar(item, button) {
+  if (!await window.PrismAuth.requireAuth(window.location.href)) return;
+
+  const starred = button.dataset.starred === "true";
+  const method = starred ? "DELETE" : "POST";
+
+  try {
+    const res = await fetch(`/api/stars.php?gallery_id=${encodeURIComponent(item.id)}`, { method });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "スターを更新できませんでした");
+    item.star_count = data.star_count;
+    item.starred = data.starred;
+    updateStarButton(button, data.star_count, data.starred);
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
 function renderNavigation() {
   const templates = document.querySelectorAll("#nav-item-template");
 

@@ -39,13 +39,17 @@ include __DIR__ . '/includes/head.php';
       <section id="profileWorks" class="gallery-grid">
         <template id="profile-item-template">
           <article class="gallery-card">
-            <a class="work-link" href="gallery-detail.php?id={ID}">
-              <figure class="gallery-item">
-                <img src="{SRC}" alt="{TITLE}">
-                <figcaption>{TITLE}</figcaption>
-              </figure>
-            </a>
-            <p class="tag-list"></p>
+            <div class="card-thumb">
+              <a class="work-link" href="gallery-detail.php?id={ID}">
+                <figure class="gallery-item">
+                  <img src="{SRC}" alt="{TITLE}">
+                </figure>
+              </a>
+            </div>
+            <div class="card-body">
+              <h3 class="card-title">{TITLE}</h3>
+              <p class="tag-list"></p>
+            </div>
           </article>
         </template>
       </section>

@@ -17,14 +17,24 @@
     margin-top: 0;
 }
 
-.gallery-title {
-    text-align:center;
-    margin:30px 0;
-    font-size:2.0rem; 
-    color:#374151;
+/* 画像の下：タイトルは中央、星は同じ高さの右端（絶対配置）。 */
+.detail-head {
+    position: relative;
+    margin: 20px 0 0;
 }
 
-.detail-img img {
+.gallery-title {
+    margin: 0;
+    font-size: 1.6rem;
+    color:#374151;
+    text-align: center;
+    padding: 0 60px; /* 右端の星と重ならない＆左右対称で中央を保つ */
+}
+
+/* メイン画像のみを対象にする（直下の img）。figcaption 内の .author-avatar まで
+   width:100% を当てると、より詳細度の高いこのルールが .author-avatar を上書きして
+   アイコンが全幅に巨大化するため、直接の子に限定する。 */
+.detail-img > img {
     width: 100%;
     height: auto;
     display: block;
@@ -41,28 +51,34 @@
     border-top: 1px solid #e5e7eb;
   }
 
+  /* 画像の下の作者 byline：アイコン＋名前をひとまとまりに中央寄せ。 */
   .detail-author {
     align-items: center;
     color: #4b5563;
     display: flex;
-    gap: 6px;
+    gap: 8px;
     justify-content: center;
-    font-size: 0.95rem;
-    margin: 8px 0 0;
+    font-size: 1rem;
+    margin: 14px 0 0;
   }
 
   .author-avatar {
     border: 1px solid #e5e7eb;
     border-radius: 50%;
-    height: 20px;
-    margin-right: 6px;
+    flex: 0 0 auto;
+    height: 28px;
     object-fit: cover;
-    vertical-align: middle; /* テキスト行に揃える（投稿者：[icon][name]） */
-    width: 20px;
+    width: 28px;
   }
 
   .detail-author a {
     color: royalblue;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .detail-author a:hover,
+  .detail-author a:focus-visible {
     text-decoration: underline;
   }
 
@@ -94,8 +110,15 @@
     color: #f59e0b;
   }
 
+  /* タイトルと同じ高さの右端に。小さくして作者名/タグ/説明を霞ませない。 */
   .detail-star-button {
-    margin: 12px auto 0;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    margin: 0;
+    padding: 4px 10px;
+    font-size: 0.85rem;
   }
 
   .detail-txt {
@@ -141,7 +164,8 @@
   .detail-meta {
     color: #6b7280;
     font-size: 0.9rem;
-    margin: 8px 0 0;
+    margin: 10px 0 0;
+    text-align: center;
   }
 
   .tag-link {
@@ -201,6 +225,5 @@
   @media (max-width: 600px) {
     .detail-txt { line-height:1.6; }
     .back-menu { font-size: .9rem; }
-    .detail-img figcaption h2 { font-size:1rem; }
 
   }

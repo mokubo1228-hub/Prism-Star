@@ -187,7 +187,7 @@ if ($method === 'GET') {
         $stmt = $pdo->prepare(baseSelectSql("
             INNER JOIN stars s2 ON s2.gallery_id = g.id AND s2.user_id = ?
             WHERE (g.visibility = 'public' OR g.user_id = ?)
-        ") . " ORDER BY MAX(s2.created_at) DESC, g.id DESC");
+        ", true) . " ORDER BY MAX(s2.created_at) DESC, g.id DESC");
         $stmt->execute([$userId, $userId, $userId, $userId]);
         echo json_encode(mapRows($stmt->fetchAll()), JSON_UNESCAPED_UNICODE);
         exit;
@@ -218,10 +218,10 @@ if ($method === 'GET') {
     $where = "WHERE g.visibility = 'public' AND (? = 0 OR g.user_id <> ?)";
     $params = [$userId, $userId, $userId, $userId];
 
-    $newestStmt = $pdo->prepare(baseSelectSql($where) . " ORDER BY g.created_at DESC, g.id DESC LIMIT 5");
+    $newestStmt = $pdo->prepare(baseSelectSql($where, true) . " ORDER BY g.created_at DESC, g.id DESC LIMIT 5");
     $newestStmt->execute($params);
 
-    $popularStmt = $pdo->prepare(baseSelectSql($where) . " ORDER BY star_count DESC, g.created_at DESC, g.id DESC LIMIT 5");
+    $popularStmt = $pdo->prepare(baseSelectSql($where, true) . " ORDER BY star_count DESC, g.created_at DESC, g.id DESC LIMIT 5");
     $popularStmt->execute($params);
 
     echo json_encode([

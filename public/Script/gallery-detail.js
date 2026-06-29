@@ -10,29 +10,9 @@ function showError(message = "指定された作品が見つかりません。")
   `;
 }
 
-function updateStarButton(button, starCount, starred) {
-  button.querySelector(".star-count").textContent = starCount;
-  button.classList.toggle("is-starred", starred);
-  button.setAttribute("aria-pressed", String(starred));
-  button.dataset.starred = String(starred);
-}
-
-async function toggleStar(work, button) {
-  if (!await window.PrismAuth.requireAuth(window.location.href)) return;
-
-  const starred = button.dataset.starred === "true";
-  const method = starred ? "DELETE" : "POST";
-
-  try {
-    const res = await fetch(`/api/stars.php?gallery_id=${encodeURIComponent(work.id)}`, { method });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "スターを更新できませんでした");
-    work.star_count = data.star_count;
-    work.starred = data.starred;
-    updateStarButton(button, data.star_count, data.starred);
-  } catch (err) {
-    alert(err.message);
-  }
+function formatCreatedDate(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value || "");
+  return match ? `${match[1]}/${match[2]}/${match[3]}` : "";
 }
 
 async function loadDetail() {
@@ -59,7 +39,6 @@ async function loadDetail() {
     img.src = work.src;
     img.alt = work.title;
 
-    clone.querySelector("figcaption h2").textContent = work.title;
     clone.querySelector(".detail-txt").textContent = work.desc || "";
 
     const authorLink = clone.querySelector(".detail-author a");
@@ -69,7 +48,15 @@ async function loadDetail() {
     authorLink.textContent = work.author || "Unknown";
 
     const meta = clone.querySelector(".detail-meta");
-    meta.textContent = `${work.visibility === "private" ? "非公開" : "公開"} `;
+    const createdDate = formatCreatedDate(work.created_at);
+    meta.textContent = work.visibility === "private" ? "非公開" : "";
+    if (createdDate) {
+      if (meta.textContent) meta.append(" / ");
+      meta.append(`作成日 ${createdDate}`);
+    }
+    if ((work.tags || []).length > 0 && meta.textContent) {
+      meta.append(" / ");
+    }
     renderTagLinks(meta, work.tags || []);
     if (work.source === "github") {
       const badge = document.createElement("span");
@@ -80,7 +67,10 @@ async function loadDetail() {
 
     const starButton = clone.querySelector(".star-button");
     updateStarButton(starButton, work.star_count || 0, Boolean(work.starred));
-    starButton.addEventListener("click", () => toggleStar(work, starButton));
+    starButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      toggleStar(work, starButton);
+    });
 
     // 詳細は閲覧専用（[ADR-027]）。所有者でも編集導線は出さない＝編集はマイページから行う。
     if (work.source === "github" && work.source_url) {

@@ -27,24 +27,70 @@ function renderWork(work) {
   const article = document.createElement("article");
   article.className = "gallery-card";
 
+  const thumb = document.createElement("div");
+  thumb.className = "card-thumb";
+
   const link = document.createElement("a");
   link.className = "work-link";
   link.href = `gallery-detail.php?id=${work.id}`;
+  link.addEventListener("click", async (e) => {
+    e.preventDefault();
+    if (await window.PrismAuth.requireAuth(link.href)) {
+      window.location.href = link.href;
+    }
+  });
 
   const figure = document.createElement("figure");
   figure.className = "gallery-item";
   const img = document.createElement("img");
   img.src = work.src;
   img.alt = work.title;
-  const caption = document.createElement("figcaption");
-  caption.textContent = work.title;
-  figure.append(img, caption);
+  figure.appendChild(img);
   link.appendChild(figure);
+
+  const starButton = document.createElement("button");
+  starButton.type = "button";
+  starButton.className = "star-button";
+  starButton.dataset.galleryId = String(work.id);
+  starButton.setAttribute("aria-pressed", "false");
+
+  const starIcon = document.createElement("span");
+  starIcon.className = "star-icon";
+  starIcon.textContent = "★";
+  const starCount = document.createElement("span");
+  starCount.className = "star-count";
+  starButton.append(starIcon, starCount);
+  updateStarButton(starButton, work.star_count || 0, Boolean(work.starred));
+  starButton.addEventListener("click", (e) => {
+    e.preventDefault();
+    toggleStar(work, starButton);
+  });
+
+  thumb.append(link, starButton);
+
+  const body = document.createElement("div");
+  body.className = "card-body";
+
+  const title = document.createElement("h3");
+  title.className = "card-title";
+  title.textContent = work.title;
+
+  const meta = document.createElement("div");
+  meta.className = "card-meta";
+
+  const metaText = document.createElement("div");
+  metaText.className = "card-meta-text";
 
   const author = document.createElement("a");
   author.className = "author-link";
   author.href = `profile.php?id=${work.user_id}`;
   author.textContent = `by ${work.author || "Unknown"}`;
+  author.addEventListener("click", async (e) => {
+    e.preventDefault();
+    if (await window.PrismAuth.requireAuth(author.href)) {
+      window.location.href = author.href;
+    }
+  });
 
   const tags = document.createElement("p");
   tags.className = "tag-list";
@@ -56,7 +102,15 @@ function renderWork(work) {
     tags.prepend(badge, " ");
   }
 
-  article.append(link, author, tags);
+  const avatar = document.createElement("img");
+  avatar.className = "card-avatar";
+  avatar.src = work.author_avatar || "Image/default-avatar.svg";
+  avatar.alt = "";
+
+  metaText.append(author, tags);
+  meta.append(metaText, avatar);
+  body.append(title, meta);
+  article.append(thumb, body);
   searchResults.appendChild(article);
 }
 
@@ -67,12 +121,18 @@ function renderUser(user) {
   const link = document.createElement("a");
   link.href = `profile.php?id=${user.id}`;
   link.textContent = user.name;
+  link.addEventListener("click", async (e) => {
+    e.preventDefault();
+    if (await window.PrismAuth.requireAuth(link.href)) {
+      window.location.href = link.href;
+    }
+  });
 
   const github = document.createElement("p");
   github.textContent = user.github_username ? `GitHub: ${user.github_username}` : "GitHub未設定";
 
   const meta = document.createElement("span");
-  meta.textContent = `公開作品 ${user.public_work_count} / 獲得スター ${user.total_stars}`;
+  meta.textContent = `作品 ${user.public_work_count} / 獲得スター ${user.total_stars}`;
 
   article.append(link, github, meta);
   searchResults.appendChild(article);
@@ -133,12 +193,6 @@ async function runSearch() {
   }
 
   await window.PrismAuth.ready;
-  if (!await window.PrismAuth.requireAuth(window.location.href)) {
-    if (searchLoadMoreButton) searchLoadMoreButton.hidden = true;
-    showSearchMessage("ログインすると検索結果を表示できます。");
-    return;
-  }
-
   showSearchMessage("検索中...");
   await loadSearchPage(1);
 }

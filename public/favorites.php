@@ -15,18 +15,27 @@ include __DIR__ . '/includes/head.php';
       <section id="favoritesGrid" class="gallery-grid favorites-grid">
         <template id="favorite-item-template">
           <article class="gallery-card">
-            <a class="work-link" href="gallery-detail.php?id={ID}">
-              <figure class="gallery-item">
-                <img src="{SRC}" alt="{TITLE}">
-                <figcaption>{TITLE}</figcaption>
-              </figure>
-            </a>
-            <a class="author-link" href="profile.php?id={USER_ID}">by {AUTHOR}</a>
-            <p class="tag-list"></p>
-            <button type="button" class="star-button" data-gallery-id="{ID}" aria-pressed="false">
-              <span class="star-icon">★</span>
-              <span class="star-count">0</span>
-            </button>
+            <div class="card-thumb">
+              <a class="work-link" href="gallery-detail.php?id={ID}">
+                <figure class="gallery-item">
+                  <img src="{SRC}" alt="{TITLE}">
+                </figure>
+              </a>
+              <button type="button" class="star-button" data-gallery-id="{ID}" aria-pressed="false">
+                <span class="star-icon">★</span>
+                <span class="star-count">0</span>
+              </button>
+            </div>
+            <div class="card-body">
+              <h3 class="card-title">{TITLE}</h3>
+              <div class="card-meta">
+                <div class="card-meta-text">
+                  <a class="author-link" href="profile.php?id={USER_ID}">by {AUTHOR}</a>
+                  <p class="tag-list"></p>
+                </div>
+                <img class="card-avatar" src="Image/default-avatar.svg" alt="">
+              </div>
+            </div>
           </article>
         </template>
       </section>

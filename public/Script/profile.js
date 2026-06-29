@@ -81,13 +81,13 @@ function renderProfileWork(work) {
   const clone = profileTemplate.content.cloneNode(true);
   const link = clone.querySelector(".work-link");
   const img = clone.querySelector("img");
-  const figcaption = clone.querySelector("figcaption");
+  const title = clone.querySelector(".card-title");
   const tagList = clone.querySelector(".tag-list");
 
   link.href = `gallery-detail.php?id=${work.id}`;
   img.src = work.src;
   img.alt = work.title;
-  figcaption.textContent = work.title;
+  title.textContent = work.title;
   renderTagLinks(tagList, work.tags || []);
   if (work.source === "github") {
     const badge = document.createElement("span");

@@ -1,6 +1,6 @@
 :root {
-  --gallery-icon-w: 160px;   
-  --gallery-icon-h: 120px;   
+  --gallery-icon-w: 200px;
+  --gallery-icon-h: 150px;
   --cols: 1;         
   --gap: 14px;
 }
@@ -63,6 +63,12 @@
   width: var(--gallery-icon-w);
 }
 
+.card-thumb {
+  position: relative;
+  width: var(--gallery-icon-w);
+  height: var(--gallery-icon-h);
+}
+
 .rank-lane {
   margin-top: 24px;
 }
@@ -100,20 +106,23 @@
 
 .work-link {
   display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .gallery-item {
-  width: var(--gallery-icon-w);
-  height: var(--gallery-icon-h);
+  width: 100%;
+  height: 100%;
   border: 1px solid #ccc;
   border-radius: 6px;
   overflow: hidden;
   background: #fff;
+  margin: 0;
   position: relative;
 }
 
 .gallery-item:hover {
-   border: 5px solid #767575;
+  border-color: #767575;
 }
 
 .gallery-item img {
@@ -123,35 +132,17 @@
   display: block;
 }
 
-.gallery-item figcaption {
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  color: black;
-  background: rgba(255,255,255,0.9); 
-  padding: 4px 6px;                 
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 8px;
-  font-size: 0.9rem;
-  white-space: nowrap;          
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.gallery-item:hover figcaption {
-  background-color: #767575;
-  color: #fff
-}
-
 .author-link {
   color: #374151;
   display: block;
+  flex: 0 1 auto;
   font-size: 0.85rem;
-  margin-top: 6px;
+  line-height: 1.2;
+  max-width: calc(100% - 24px);
+  min-width: 0;
+  order: 2;
   overflow: hidden;
-  text-align: center;
+  text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -162,16 +153,20 @@
 
 .star-button {
   align-items: center;
-  background: #fff;
-  border: 1px solid #d1d5db;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(209, 213, 219, 0.9);
   border-radius: 999px;
   color: #374151;
   cursor: pointer;
   display: flex;
   gap: 4px;
   justify-content: center;
-  margin: 8px auto 0;
-  padding: 5px 10px;
+  line-height: 1;
+  padding: 5px 8px;
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  z-index: 1;
 }
 
 .star-button.is-starred {
@@ -191,13 +186,59 @@
 
 .tag-list {
   color: #4b5563;
+  flex: 0 1 100%;
   font-size: 0.8rem;
-  margin: 6px 0 0;
+  line-height: 1.2;
+  margin: 4px 0 0;
+  max-width: 100%;
   min-height: 1.2em;
+  min-width: 0;
+  order: 3;
   overflow: hidden;
   text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.card-body {
+  display: block;
+  padding-top: 8px;
+}
+
+.card-title {
+  color: #374151;
+  font-size: 0.96rem;
+  line-height: 1.35;
+  margin: 0 0 4px;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-meta {
+  align-items: center;
+  column-gap: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 4px;
+  min-width: 0;
+  width: 100%;
+}
+
+.card-meta-text {
+  display: contents;
+}
+
+.card-avatar {
+  border: 1px solid #e5e7eb;
+  border-radius: 50%;
+  display: block;
+  height: 18px;
+  object-fit: cover;
+  order: 1;
+  width: 18px;
 }
 
 .tag-link {
@@ -686,8 +727,8 @@
 
 @media (min-width: 600px) {
   :root {
-    --gallery-icon-w: 180px;
-    --gallery-icon-h: 130px;
+    --gallery-icon-w: 230px;
+    --gallery-icon-h: 170px;
     --cap-h: 32px;
     --cols: 2;
     --gap: 16px;
@@ -722,8 +763,8 @@
 
 @media (min-width: 900px) {
   :root {
-    --gallery-icon-w: 200px;
-    --gallery-icon-h: 140px;
+    --gallery-icon-w: 250px;
+    --gallery-icon-h: 185px;
     --cols: 3;
 
   }
@@ -731,16 +772,16 @@
 
 @media (min-width: 1100px) {
   :root {
-    --gallery-icon-w: 200px;
-    --gallery-icon-h: 150px;
+    --gallery-icon-w: 250px;
+    --gallery-icon-h: 185px;
     --cols: 4;
   }
 }
 
 @media (min-width: 1280px) {
   :root {
-    --gallery-icon-w: 200px;
-    --gallery-icon-h: 150px;
-    --cols: 5;
+    --gallery-icon-w: 260px;
+    --gallery-icon-h: 195px;
+    --cols: 4;
   }
 }
