@@ -10,15 +10,16 @@ a {
   }
   .header-inner{
     min-height: 104px;
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr minmax(220px, 520px) 1fr;
     align-items: center;
     gap: 16px;
     position: relative;
-    padding: 10px 14px;
+    padding: 10px 20px;
   }
   .site-brand {
-    flex: 0 0 auto;
-    text-align: center;
+    justify-self: start;
+    text-align: left;
   }
 
   .site-title{
@@ -34,19 +35,16 @@ a {
     margin: 4px 0 0;
   }
 
+  /* ドロワー本体(.header-nav)は position:fixed で浮くので、その親はレイアウトから外す。
+     これで grid 上に幽霊セルを作らず、検索が真ん中の列に収まる。 */
   .header-menu {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-left: 0;
+    display: contents;
   }
 
   .header-search {
     display: flex;
-    flex: 0 1 520px;
+    width: 100%;
     max-width: 520px;
-    min-width: 220px;
     margin: 0 auto;
   }
 
@@ -82,13 +80,12 @@ a {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-left: 12px;
+    justify-self: end;
   }
 
   .auth-guest-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
   }
 
   .auth-action {
@@ -103,31 +100,52 @@ a {
     white-space: nowrap;
   }
 
-  .auth-action-login,
-  .auth-action-logout {
+  .auth-action-login {
     background: rgba(255, 255, 255, 0.14);
-  }
-
-  .auth-action-register {
-    background: #fff;
-    color: royalblue;
-  }
-
-  .auth-action-logout {
-    font-family: inherit;
   }
 
   .auth-action:hover {
     background: rgba(255, 255, 255, 0.25);
   }
 
-  .auth-action-register:hover {
-    background: #eef4ff;
-  }
-
   .auth-action[hidden],
   .auth-guest-actions[hidden] {
     display: none;
+  }
+
+  .header-avatar {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.14);
+    border: 2px solid rgba(255, 255, 255, 0.82);
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    cursor: pointer;
+    display: flex;
+    height: 52px;
+    justify-content: center;
+    overflow: hidden;
+    padding: 0;
+    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+    width: 52px;
+  }
+
+  .header-avatar[hidden] {
+    display: none;
+  }
+
+  .header-avatar:hover,
+  .header-avatar:focus-visible {
+    background: rgba(255, 255, 255, 0.26);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.24), 0 2px 8px rgba(0, 0, 0, 0.2);
+    outline: 0;
+    transform: scale(1.05);
+  }
+
+  .header-avatar img {
+    display: block;
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
   }
 
   .auth-gate-modal {
@@ -214,53 +232,6 @@ a {
     margin: 12px 0 0;
   }
 
-  .nav-icon {
-    text-align: center;
-    margin-bottom: 40px;
-  }
-
-  .header-nav .icon{
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin: 0 auto;
-    margin-bottom: 40px;
-    display: block;
-    border: 2px solid #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  }
-
-  .hamburger {
-    margin-left: 1%;
-    width: 48px;
-    height: 48px;
-    background: #1a022a26;
-    border: 1.5px solid rgba(255, 255, 255, 0.8);
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 5px;
-    transition: background 0.25s ease, transform 0.15s ease;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  }
-
-  .hamburger:hover {
-    background: rgba(255, 255, 255, 0.25);
-    transform: scale(1.07);
-  }
-
-  .hamburger span {
-    display: block;
-    width: 26px;
-    height: 3.5px;
-    background-color: #fff;
-    border-radius: 3px;
-  }
-
   .header-nav {
     position: fixed;
     top: 0;
@@ -269,7 +240,7 @@ a {
     height: 100vh;
     background-color: #2a5bd7;
     list-style: none;
-    padding: 30px 20px;
+    padding: 10px 20px 30px 14px;
     margin: 0;
     border-radius: 0 8px 8px 0;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
@@ -286,6 +257,22 @@ a {
 
   .header-nav li {
     margin-bottom: 18px;
+  }
+
+  .header-nav .nav-brand {
+    align-items: center;
+    display: flex;
+    min-height: 84px;
+    margin-bottom: 24px;
+  }
+
+  .header-nav .nav-brand-link {
+    color: azure;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.2;
+    padding: 0;
+    white-space: nowrap;
   }
 
   .header-nav .nav-separator {
@@ -307,6 +294,35 @@ a {
     color: #00aced;
   }
 
+  .nav-logout {
+    border-top: 1px solid rgba(255, 255, 255, 0.42);
+    padding-top: 18px;
+  }
+
+  .nav-logout[hidden] {
+    display: none;
+  }
+
+  .nav-logout-button {
+    background: transparent;
+    border: 0;
+    color: #fff;
+    cursor: pointer;
+    display: block;
+    font: inherit;
+    font-size: 18px;
+    padding: 4px 0;
+    text-align: left;
+    transition: color 0.2s ease;
+    width: 100%;
+  }
+
+  .nav-logout-button:hover,
+  .nav-logout-button:focus-visible {
+    color: #00aced;
+    outline: 0;
+  }
+
   .nav-overlay {
     display: none;
     position: fixed;
@@ -324,38 +340,32 @@ a {
   }
 
   @media (max-width: 760px){
-    .header-inner { 
-      flex-wrap: wrap;
-      height: auto;
-      min-height: 100px;
+    /* モバイルは2行: 上段「ブランド｜アクション」/ 下段に検索を全幅で。 */
+    .header-inner {
+      grid-template-columns: 1fr auto;
+      grid-template-areas:
+        "brand actions"
+        "search search";
+      min-height: auto;
       row-gap: 8px;
-      padding: 8px 0;
+      padding: 8px 12px;
     }
 
     .site-brand {
-      position: static;
-      transform: none;
-      order: 1;
-      width: calc(100% - 80px);
-    }
-
-    .header-menu {
-      margin-left: 0;
-      order: 1;
-    }
-
-    .header-search {
-      flex-basis: 100%;
-      max-width: none;
-      order: 3;
-      padding: 0 8px;
+      grid-area: brand;
+      justify-self: start;
     }
 
     .header-auth-actions {
-      margin: 0 8px;
-      order: 4;
+      grid-area: actions;
+      justify-self: end;
+    }
+
+    .header-search {
+      grid-area: search;
       width: 100%;
-      justify-content: center;
+      max-width: none;
+      margin: 0;
     }
 
     .auth-action {
@@ -363,8 +373,8 @@ a {
       padding: 8px 9px;
     }
 
-    .icon { 
-      width: 48px; 
-      height: 48px; 
+    .header-avatar {
+      height: 48px;
+      width: 48px;
     }
   }

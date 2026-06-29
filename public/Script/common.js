@@ -107,6 +107,11 @@ function renderNavigation() {
       container.appendChild(clone);
       previousGroup = item.group;
     });
+
+    if (isHeaderNav) {
+      const logoutItem = container.querySelector(".nav-logout");
+      if (logoutItem) container.appendChild(logoutItem);
+    }
   });
 }
 
@@ -289,6 +294,7 @@ async function initCommon() {
     hamburger?.classList.toggle("active");
     nav?.classList.toggle("active");
     overlay.classList.toggle("active");
+    hamburger?.setAttribute("aria-expanded", String(nav?.classList.contains("active")));
   };
 
   hamburger?.addEventListener("click", toggleMenu);

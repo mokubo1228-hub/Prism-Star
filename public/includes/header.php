@@ -16,28 +16,28 @@
 
       <nav class="header-menu">
         <ul class="header-nav">
-          <li class="nav-icon">
-            <img src="https://placehold.jp/100x100.png" alt="作者アイコン" class="icon">
+          <li class="nav-brand">
+            <a href="gallery-list.php" class="nav-brand-link">PrismStar</a>
           </li>
 
           <template id="nav-item-template">
             <li><a class="header-a" href="{HREF}">{LABEL}</a></li>
           </template>
+
+          <li class="nav-logout" data-auth-nav hidden>
+            <button type="button" class="auth-action-logout nav-logout-button">ログアウト</button>
+          </li>
         </ul>
       </nav>
 
       <div class="header-auth-actions" aria-label="認証メニュー">
         <div class="auth-guest-actions">
           <a class="auth-action auth-action-login" href="login.php">ログイン</a>
-          <a class="auth-action auth-action-register" href="register.php">新規登録</a>
         </div>
-        <a class="auth-action auth-action-mypage" href="mypage.php" hidden>マイページ</a>
-        <button type="button" class="auth-action auth-action-logout" hidden>ログアウト</button>
+        <button id="hamburger" class="header-avatar" type="button" aria-label="メニュー" aria-expanded="false" data-auth-nav hidden>
+          <img src="Image/default-avatar.svg" alt="" width="44" height="44">
+        </button>
       </div>
-
-      <button id="hamburger" class="hamburger">
-        <span></span><span></span><span></span>
-      </button>
     </div>
   </header>
 
