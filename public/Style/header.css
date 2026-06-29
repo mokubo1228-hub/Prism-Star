@@ -81,6 +81,7 @@ a {
     align-items: center;
     gap: 8px;
     justify-self: end;
+    margin-right: 8px; /* 右端に張り付かせず少し内側へ */
   }
 
   .auth-guest-actions {
@@ -121,12 +122,12 @@ a {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
     cursor: pointer;
     display: flex;
-    height: 52px;
+    height: 56px;
     justify-content: center;
     overflow: hidden;
     padding: 0;
     transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
-    width: 52px;
+    width: 56px;
   }
 
   .header-avatar[hidden] {
@@ -236,11 +237,13 @@ a {
     position: fixed;
     top: 0;
     left: 0px;
-    width: 220px;
+    width: 260px;
     height: 100vh;
-    background-color: #2a5bd7;
+    background-color: royalblue; /* ヘッダー(.site-header)と同色。被さっても継ぎ目が出ない */
     list-style: none;
-    padding: 10px 20px 30px 14px;
+    /* 上 0：ブランド帯を y=0 から始め、ヘッダー(.header-inner min-height:104px / border-box)と
+       同じ高さ・同じロゴ中心(y=52)にする。左右 20px もヘッダーの padding と一致＝x も重なる。 */
+    padding: 0 20px 30px;
     margin: 0;
     border-radius: 0 8px 8px 0;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
@@ -259,20 +262,33 @@ a {
     margin-bottom: 18px;
   }
 
+  /* ドロワー先頭はヘッダーのブランド(.site-brand)の複製。高さ104px・縦中央・同じ字サイズ/
+     タグラインに揃え、被さってもロゴ帯がそのまま重なる（サイズ・位置・高さが一致）。 */
   .header-nav .nav-brand {
-    align-items: center;
     display: flex;
-    min-height: 84px;
-    margin-bottom: 24px;
+    min-height: 104px;
+    margin-bottom: 12px;
   }
 
   .header-nav .nav-brand-link {
-    color: azure;
-    font-size: 26px;
-    font-weight: 700;
-    line-height: 1.2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.5; /* ヘッダーは global(sanitize) 1.5 を継承。揃えると title/タグラインの行高が一致＝位置も合う */
     padding: 0;
+  }
+
+  .header-nav .nav-brand-title {
+    color: #fff;                        /* ヘッダーのロゴ(a)と同じ白 */
+    font-size: clamp(20px, 3vw, 36px);  /* .site-title と同寸。幅(260px)で折り返さない */
+    font-weight: 700;
     white-space: nowrap;
+  }
+
+  .header-nav .nav-brand-tagline {
+    color: rgba(255, 255, 255, 0.78);   /* .site-tagline と同じ */
+    font-size: 12px;
+    margin-top: 4px;
   }
 
   .header-nav .nav-separator {

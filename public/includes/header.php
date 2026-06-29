@@ -17,7 +17,10 @@
       <nav class="header-menu">
         <ul class="header-nav">
           <li class="nav-brand">
-            <a href="gallery-list.php" class="nav-brand-link">PrismStar</a>
+            <a href="gallery-list.php" class="nav-brand-link">
+              <span class="nav-brand-title">PrismStar</span>
+              <span class="nav-brand-tagline">Shine in every color.</span>
+            </a>
           </li>
 
           <template id="nav-item-template">
