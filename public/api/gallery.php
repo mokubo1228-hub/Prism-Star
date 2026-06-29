@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../../src/session.php';
 require_once __DIR__ . '/../../src/db.php';
 require_once __DIR__ . '/../../src/github_client.php';
+require_once __DIR__ . '/../../src/upload.php';
 
 bootSession();
 
@@ -95,57 +96,6 @@ function findGithubRepoByName(array $repos, string $repoName): ?array
     return null;
 }
 
-// 画像アップロードの安全弁（[ADR-015]）。「偽装した実行可能ファイルの設置」を 3 段で防ぐ：
-//   ① 拡張子 allowlist ② finfo による実体 MIME と拡張子の一致確認
-//   ③ 保存名はサーバ生成の乱数（元のファイル名を信用せず、上書き・パス操作・.php 偽装を断つ）。
-// 保存先 public/uploads/ は .htaccess で PHP 実行を無効化済みで、これと二重の防御になる。
-function storeUpload(string $fieldName): ?string
-{
-    if (empty($_FILES[$fieldName]) || ($_FILES[$fieldName]['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
-        return null;
-    }
-
-    $file = $_FILES[$fieldName];
-    if ($file['error'] !== UPLOAD_ERR_OK) {
-        respondJson(['error' => '画像アップロードに失敗しました'], 400);
-    }
-    if (($file['size'] ?? 0) > 5 * 1024 * 1024) {
-        respondJson(['error' => '画像サイズは5MB以下にしてください'], 400);
-    }
-
-    $original = (string)($file['name'] ?? '');
-    $ext = strtolower(pathinfo($original, PATHINFO_EXTENSION));
-    $allowed = [
-        'jpg'  => 'image/jpeg',
-        'jpeg' => 'image/jpeg',
-        'png'  => 'image/png',
-        'webp' => 'image/webp',
-        'gif'  => 'image/gif',
-    ];
-    if (!isset($allowed[$ext])) {
-        respondJson(['error' => 'アップロードできる画像は jpg/png/webp/gif です'], 400);
-    }
-
-    $finfo = new finfo(FILEINFO_MIME_TYPE);
-    $mime = $finfo->file($file['tmp_name']);
-    if ($mime !== $allowed[$ext]) {
-        respondJson(['error' => '画像ファイルの形式が不正です'], 400);
-    }
-
-    $uploadDir = dirname(__DIR__) . '/uploads';
-    if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true)) {
-        respondJson(['error' => 'アップロード先を作成できません'], 500);
-    }
-
-    $name = bin2hex(random_bytes(16)) . '.' . ($ext === 'jpeg' ? 'jpg' : $ext);
-    $path = $uploadDir . '/' . $name;
-    if (!move_uploaded_file($file['tmp_name'], $path)) {
-        respondJson(['error' => '画像を保存できませんでした'], 500);
-    }
-
-    return 'uploads/' . $name;
-}
-
 // タグは差分更新でなく「全削除→張り直し」。送られてきたタグ集合を最終状態としてそのまま反映する方が、
 // 編集時の付け外しを取りこぼさず単純（1作品あたり最大10タグ前提なので張り直しコストも問題にならない）。
 function syncTags(PDO $pdo, int $galleryId, array $tags): void
@@ -178,18 +128,25 @@ function mapRows(array $rows): array
         $row['star_count'] = (int)$row['star_count'];
         $row['starred'] = (bool)$row['starred'];
         $row['is_owner'] = (bool)$row['is_owner'];
+        if (array_key_exists('author_avatar', $row)) {
+            $row['author_avatar'] = avatarUrl($row['author_avatar']);
+        }
         $row['tags'] = $row['tags'] === null || $row['tags'] === '' ? [] : explode(',', $row['tags']);
         return $row;
     }, $rows);
 }
 
-function baseSelectSql(string $where): string
+function baseSelectSql(string $where, bool $includeAuthorAvatar = false): string
 {
+    $authorAvatarSelect = $includeAuthorAvatar ? "u.avatar_path AS author_avatar," : "";
+    $authorAvatarGroup = $includeAuthorAvatar ? ", u.avatar_path" : "";
+
     return "
         SELECT
             g.id,
             g.user_id,
             u.name AS author,
+            {$authorAvatarSelect}
             g.title,
             g.src,
             g.description AS `desc`,
@@ -207,7 +164,7 @@ function baseSelectSql(string $where): string
         LEFT JOIN gallery_tags gt ON gt.gallery_id = g.id
         LEFT JOIN tags t ON t.id = gt.tag_id
         {$where}
-        GROUP BY g.id, g.user_id, u.name, g.title, g.src, g.description, g.visibility, g.source, g.source_url, g.created_at
+        GROUP BY g.id, g.user_id, u.name{$authorAvatarGroup}, g.title, g.src, g.description, g.visibility, g.source, g.source_url, g.created_at
     ";
 }
 
@@ -240,7 +197,7 @@ if ($method === 'GET') {
     // 「非公開」とも「存在しない」とも区別させずに一律 404（safety invariant：非公開を所有者以外に返さない）。
     if (isset($_GET['id'])) {
         $id = (int)$_GET['id'];
-        $stmt = $pdo->prepare(baseSelectSql("WHERE g.id = ? AND (g.visibility = 'public' OR g.user_id = ?)"));
+        $stmt = $pdo->prepare(baseSelectSql("WHERE g.id = ? AND (g.visibility = 'public' OR g.user_id = ?)", true));
         $stmt->execute([$userId, $userId, $id, $userId]);
         $rows = mapRows($stmt->fetchAll());
         if (!$rows) {

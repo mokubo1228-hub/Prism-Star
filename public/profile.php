@@ -9,12 +9,22 @@ include __DIR__ . '/includes/head.php';
   <main class="gallery-list">
     <div class="gallery-back">
       <a class="back-menu" href="gallery-list.php">← 戻る</a>
+      <img id="profileAvatar" class="profile-avatar" src="Image/default-avatar.svg" alt="">
       <p id="profileUsername" class="profile-username" hidden></p>
       <h2 id="profileName" class="profile-heading"></h2>
       <p id="profileBio" class="profile-bio" hidden></p>
       <p id="profileStars" class="profile-stars"></p>
       <section id="profileEditPanel" class="profile-edit-panel" hidden>
         <h3>プロフィール編集</h3>
+        <form id="profileAvatarForm" class="github-settings profile-avatar-form">
+          <label for="profileAvatarInput">アバター画像</label>
+          <input id="profileAvatarInput" type="file" name="avatar" accept="image/*">
+          <div class="profile-avatar-actions">
+            <button type="submit">更新</button>
+            <button type="button" id="profileAvatarRemove">デフォルトに戻す</button>
+          </div>
+          <p id="profileAvatarMessage" class="github-message" hidden></p>
+        </form>
         <form id="profileEditForm" class="github-settings">
           <label for="profileEditUsername">ユーザーネーム</label>
           <input id="profileEditUsername" type="text" name="username" autocomplete="username" maxlength="20" required>

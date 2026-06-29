@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../../src/session.php';
 require_once __DIR__ . '/../../src/db.php';
 require_once __DIR__ . '/../../src/username.php';
+require_once __DIR__ . '/../../src/upload.php';
 
 bootSession();
 
@@ -24,11 +25,43 @@ if ($method === 'POST') {
         usersJson(['error' => 'ログインが必要です'], 401);
     }
 
+    $userId = (int)$_SESSION['user_id'];
+
+    if (($_GET['action'] ?? '') === 'avatar') {
+        $avatarPath = storeUpload('avatar');
+        if ($avatarPath === null) {
+            usersJson(['error' => 'アバター画像を選択してください'], 400);
+        }
+
+        $stmt = $pdo->prepare("SELECT avatar_path FROM users WHERE id = ?");
+        $stmt->execute([$userId]);
+        $oldPath = $stmt->fetchColumn();
+
+        // アバター更新は常にセッション本人だけを対象にし、client から user_id を受けない。
+        $stmt = $pdo->prepare("UPDATE users SET avatar_path = ? WHERE id = ?");
+        $stmt->execute([$avatarPath, $userId]);
+        deleteStoredUpload(is_string($oldPath) ? $oldPath : null);
+
+        usersJson(['avatar' => avatarUrl($avatarPath)]);
+    }
+
+    if (($_GET['action'] ?? '') === 'avatar-remove') {
+        $stmt = $pdo->prepare("SELECT avatar_path FROM users WHERE id = ?");
+        $stmt->execute([$userId]);
+        $oldPath = $stmt->fetchColumn();
+
+        // デフォルト復帰も本人の avatar_path を NULL に戻すだけ。共有デフォルト画像は DB に保存しない。
+        $stmt = $pdo->prepare("UPDATE users SET avatar_path = NULL WHERE id = ?");
+        $stmt->execute([$userId]);
+        deleteStoredUpload(is_string($oldPath) ? $oldPath : null);
+
+        usersJson(['avatar' => avatarUrl(null)]);
+    }
+
     $data = json_decode(file_get_contents('php://input'), true);
     if (!is_array($data)) {
         $data = [];
     }
-    $userId = (int)$_SESSION['user_id'];
     $response = ['ok' => true];
     $pendingUsername = null;
 
@@ -112,14 +145,14 @@ if (isset($_GET['u'])) {
     if (!isValidUsername($lookupUsername)) {
         usersJson(['error' => 'ユーザーが見つかりません'], 404);
     }
-    $stmt = $pdo->prepare("SELECT id, name, username, github_username, bio FROM users WHERE username = ?");
+    $stmt = $pdo->prepare("SELECT id, name, username, github_username, bio, avatar_path FROM users WHERE username = ?");
     $stmt->execute([$lookupUsername]);
 } else {
     $id = (int)($_GET['id'] ?? 0);
     if ($id <= 0) {
         usersJson(['error' => 'IDが不正です'], 400);
     }
-    $stmt = $pdo->prepare("SELECT id, name, username, github_username, bio FROM users WHERE id = ?");
+    $stmt = $pdo->prepare("SELECT id, name, username, github_username, bio, avatar_path FROM users WHERE id = ?");
     $stmt->execute([$id]);
 }
 $user = $stmt->fetch();
@@ -173,6 +206,7 @@ usersJson([
     'username' => $user['username'],
     'github_username' => $user['github_username'],
     'bio' => $user['bio'],
+    'avatar' => avatarUrl($user['avatar_path']),
     'total_stars' => $totalStars,
     'works' => $works,
 ]);

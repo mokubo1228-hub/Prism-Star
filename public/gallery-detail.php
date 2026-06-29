@@ -15,7 +15,7 @@ include __DIR__ . '/includes/head.php';
           <img src="{SRC}" alt="{TITLE}">
           <figcaption>
             <h2>{TITLE}</h2>
-            <p class="detail-author">投稿者：<a href="profile.php?id={USER_ID}">{AUTHOR}</a></p>
+            <p class="detail-author">投稿者：<img class="author-avatar" src="Image/default-avatar.svg" alt=""><a href="profile.php?id={USER_ID}">{AUTHOR}</a></p>
             <p class="detail-meta"></p>
             <button type="button" class="star-button detail-star-button" aria-pressed="false">
               <span class="star-icon">★</span>

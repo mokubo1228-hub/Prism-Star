@@ -72,6 +72,13 @@ if (!columnExists($pdo, 'users', 'bio')) {
     echo "users.bio already exists\n";
 }
 
+if (!columnExists($pdo, 'users', 'avatar_path')) {
+    $pdo->exec("ALTER TABLE users ADD COLUMN avatar_path VARCHAR(255) NULL AFTER bio");
+    echo "Added users.avatar_path\n";
+} else {
+    echo "users.avatar_path already exists\n";
+}
+
 if (!tableExists($pdo, 'stars')) {
     $pdo->exec("
         CREATE TABLE stars (

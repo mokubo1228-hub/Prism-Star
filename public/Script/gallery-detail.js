@@ -63,6 +63,8 @@ async function loadDetail() {
     clone.querySelector(".detail-txt").textContent = work.desc || "";
 
     const authorLink = clone.querySelector(".detail-author a");
+    const authorAvatar = clone.querySelector(".author-avatar");
+    authorAvatar.src = work.author_avatar || "Image/default-avatar.svg";
     authorLink.href = `profile.php?id=${work.user_id}`;
     authorLink.textContent = work.author || "Unknown";
 

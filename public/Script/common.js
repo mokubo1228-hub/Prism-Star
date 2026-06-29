@@ -122,6 +122,7 @@ function applyAuthState(status) {
   const guestActions = document.querySelector(".auth-guest-actions");
   const logoutButton = document.querySelector(".auth-action-logout");
   const mypageLink = document.querySelector(".auth-action-mypage");
+  const headerAvatar = document.querySelector(".header-avatar img");
   const profileHref = loggedIn && status.user?.id ? `profile.php?id=${status.user.id}` : "profile.php";
 
   document.querySelectorAll("[data-auth-nav]").forEach(item => {
@@ -133,6 +134,9 @@ function applyAuthState(status) {
 
   if (guestActions) guestActions.hidden = loggedIn;
   if (mypageLink) mypageLink.hidden = !loggedIn;
+  if (headerAvatar) {
+    headerAvatar.src = loggedIn && status.user?.avatar ? status.user.avatar : "Image/default-avatar.svg";
+  }
   if (logoutButton) {
     logoutButton.hidden = !loggedIn;
     logoutButton.removeEventListener("click", handleLogout);

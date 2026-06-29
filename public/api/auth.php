@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../../src/session.php';
 require_once __DIR__ . '/../../src/db.php';
 require_once __DIR__ . '/../../src/username.php';
+require_once __DIR__ . '/../../src/upload.php';
 
 bootSession();
 
@@ -105,12 +106,17 @@ function sendResetMail(string $email, string $token): bool
 
 if ($method === 'GET' && $action === 'status') {
     if (!empty($_SESSION['user_id'])) {
+        $stmt = $pdo->prepare("SELECT avatar_path FROM users WHERE id = ?");
+        $stmt->execute([(int)$_SESSION['user_id']]);
+        $avatarPath = $stmt->fetchColumn();
+
         authJson([
             'loggedIn' => true,
             'user' => [
                 'id' => (int)$_SESSION['user_id'],
                 'email' => $_SESSION['user_email'],
                 'name' => $_SESSION['user_name'],
+                'avatar' => avatarUrl(is_string($avatarPath) ? $avatarPath : null),
             ],
         ]);
     }

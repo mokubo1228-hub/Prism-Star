@@ -224,6 +224,16 @@
   vertical-align: middle;
 }
 
+.profile-avatar {
+  border: 3px solid #e5e7eb;
+  border-radius: 50%;
+  display: block;
+  height: 96px;
+  margin: 0 auto 14px;
+  object-fit: cover;
+  width: 96px;
+}
+
 .profile-heading {
   color: #374151;
   margin: 0 20px 4px;
@@ -264,6 +274,23 @@
 .profile-edit-panel h3 {
   color: #374151;
   margin: 0 0 14px;
+}
+
+.profile-avatar-form {
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 20px;
+  padding-bottom: 18px;
+}
+
+.profile-avatar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.profile-avatar-actions button[type="button"] {
+  background: #6b7280;
 }
 
 .profile-edit-panel textarea {

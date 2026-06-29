@@ -2,6 +2,7 @@ const profileParams = new URLSearchParams(window.location.search);
 const profileId = profileParams.get("id");
 const profileHandle = profileParams.get("u");
 const profileUsername = document.getElementById("profileUsername");
+const profileAvatar = document.getElementById("profileAvatar");
 const profileName = document.getElementById("profileName");
 const profileBio = document.getElementById("profileBio");
 const profileStars = document.getElementById("profileStars");
@@ -10,6 +11,10 @@ const profileTemplate = document.getElementById("profile-item-template");
 const githubRepos = document.getElementById("githubRepos");
 const profileEditPanel = document.getElementById("profileEditPanel");
 const profileEditForm = document.getElementById("profileEditForm");
+const profileAvatarForm = document.getElementById("profileAvatarForm");
+const profileAvatarInput = document.getElementById("profileAvatarInput");
+const profileAvatarRemove = document.getElementById("profileAvatarRemove");
+const profileAvatarMessage = document.getElementById("profileAvatarMessage");
 const profileEditUsername = document.getElementById("profileEditUsername");
 const profileEditName = document.getElementById("profileEditName");
 const profileEditBio = document.getElementById("profileEditBio");
@@ -30,7 +35,21 @@ function showProfileEditMessage(message, isError = false) {
   profileEditMessage.classList.toggle("is-error", isError);
 }
 
+function showProfileAvatarMessage(message, isError = false) {
+  profileAvatarMessage.textContent = message;
+  profileAvatarMessage.hidden = false;
+  profileAvatarMessage.classList.toggle("is-error", isError);
+}
+
+function updateAvatarImages(avatar) {
+  const src = avatar || "Image/default-avatar.svg";
+  if (profileAvatar) profileAvatar.src = src;
+  const headerAvatar = document.querySelector(".header-avatar img");
+  if (headerAvatar) headerAvatar.src = src;
+}
+
 function renderProfileIdentity(user) {
+  updateAvatarImages(user.avatar);
   if (user.username) {
     profileUsername.textContent = `@${user.username}`;
     profileUsername.hidden = false;
@@ -188,12 +207,58 @@ profileEditForm?.addEventListener("submit", async (e) => {
       ...currentProfileUser,
       username: data.username || profileEditUsername.value.trim().toLowerCase(),
       name: data.name || profileEditName.value.trim(),
-      bio: data.bio || ""
+      bio: data.bio || "",
+      avatar: currentProfileUser.avatar
     };
     renderProfileIdentity(currentProfileUser);
     await window.PrismAuth.refresh();
     showProfileEditMessage("保存しました。");
   } catch (err) {
     showProfileEditMessage(err.message, true);
+  }
+});
+
+profileAvatarForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  profileAvatarMessage.hidden = true;
+
+  if (!profileAvatarInput.files || profileAvatarInput.files.length === 0) {
+    showProfileAvatarMessage("アバター画像を選択してください。", true);
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("avatar", profileAvatarInput.files[0]);
+
+  try {
+    const res = await fetch("/api/users.php?action=avatar", {
+      method: "POST",
+      body: formData
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "アバターを更新できませんでした");
+    currentProfileUser = { ...currentProfileUser, avatar: data.avatar };
+    updateAvatarImages(data.avatar);
+    profileAvatarInput.value = "";
+    await window.PrismAuth.refresh();
+    showProfileAvatarMessage("アバターを更新しました。");
+  } catch (err) {
+    showProfileAvatarMessage(err.message, true);
+  }
+});
+
+profileAvatarRemove?.addEventListener("click", async () => {
+  profileAvatarMessage.hidden = true;
+
+  try {
+    const res = await fetch("/api/users.php?action=avatar-remove", { method: "POST" });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "アバターを戻せませんでした");
+    currentProfileUser = { ...currentProfileUser, avatar: data.avatar };
+    updateAvatarImages(data.avatar);
+    await window.PrismAuth.refresh();
+    showProfileAvatarMessage("デフォルトに戻しました。");
+  } catch (err) {
+    showProfileAvatarMessage(err.message, true);
   }
 });

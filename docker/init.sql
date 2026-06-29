@@ -8,6 +8,7 @@ CREATE TABLE users (
     username VARCHAR(30) NULL,
     github_username VARCHAR(100) NULL,
     bio TEXT NULL,
+    avatar_path VARCHAR(255) NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uniq_users_username (username)
 );
