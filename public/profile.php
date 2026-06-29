@@ -17,7 +17,7 @@ include __DIR__ . '/includes/head.php';
       <section id="profileEditPanel" class="profile-edit-panel" hidden>
         <h3>プロフィール編集</h3>
         <form id="profileAvatarForm" class="github-settings profile-avatar-form">
-          <label for="profileAvatarInput">アバター画像</label>
+          <label for="profileAvatarInput">アイコン画像</label>
           <input id="profileAvatarInput" type="file" name="avatar" accept="image/*">
           <div class="profile-avatar-actions">
             <button type="submit">更新</button>

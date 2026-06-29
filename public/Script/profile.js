@@ -223,7 +223,7 @@ profileAvatarForm?.addEventListener("submit", async (e) => {
   profileAvatarMessage.hidden = true;
 
   if (!profileAvatarInput.files || profileAvatarInput.files.length === 0) {
-    showProfileAvatarMessage("アバター画像を選択してください。", true);
+    showProfileAvatarMessage("アイコン画像を選択してください。", true);
     return;
   }
 
@@ -236,12 +236,12 @@ profileAvatarForm?.addEventListener("submit", async (e) => {
       body: formData
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "アバターを更新できませんでした");
+    if (!res.ok) throw new Error(data.error || "アイコンを更新できませんでした");
     currentProfileUser = { ...currentProfileUser, avatar: data.avatar };
     updateAvatarImages(data.avatar);
     profileAvatarInput.value = "";
     await window.PrismAuth.refresh();
-    showProfileAvatarMessage("アバターを更新しました。");
+    showProfileAvatarMessage("アイコンを更新しました。");
   } catch (err) {
     showProfileAvatarMessage(err.message, true);
   }
@@ -253,7 +253,7 @@ profileAvatarRemove?.addEventListener("click", async () => {
   try {
     const res = await fetch("/api/users.php?action=avatar-remove", { method: "POST" });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "アバターを戻せませんでした");
+    if (!res.ok) throw new Error(data.error || "アイコンを戻せませんでした");
     currentProfileUser = { ...currentProfileUser, avatar: data.avatar };
     updateAvatarImages(data.avatar);
     await window.PrismAuth.refresh();

@@ -54,9 +54,11 @@
   .author-avatar {
     border: 1px solid #e5e7eb;
     border-radius: 50%;
-    height: 28px;
+    height: 20px;
+    margin-right: 6px;
     object-fit: cover;
-    width: 28px;
+    vertical-align: middle; /* テキスト行に揃える（投稿者：[icon][name]） */
+    width: 20px;
   }
 
   .detail-author a {

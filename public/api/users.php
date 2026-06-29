@@ -30,7 +30,7 @@ if ($method === 'POST') {
     if (($_GET['action'] ?? '') === 'avatar') {
         $avatarPath = storeUpload('avatar');
         if ($avatarPath === null) {
-            usersJson(['error' => 'アバター画像を選択してください'], 400);
+            usersJson(['error' => 'アイコン画像を選択してください'], 400);
         }
 
         $stmt = $pdo->prepare("SELECT avatar_path FROM users WHERE id = ?");
