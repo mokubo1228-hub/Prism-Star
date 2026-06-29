@@ -1,10 +1,10 @@
 .login-page {
-    background:#f5f7fa; 
+    background:#f5f7fa;
     min-height:100%;
     display:flex;
     justify-content: center;
     align-items: center;
-    padding:24px;
+    padding:var(--space-page-top) 24px;
 }
 
 .login-box{

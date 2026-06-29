@@ -3,6 +3,14 @@
     --w-wide: min(1180px, 96vw);
     --w-read: min(760px, 92vw);  /* 長文・本文用の読みやすい行長（ポリシー等） */
     --w-form: min(640px, 92vw);
+
+    /* 幅トークンの縦版：ヘッダー下〜本文開始の頭出しを全 main で共通化する。
+       ページごとに margin-top / padding がバラついていた（10〜40px）のを1本に寄せる。 */
+    --space-page-top: 32px;
+  }
+
+  @media (max-width: 760px) {
+    :root { --space-page-top: 20px; }
   }
 
 .site-body {

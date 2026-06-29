@@ -19,7 +19,7 @@
   box-sizing: border-box;
   padding: 40px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  margin-top: 30px;
+  margin-top: var(--space-page-top);
   margin-bottom: 30px;
   width: var(--w-wide);
 }
