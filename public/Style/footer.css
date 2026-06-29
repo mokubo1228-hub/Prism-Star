@@ -1,95 +1,115 @@
-    .footer-a:hover {
-    color: #00aced;
-    text-decoration: underline;
-  }
+.footer-a {
+  color: #fff;
+  text-decoration: none;
+}
 
-/* 左＝情報＋Contact/Privacy、右端＝X/GitHub（古典的フッター）。 */
+.footer-a:hover {
+  color: #00aced;
+  text-decoration: underline;
+}
+
+/* 3ブロック：左＝ブランド / 中央＝サポート / 右＝作り手＋SNS。 */
 .site-footer {
-    align-items: flex-start;
-    background-color: #222;
-    color: #fff;
-    display: flex;
-    gap: 20px;
-    justify-content: space-between;
-    padding: 20px;
-  }
+  align-items: center;
+  background-color: #222;
+  color: #fff;
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  padding: 24px 28px;
+}
 
-  .footer-info .footer-a:hover {
-    text-decoration: none;
-    color: #fff;
-    background-color: dimgrey;
-  }
+/* 左：PrismStar ＋ タグライン（製品ブランドを主役に） */
+.footer-brand {
+  justify-self: start;
+  min-width: 0;
+}
 
-  .footer-left {
-    align-items: flex-start;
-    display: flex;
-    gap: 48px;
-  }
+.footer-brand-name {
+  margin: 0;
+}
 
-  /* info と Contact/Privacy を同じ行高で揃える＝左ブロックの各行が横一線に並ぶ。 */
-  .footer-info p {
-    line-height: 2;
-    margin: 0;
-  }
+.footer-brand-name a {
+  color: #fff;
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-decoration: none;
+}
 
-  .footer-links a {
-    display: block;
-    line-height: 2;
-  }
+.footer-brand-name a:hover,
+.footer-brand-name a:focus-visible {
+  color: #00aced;
+}
 
-  /* X / GitHub は横並び。グリッド行の縦中央（＝左ブロックの2行目あたり）に置く。 */
-  .footer-social {
-    align-items: center;
-    align-self: center;
-    display: flex;
-    gap: 16px;
-  }
+.footer-brand-tagline {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  margin: 4px 0 0;
+}
 
-  .footer-social a {
-    color: #fff;
-    text-decoration: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-  }
-  
-  .footer-social a:hover {
-    text-decoration: underline;
-  } 
+/* 中央：Contact / Privacy Policy */
+.footer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-self: center;
+  text-align: center;
+}
 
-  .footer-social img {
-    background-color: #fff;
-    border-radius: 4px;
-    padding: 2px;
-    width: 36px;
-    height: 36px;
+/* 右：© Miz Kingdom ＋ SNS（作り手） */
+.footer-maker {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-self: end;
+}
 
-    transition: transform 0.3s ease;
-  }
+.footer-corporate {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.85rem;
+  margin: 0;
+}
 
-  .footer-social img:hover {
-    background-color: dimgray;
-    border-radius: 4px;
-    padding: 2px;
-    transform: scale(1.2);
-  }
-  
+.footer-mail {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.82rem;
+  margin: 0;
+}
 
-  /* スマホ用：768px以下の時 */
+.footer-social {
+  display: flex;
+  gap: 12px;
+}
+
+/* SNS は控えめ：30px・hover は軽く（大きな拡大はしない）。 */
+.footer-social img {
+  background-color: #fff;
+  border-radius: 6px;
+  height: 30px;
+  opacity: 0.85;
+  padding: 3px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  width: 30px;
+}
+
+.footer-social img:hover {
+  opacity: 1;
+  transform: scale(1.06);
+}
+
 @media (max-width: 1000px) {
-    .site-footer {
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
+  .site-footer {
+    align-items: center;
+    gap: 18px;
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
 
-    .footer-left {
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .footer-social {
-      justify-content: center;
-      flex-wrap: wrap;
-    }
+  .footer-brand,
+  .footer-links,
+  .footer-maker {
+    align-items: center;
+    justify-self: center;
+  }
 }

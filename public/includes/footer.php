@@ -1,26 +1,27 @@
 <?php require_once __DIR__ . '/asset.php'; ?>
 
   <footer id="site-footer" class="site-footer">
-    <div class="footer-left">
-      <div class="footer-info">
-        <p class="footer-corporate">&copy; <?= date('Y') ?> Miz Kingdom</p>
-        <p>Developer：Miz Kingdom</p>
-        <p>Mail: <a class="footer-a" href="mailto:okubo.m.jobs@gmail.com">okubo.m.jobs@gmail.com</a></p>
-      </div>
-
-      <nav class="footer-links">
-        <a class="footer-a" href="form.php">Contact</a>
-        <a class="footer-a" href="policy.php">Privacy Policy</a>
-      </nav>
+    <div class="footer-brand">
+      <p class="footer-brand-name"><a href="gallery-list.php">PrismStar</a></p>
+      <p class="footer-brand-tagline">Shine in every color.</p>
     </div>
 
-    <div class="footer-social">
-      <a class="footer-a" href="https://twitter.com" target="_blank">
-        <img src="Image/x-icon.png" alt="X">
-      </a>
-      <a class="footer-a" href="https://github.com" target="_blank">
-        <img src="Image/Github-icon.png" alt="GitHub">
-      </a>
+    <nav class="footer-links" aria-label="Footer">
+      <a class="footer-a" href="form.php">Contact</a>
+      <a class="footer-a" href="policy.php">Privacy Policy</a>
+    </nav>
+
+    <div class="footer-maker">
+      <p class="footer-corporate">&copy; <?= date('Y') ?> Miz Kingdom</p>
+      <p class="footer-mail">Mail: <a class="footer-a" href="mailto:okubo.m.jobs@gmail.com">okubo.m.jobs@gmail.com</a></p>
+      <div class="footer-social">
+        <a class="footer-a" href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+          <img src="Image/Github-icon.png" alt="GitHub">
+        </a>
+        <a class="footer-a" href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="X">
+          <img src="Image/x-icon.png" alt="X">
+        </a>
+      </div>
     </div>
   </footer>
 
