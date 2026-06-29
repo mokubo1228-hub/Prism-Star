@@ -3,36 +3,46 @@
     text-decoration: underline;
   }
 
+/* 左＝情報＋Contact/Privacy、右端＝X/GitHub（古典的フッター）。 */
 .site-footer {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto;
-    gap: 20px;
-    padding: 20px;
+    align-items: flex-start;
     background-color: #222;
     color: #fff;
-  }
-  
-  .footer-info {
-    grid-column: 1;
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+    padding: 20px;
   }
 
   .footer-info .footer-a:hover {
-    grid-column: 1;
     text-decoration: none;
     color: #fff;
     background-color: dimgrey;
   }
-  
-  .footer-nav {
-    grid-column: 2;
-  }
-  
-  .footer-social {
-    grid-column: 1 / 3;
+
+  .footer-left {
+    align-items: flex-start;
     display: flex;
-    justify-content: space-evenly; 
-    text-align: center;
+    gap: 48px;
+  }
+
+  /* info と Contact/Privacy を同じ行高で揃える＝左ブロックの各行が横一線に並ぶ。 */
+  .footer-info p {
+    line-height: 2;
+    margin: 0;
+  }
+
+  .footer-links a {
+    display: block;
+    line-height: 2;
+  }
+
+  /* X / GitHub は横並び。グリッド行の縦中央（＝左ブロックの2行目あたり）に置く。 */
+  .footer-social {
+    align-items: center;
+    align-self: center;
+    display: flex;
+    gap: 16px;
   }
 
   .footer-social a {
@@ -50,8 +60,8 @@
     background-color: #fff;
     border-radius: 4px;
     padding: 2px;
-    width: 24px;
-    height: 24px;
+    width: 36px;
+    height: 36px;
 
     transition: transform 0.3s ease;
   }
@@ -67,27 +77,19 @@
   /* スマホ用：768px以下の時 */
 @media (max-width: 1000px) {
     .site-footer {
-      grid-template-columns: 1fr;
-      grid-template-rows: auto auto auto;
+      flex-direction: column;
+      align-items: center;
       text-align: center;
     }
 
-    .footer-info {
-        grid-column: 1;
-      }
-    
-    .footer-nav {
-    grid-column: 1;
+    .footer-left {
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
     }
 
     .footer-social {
-    grid-column: 1;
-    justify-content: center;
-    flex-wrap: wrap;
-    }
-
-    .footer-social a {
-    display: block;
-    margin: 5px 0;
+      justify-content: center;
+      flex-wrap: wrap;
     }
 }
