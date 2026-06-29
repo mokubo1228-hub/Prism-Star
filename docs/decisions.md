@@ -449,3 +449,28 @@
   - `公開日` として表示する → 現状は公開状態の変更日時を管理していない。`created_at` を使うため「作成日」が正確。
 - **影響**：主に `public/Style/gallery-list.css`、`public/Style/gallery-detail.css`、`public/Script/gallery-detail.js`、検索/カード描画まわり。API の公開/非公開フィルタ、非公開作品を所有者以外へ返さない safety invariant、スターのクリック動線は不変。
 - **関連**：`docs/work-card-redesign-handoff.md`、`docs/work-card-layout-handoff.md`、[ADR-027](decisions.md)（発見系は他人の公開作品）、[ADR-029](decisions.md)（おすすめ/検索の役割分担）、[ADR-036](decisions.md)（タグ回遊）。
+
+## ADR-041 ヘッダー右上を「アカウントトリガー」1枠に集約 ✅
+- **背景**：機能が増え、ヘッダー右上に `ログイン/新規登録/マイページ/ログアウト` のボタン群と `≡`（ハンバーガー）が並び、ドロワーには `作品管理/お気に入り/設定…` のナビが入っていた。`マイページ`（トップバー）とドロワーの `作品管理` が同じ `mypage.php` への二重入口になっていた。pixiv の「丸アイコンがメニュー起動を兼ねる」を参照に整理。
+- **決定**：ヘッダー右上を **1枠** に集約し、`is-authed` で出し分ける。**未ログイン＝ログインボタン／ログイン中＝アバター**（押すとドロワー）。`≡` とトップバーの認証ボタン群は撤去、`ログアウト` はドロワー内へ移し、`マイページ` 二重入口は廃止。ドロワー先頭に **PrismStar ロゴ**を置き、横から被さってもヘッダーのロゴと重なって見える（pixiv 式・ロゴが隠れない）。
+- **理由**：トップバーが `ブランド｜検索｜◯` の3点に整理され、特にモバイルで認証ボタンが1行を占有する重さが消える。アバター＝「自分のメニュー」という記号で操作モデルが明確になる。ゲストのナビ導線はロゴ（ホーム）＋検索＋フッターでカバー（フッターに既存）。
+- **代替案・却下理由**：(a) ゲストもアバター式に統一 → ゲストは自分のアイコンが無く「メニュー」と読みにくく発見性が落ちる。ログインボタンを残す方が良い。(b) `≡` を残す → トップバーが煩雑なまま。(c) ドロワーを account 専用に絞る → 今回は変更最小で全ナビ残し。
+- **影響**：`public/includes/header.php`、`public/Style/header.css`、`public/Script/common.js`（既存の auth トグルに乗せる）、`public/Image/default-avatar.svg`。ドロワー開閉 JS・`data-auth-nav`・`.auth-action-logout`・フッターナビ・CSRF・`requireAuth` 動線は不変。
+- **関連**：`docs/header-account-trigger-handoff.md`、[ADR-019](decisions.md)（認証ゲートモーダル）、[ADR-030](decisions.md)（作品＝マイページ／人となり＝プロフィール）。
+
+## ADR-042 ユーザーアイコン（アバター）機能を入れる・呼称は「アイコン」に統一 ✅
+- **背景**：ヘッダーをアバタートリガーにした流れで「アイコン」概念が入ったが、当初は未設定フォールバックの人型画像を出すだけで、自分で設定したアイコンが無く、プロフィールや作品の作者欄にも無かった。「全員が発信者」の場として、各ユーザーが自分のアイコンを持てるべき。
+- **決定**：ユーザーアイコンを実装。**設定はプロフィールの owner 限定パネル**でアップロード／差し替え／デフォルト復帰。**表示**はヘッダー・自分/他人のプロフィール上部・作品詳細の作者欄・カードの作者欄。未設定は `Image/default-avatar.svg` にフォールバック。**アップロード検証は `src/upload.php` に共通化**し、作品画像とアイコンで同じ allowlist＋`finfo` MIME 一致＋乱数名＋`uploads/` の `.htaccess` を使う。UI の呼称は「アバター」でなく **「アイコン」** に統一（現代的でない／馴染みのため）。
+- **理由**：デフォルトだけ（全員同じ灰アイコン）では無意味に見えるので「変更まで」含めて機能にする。検証を1箇所に共通化して、作品画像とアイコンで安全をブレさせない（DRY）。
+- **代替案・却下理由**：(a) 表示のみ（全員デフォルト）→ 全員同じで無意味。(b) 検証を各所に複製 → ドリフトの元。共通化が安全。(c) id 由来の色違いイニシャル等の生成アイコン → 今回は対象外（"Shine in every color." と相性は良いので将来案）。
+- **影響**：`users.avatar_path`（冪等 ALTER）、`src/upload.php`、`public/api/users.php`（`action=avatar`／`avatar-remove`）、`auth.php?status`・`users.php`・`gallery.php`（詳細）の avatar URL 返却、`profile`/`gallery-detail`/ヘッダー/カードの表示。更新対象は**常にセッション本人**（client の id を信用しない）。
+- **バグ修正（同時）**：作者アイコン `<img class="author-avatar">` が `<figure class="detail-img">` 内にネストし、メイン画像用の `.detail-img img { width:100% }`（詳細度が高い）に上書きされてアイコンが全幅に巨大化していた。`.detail-img > img`（直下の img のみ）に限定して解消。
+- **関連**：`docs/user-avatar-handoff.md`、[ADR-015](decisions.md)（画像アップロードの安全弁）、[ADR-030](decisions.md)（プロフィール）。
+
+## ADR-043 フッターを「プロダクト・ファースト」の3ブロックに ✅
+- **背景**：フッターが `© Miz Kingdom / Developer：Miz Kingdom / Mail` に**全アプリナビ（おすすめ〜Privacy Policy）**と SNS（X/GitHub/LinkedIn が各サービスのトップに向くダミー）を同列に並べ、会社/開発者情報ファーストで事務的・雑多だった。アプリナビはヘッダードロワーと重複。コピーライトに `Miz..Kingdom` の誤記、年も固定 `2025`。
+- **決定**：3ブロックに整理 ── **左＝ブランド（PrismStar＋タグライン）／中央＝サポート（Contact・Privacy Policy）／右＝作り手（© Miz Kingdom・Mail・GitHub/X）**。アプリ内ナビは撤去するが **Contact / Privacy Policy は残す**（未ログインでもポリシー等に到達できる）。LinkedIn は外し X/GitHub のみ。レイアウトは grid `minmax(0,1fr) auto minmax(0,1fr)` で**中央リンクを真の幅中央**に。SNS は控えめ（30px・hover も軽く）。コピーライトを `Miz Kingdom` に修正し、年は `date('Y')` で動的化。外部リンクに `rel="noopener noreferrer"` と `aria-label`。
+- **理由**：PrismStar（製品）を主役・Miz Kingdom（作り手）を右に置くと両者の関係が一目で伝わり、製品フッターらしくなる。アプリナビはヘッダーにあるので重複を撤去し、サポート/法務だけ残すのが定石。SNS は中央に浮かせるより端に錨を下ろす方が締まる（実機で確認）。
+- **代替案・却下理由**：(a) 全部左に固める → 右が空いて中途半端。(b) SNS を幅中央に浮かせる → 一番座りが悪い。右端＋小さめが最も安定。(c) 会社情報ファーストのまま → 事務的で製品が埋もれる。
+- **影響**：`public/includes/footer.php`、`public/Style/footer.css` のみ。X/GitHub の URL は実プロフィール未設定のため**ダミー据え置き**（README の「デモ / プレースホルダについて」に明記）。
+- **関連**：[ADR-006](decisions.md)（PrismStar 命名）、[ADR-026](decisions.md)/[ADR-028](decisions.md)（安全の中央化）。
