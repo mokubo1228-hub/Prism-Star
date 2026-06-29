@@ -49,7 +49,7 @@ safety invariants（壊さない不変条件）と検証コマンドは正本 §
 | GET/POST/PATCH/DELETE /api/gallery.php | 作品 CRUD（?action=import-github で GitHub 取込） |
 | GET /api/search.php | 作品 / ユーザー / タグ検索 |
 | POST/DELETE /api/stars.php | スター付与 / 解除 |
-| GET /api/users.php | プロフィール＋その人の作品（?id= / ?u=） |
+| GET/POST /api/users.php | プロフィール取得＋更新（?id= / ?u=・名前/bio/username・アイコン画像 ?action=avatar） |
 | GET /api/github.php | GitHub リポジトリ取得（サーバ側 token） |
 | /api/auth.php（login/logout/register/verify/reset・?action=status） | 認証（登録 double opt-in・パスワード再設定） |
 | POST /api/contact.php | お問い合わせ送信 |
@@ -62,8 +62,8 @@ public/          … Apache ドキュメントルート
   includes/      … head/header/footer/asset の partial（共通化）
   Script/        … JS（common.js で共通ナビ生成）
   Style/         … CSS（ページごとに分割、sanitize.css でリセット）
-  Image/         … SNSアイコン画像
-src/             … PHP共通処理（db, seed, migrate, session, username, github_client）
+  Image/         … SNSアイコン・デフォルトアバター画像
+src/             … PHP共通処理（db, seed, migrate, session, username, upload, github_client）
 docker/          … Docker設定（Dockerfile, init.sql）
 ```
 

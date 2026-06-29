@@ -83,7 +83,7 @@ public/            Apache ドキュメントルート
   Script/          common.js（共通）/ ページ別 JS
   api/             gallery / auth / contact / github / stars / users / search
   Image/ uploads/  SNSアイコン / アップロード画像（.htaccess で実行抑止）
-src/               db.php / seed.php / migrate.php / session.php / username.php / github_client.php
+src/               db.php / seed.php / migrate.php / session.php / username.php / upload.php（画像アップロード共通検証） / github_client.php
 docker/            Dockerfile / init.sql
 docs/              spec / roadmap / decisions / roles / handoff
 ```
@@ -99,7 +99,7 @@ docs/              spec / roadmap / decisions / roles / handoff
 
 ### スキーマ ✅（`docker/init.sql` ＋ `src/migrate.php`）
 
-**users**：id / email(UNIQUE) / password_hash(bcrypt) / name / **username(UNIQUE・@ハンドル)** / **github_username** / **bio** / created_at
+**users**：id / email(UNIQUE) / password_hash(bcrypt) / name / **username(UNIQUE・@ハンドル)** / **github_username** / **bio** / **avatar_path（アイコン画像・未設定は NULL）** / created_at
 **gallery**：id / user_id(FK) / title / src / description / **visibility(public｜private)** / **source(manual｜github)** / **source_url** / created_at
 **tags** / **gallery_tags**：タグを正規化テーブルで多対多に保持（[ADR-017](decisions.md)）
 **stars**：id / user_id / gallery_id / created_at、`UNIQUE(user_id, gallery_id)` で二重付与防止（star 数は集計で算出）
@@ -123,6 +123,7 @@ docs/              spec / roadmap / decisions / roles / handoff
 | `GET /api/search.php?q=&type=works｜users&tag=` | 作品 / ユーザー / タグ検索（[ADR-025](decisions.md)） | 要 |
 | `POST｜DELETE /api/stars.php?gallery_id=N` | スター付与 / 解除（star 数を返す） | 要 |
 | `GET /api/users.php?id=｜u=｜name=` | プロフィール＋その人の公開作品 | 要 |
+| `POST /api/users.php`（`?action=avatar｜avatar-remove` 含む） | プロフィール更新（名前 / bio / username）＋**アイコン画像のアップロード・デフォルト復帰**（本人のみ） | 要 |
 | `GET /api/github.php?user=` | GitHub リポジトリ取得（token はサーバ側・[ADR-003](decisions.md)） | 要 |
 | `/api/auth.php` | ログイン / ログアウト / `?action=status` / 新規登録〔double opt-in・[ADR-018](decisions.md)〕/ メール確認 / パスワード再設定 | — |
 | `POST /api/contact.php` | お問い合わせ保存（姓/名/email 必須・形式チェック） | 不要 |
@@ -155,7 +156,7 @@ docs/              spec / roadmap / decisions / roles / handoff
 - **おすすめ**（新着・人気の2軸ランキング）/ **タグ検索** / **ユーザー検索**。
 - **スター(⭐)** 付与・解除と**お気に入り**一覧。
 - **GitHub リポジトリ取り込み**・展示（token はサーバ側）。
-- **プロフィール**（`@username` ハンドル・自己紹介 bio）/ **マイページ**（作品管理）/ **アカウント設定**。
+- **プロフィール**（`@username` ハンドル・自己紹介 bio・**アイコン画像のアップロード/差し替え**）/ **マイページ**（作品管理）/ **アカウント設定**。
 - ページネーション（おすすめ「もっと見る」・検索）/ 共通ナビ・ハンバーガー・レスポンシブ。
 
 ### 今後の発展 🔜
