@@ -15,8 +15,13 @@ db_data/
 .idea/
 .obsidian/
 
+# PHP dependencies
+vendor/
+.phpunit.cache/
+
 # 個人作業メモ（repo に出さない・運用側で管理）
 開発者メモ.md
+ポートフォリオ化-手順書.md
 
 # ユーザーアップロード: 実体はコミットしない（.htaccess の security 設定だけ追跡）
 public/uploads/*
