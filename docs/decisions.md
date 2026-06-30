@@ -257,6 +257,7 @@
 - **関連**：`docs/account-settings-handoff.md`、[ADR-013](decisions.md)、[ADR-021](decisions.md)、[ADR-026](decisions.md)（CSRF）、`public/api/{users,auth}.php`、`public/mypage.php`。
 
 ## ADR-029 発見系の役割分担：検索は「もっと見る」ページング／おすすめは新着・人気の2軸ランキング型トップ ✅（優先トラック③）
+> **更新（2026-06-30）**：本ADRの**検索（works/users）側の「もっと見る」**は [ADR-044](decisions.md) で**番号付きページング＋総件数＋表示数切替**に置き換えた。当時「本規模では過剰」として番号ページ／`COUNT` を却下したが、検証用 seed の増量で対象件数が増え、検索が網羅ブラウズの実面になったため前提を見直した（規模変更による決定更新）。**おすすめ＝新着・人気の2軸ランキング**は引き続き本ADRのまま有効。
 - **背景**：おすすめ一覧（`gallery.php`）と作品検索（`search.php` works）は結果を**一度に全件返していた**（おすすめは LIMIT 無し、works は LIMIT 50）。当初は両方に「もっと見る」ページングを入れる設計だった（実際に一度実装した）。が、レビュー中に **おすすめ（トップ）と検索は仕事が違う**と気づいた：検索は「探した結果を網羅的に辿る」場、おすすめ（トップ）は「今の動きを一望する入口」。トップを網羅カタログ化してページングするより、**上位をキュレーションして見せる**方がプロダクトとして自然。
 - **決定**：発見系を2つの形に**役割分担**する。
   1. **検索（`search.php` works）＝「もっと見る」ページング**。`PER_PAGE = 12`、レスポンスは `{type, results, hasMore, page}`、`hasMore` は **`PER_PAGE+1` 件取得で判定**（余り1件は捨て `COUNT(*)` を撃たない）、`LIMIT/OFFSET` は **int キャストして SQL に直接埋める**（`page` は `(int)$_GET['page']` を最小1にクランプ）。フロントは**追記描画＋「もっと見る」**、新規検索はページ再読込でリセット。**ユーザー検索（`type=users`）はページングしない**（`LIMIT 30` 据え置き）。
@@ -474,3 +475,34 @@
 - **代替案・却下理由**：(a) 全部左に固める → 右が空いて中途半端。(b) SNS を幅中央に浮かせる → 一番座りが悪い。右端＋小さめが最も安定。(c) 会社情報ファーストのまま → 事務的で製品が埋もれる。
 - **影響**：`public/includes/footer.php`、`public/Style/footer.css` のみ。X/GitHub の URL は実プロフィール未設定のため**ダミー据え置き**（README の「デモ / プレースホルダについて」に明記）。
 - **関連**：[ADR-006](decisions.md)（PrismStar 命名）、[ADR-026](decisions.md)/[ADR-028](decisions.md)（安全の中央化）。
+
+## ADR-044 検索結果を「もっと見る」から番号付きページングへ（総件数・表示数切替つき）✅（規模拡大で ADR-029 の検索側を更新）
+> **更新（2026-06-30・実装レビュー後）**：実機レビューを受けて2点を整理。**(1) 表示件数変更時はアンカー優先を正式仕様にする**。URL 直打ち・初期表示・リロード・通常のページ番号クリックで `page=1` を開いた場合は、API の定義どおり検索順の先頭から最大 `perPage` 件を返す。一方、表示件数変更時は先頭へ戻ると閲覧文脈を失うため、直前の先頭作品を含むページへ移動する。したがって、アンカーを含むページが最終ページ相当になり表示件数未満へ着地することは許容する。これは API の `page=1` が少ないバグではなく、閲覧位置維持を優先した結果。**(2) 検索結果グリッドを5列に**＝表示件数 `10/30/50` は「5で割り切れる」前提なので5列なら 2/6/10 行の長方形に揃う（CLAUDE.md「1〜5列」とも整合）。幅トークン `--w-wide`（[ADR-038]・最大1180px）は据え置き、検索結果だけカードを約196pxに縮めて収める。**おすすめ（トップ）はカードを大きく見せるキュレーション枠、検索は網羅・情報量優先で小さめ5列という [ADR-029] の役割分担を視覚にも延長したもの（＝表示が違うのは意図）**。詳細は `docs/search-results-pagination-handoff.md` の「追補」。
+- **背景**：[ADR-029](decisions.md) は検索（works）を「もっと見る」段階読み込みにし、番号付きページ／cursor／`COUNT` を「**本規模では過剰**」として却下していた。その判断は*当時の規模*（作品1〜24・star も薄い）を前提にしたもの。今回、検索ページングと総件数表示を実機検証できるよう seed を増量し（公開作品 +30 目安）、検索が「網羅的に目的の対象を探す」実用面になった。User の違和感＝「もっと見る」はタイムライン的で、検索結果に**現在位置・結果規模（総件数）・URL 共有／復元・戻りやすさ**が足りない。検索結果は流し見る場ではなく探す場なので、2ページ目へ行く／前へ戻る／同じ検索状態を URL で開く、ができる方が自然。
+- **決定**：検索（`search.php`・works/users 両方）を**番号付きページング**に置き換える。
+  1. **ページ操作**：「前へ／次へ」＋（余裕があれば）ページ番号。`page` は 1 始まりで URL に残し、リロード／ブラウザバック／URL 共有で同じ検索状態を復元。`page` 不正値は 1、最終ページ超過は API が実際の最終ページに丸める。空検索（全件ブラウズ）も同じ仕様。
+  2. **総件数**：API が `total` を返し、見出し付近に「該当 N 件」を表示。works は検索と**同じ WHERE で `COUNT(DISTINCT g.id)`**、users は一致ユーザー数。`PER_PAGE+1` による `hasMore` 判定は廃止。
+  3. **表示件数切替**：`10 / 30 / 50` を選べる（**default 30**）。選択値は URL `per_page` に残し、API は **allowlist で `10/30/50` に限定**（不正値は 30 に丸め）。外部入力をそのまま `LIMIT` に入れない。
+  4. **表示件数切替時の位置維持（optional・後続でよい）**：`per_page` でページ境界が動くため**先頭固定は狙わない**。切替直前の先頭カードのおおよその絶対位置 `offset=(page-1)*per_page` から `newPage=floor(offset/newPerPage)+1` を計算し、そのページへ移動・可能ならスクロール。アンカーは**フロント専用の一時状態で API 契約に含めない**。見つからなければ通常のページ先頭表示。
+  - **API 契約**：`{ type, results, total, page, perPage, totalPages, hasPrev, hasNext }`。`totalPages = max(1, ceil(total/perPage))`、0件時も `page=1, totalPages=1`。`LIMIT/OFFSET` は int 化（`page` は最小1にクランプ）。
+  - **ユーザー検索も同じ page/per_page/total に揃える**（[ADR-029](decisions.md) の「users はページングしない・`LIMIT 30` 据え置き」を更新）。操作モデルを works/users で統一する。
+- **理由**：[ADR-029](decisions.md) の「過剰」判断は規模前提だった。対象件数が増えた今、検索＝網羅ブラウズの実面では**現在位置・総件数・URL 共有・戻りやすさ**が情報価値を持ち、`COUNT(DISTINCT)` のコストは本規模では無視できる範囲。**トップ＝キュレーション（2軸ランキング）／検索＝網羅**という [ADR-029](decisions.md) の役割分担はそのまま維持し、検索の「見せ方」だけを規模に合わせて更新する（トップは固定枠のままでよい）。位置の完全維持は番号ページと両立しないため、アンカー近傍移動という現実解に留める。
+- **代替案・却下理由**：
+  - **「もっと見る」維持** → 現在位置・結果規模・戻りやすさが弱く、探す画面として情報不足。今回の違和感の出所そのもの。
+  - **無限スクロール** → 検索＝目的を探す画面では位置を見失いやすく不適。
+  - **cursor / anchor-based pagination** → 表示件数可変（`per_page`）や「2ページ目へ直接」「URL 共有」と相性が悪く実装も重い。本規模では番号ページで十分。
+  - **表示件数切替で先頭固定を保証** → 番号ページは境界が `per_page` で動くため非保証。`offset` 指定や cursor に寄せる必要があり過剰。アンカー近傍移動で十分（§4 を optional 化）。
+  - **users はページングしないまま** → works と操作モデルが割れて一貫しない。総件数も出したいので同じ仕様に揃える。
+- **影響**：
+  - `public/api/search.php`：works/users 両 branch に `page`/`per_page`（allowlist）／`total`（`COUNT(DISTINCT)`）／`totalPages`/`hasPrev`/`hasNext`。works の `PER_PAGE=12`＋`PER_PAGE+1`＋`hasMore`、users の `LIMIT 30` 固定を置換。`LIMIT/OFFSET` は int 化を維持。
+  - `public/Script/search.js`：追記描画＋「もっと見る」を**ページ置換描画＋ページ操作 UI** に。表示件数セレクト・総件数表示・URL 同期（`history`）。位置維持アンカーは optional。
+  - `public/search.php`（ページ）：`#searchLoadMore` を撤去し、件数表示・表示件数セレクト・ページャ要素を追加。
+  - `public/Style/gallery-list.css`：ページャ／件数／セレクトの最小スタイルを追加。**`.load-more` は他で使わなくなるので整理可**（視覚作り込みは終盤）。
+  - `src/seed.php`：検証用に公開作品を +30 目安で増量（同一タグ 13 件以上・複数ページにまたがるキーワード）。**追加分の `created_at` は既存より古めに振り、トップの新着レーン（[ADR-029](decisions.md)）を検証ダミーで埋めない**。人気ランキングの star 傾斜は壊さない・冪等。
+  - **スキーマ変更なし。自分除外（[ADR-027](decisions.md)）・公開のみ・非公開の非開示は不変。** 並び順 `star_count DESC, g.created_at DESC, g.id DESC` は維持（見直すなら別 ADR）。
+- **詰まりどころ・判断メモ**：
+  - **規模が変わったので決定を見直す**：実装済み（[ADR-029](decisions.md) の「もっと見る」）を残す理由にはしない（[dont-anchor-on-current-state]）。前提（規模）が変わったので検索だけ番号ページへ。
+  - **`COUNT(DISTINCT g.id)` 必須**：star/tag の LEFT JOIN・EXISTS で行がファンアウトするため、行数 `COUNT(*)` ではなく `DISTINCT g.id`。
+  - **位置維持は optional**：①〜③で検索画面としての価値は出るので、④は後続に切れる（handoff も本体／optional を分離）。
+  - **コメント機能は別スコープ**：今回の検索改修には含めない（新規 DB/API/UI/削除・通報設計が必要）。Roadmap の今後の発展で管理。
+- **関連**：`docs/search-results-pagination-handoff.md`（Codex 実装 handoff）、`docs/search-results-pagination-spec.md`（User の仕様ドラフト＝出所）、[ADR-029](decisions.md)（検索側を本ADRで更新／おすすめ2軸は維持）、[ADR-025](decisions.md)（検索条件）、[ADR-027](decisions.md)（自分除外）、[ADR-020](decisions.md)（seed の公開/非公開ミックス）、`public/api/search.php`、`public/Script/search.js`、`public/search.php`、`src/seed.php`。

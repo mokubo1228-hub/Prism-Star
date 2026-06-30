@@ -1,16 +1,20 @@
 const searchHeading = document.getElementById("searchHeading");
+const searchCount = document.getElementById("searchCount");
 const searchResults = document.getElementById("searchResults");
-const searchLoadMoreButton = document.getElementById("searchLoadMore");
-const initialParams = new URLSearchParams(window.location.search);
-let page = 1;
-let loading = false;
+const searchPager = document.getElementById("searchPager");
+const searchPerPageSelect = document.getElementById("searchPerPage");
+const searchAllowedPerPages = ["10", "30", "50"];
+let searchIsLoading = false;
+let searchState = { page: 1, perPage: 30, totalPages: 1 };
 
-function showSearchMessage(message, className = "profile-empty") {
-  searchResults.textContent = "";
-  const item = document.createElement("p");
-  item.className = className;
-  item.textContent = message;
-  searchResults.appendChild(item);
+function normalizeSearchPage(value) {
+  const page = Number.parseInt(value, 10);
+  return Number.isFinite(page) && page > 0 ? page : 1;
+}
+
+function normalizeSearchPerPage(value) {
+  const perPage = String(value || "30");
+  return searchAllowedPerPages.includes(perPage) ? Number(perPage) : 30;
 }
 
 function currentSearchLabel(params) {
@@ -23,9 +27,40 @@ function currentSearchLabel(params) {
   return { type: "works", term: params.get("q") || "", label: "キーワード" };
 }
 
+function readSearchParams() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    params,
+    page: normalizeSearchPage(params.get("page")),
+    perPage: normalizeSearchPerPage(params.get("per_page")),
+  };
+}
+
+function syncSearchUrl(params, data, mode) {
+  if (mode === "none") return;
+  const nextParams = new URLSearchParams(params);
+  nextParams.set("page", String(data.page));
+  nextParams.set("per_page", String(data.perPage));
+  const nextUrl = `${window.location.pathname}?${nextParams.toString()}`;
+  if (mode === "replace") {
+    window.history.replaceState(null, "", nextUrl);
+  } else {
+    window.history.pushState(null, "", nextUrl);
+  }
+}
+
+function showSearchMessage(message, className = "profile-empty") {
+  searchResults.textContent = "";
+  const item = document.createElement("p");
+  item.className = className;
+  item.textContent = message;
+  searchResults.appendChild(item);
+}
+
 function renderWork(work) {
   const article = document.createElement("article");
   article.className = "gallery-card";
+  article.dataset.resultId = String(work.id);
 
   const thumb = document.createElement("div");
   thumb.className = "card-thumb";
@@ -117,6 +152,7 @@ function renderWork(work) {
 function renderUser(user) {
   const article = document.createElement("article");
   article.className = "user-result-card";
+  article.dataset.resultId = String(user.id);
 
   const link = document.createElement("a");
   link.href = `profile.php?id=${user.id}`;
@@ -138,67 +174,162 @@ function renderUser(user) {
   searchResults.appendChild(article);
 }
 
-// 検索結果の段階読み込み。現在の検索条件（q/tag/type）を保ったまま page だけ増やして追記する。
-// 新規検索はヘッダーからの画面遷移＝ページ再読込で page=1 から引き直す（[ADR-029]）。
-async function loadSearchPage(targetPage) {
-  if (loading) return;
-  loading = true;
-  if (searchLoadMoreButton) {
-    searchLoadMoreButton.disabled = true;
-  }
-
-  const requestParams = new URLSearchParams(initialParams);
-  requestParams.set("page", String(targetPage));
-
-  try {
-    const res = await fetch(`/api/search.php?${requestParams.toString()}`);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "検索に失敗しました");
-    if (targetPage === 1) {
-      searchResults.textContent = "";
-    }
-    if (!data.results.length) {
-      if (targetPage === 1) {
-        showSearchMessage("結果がありません。");
-      }
-      if (searchLoadMoreButton) searchLoadMoreButton.hidden = true;
-      return;
-    }
-    data.results.forEach(data.type === "users" ? renderUser : renderWork);
-    page = targetPage;
-    if (searchLoadMoreButton) {
-      searchLoadMoreButton.hidden = data.type !== "works" || !data.hasMore;
-    }
-  } catch (err) {
-    if (targetPage === 1) {
-      showSearchMessage(err.message, "profile-error");
-    } else {
-      alert(err.message);
-    }
-  } finally {
-    loading = false;
-    if (searchLoadMoreButton) {
-      searchLoadMoreButton.disabled = false;
-    }
-  }
-}
-
-async function runSearch() {
-  const search = currentSearchLabel(initialParams);
+function updateSearchSummary(params, data) {
+  const search = currentSearchLabel(params);
   if (searchHeading) {
     // 空検索は「全件ブラウズ」。サーバは q/tag が空なら全公開作品（自分以外）/全ユーザーを返す。
     searchHeading.textContent = search.term === ""
       ? (search.type === "users" ? "すべてのユーザー" : "すべての作品")
       : `${search.label}「${search.term}」の検索結果`;
   }
-
-  await window.PrismAuth.ready;
-  showSearchMessage("検索中...");
-  await loadSearchPage(1);
+  if (searchCount) {
+    searchCount.textContent = `該当 ${data.total} 件`;
+  }
+  if (searchPerPageSelect) {
+    searchPerPageSelect.value = String(data.perPage);
+  }
 }
+
+function createPagerButton(label, targetPage, disabled, isCurrent = false) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = label;
+  button.disabled = disabled;
+  if (isCurrent) {
+    button.className = "is-current";
+    button.setAttribute("aria-current", "page");
+  }
+  button.addEventListener("click", () => {
+    loadSearchPage(targetPage, { mode: "push" });
+  });
+  return button;
+}
+
+function searchPageNumbers(currentPage, totalPages) {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_unused, index) => index + 1);
+  }
+
+  const pages = [1];
+  const start = Math.max(2, currentPage - 1);
+  const end = Math.min(totalPages - 1, currentPage + 1);
+  if (start > 2) pages.push("...");
+  for (let page = start; page <= end; page++) {
+    pages.push(page);
+  }
+  if (end < totalPages - 1) pages.push("...");
+  pages.push(totalPages);
+  return pages;
+}
+
+function renderSearchPager(data) {
+  if (!searchPager) return;
+  searchPager.textContent = "";
+  if (data.total === 0) {
+    searchPager.hidden = true;
+    return;
+  }
+
+  searchPager.hidden = false;
+  searchPager.appendChild(createPagerButton("前へ", data.page - 1, !data.hasPrev));
+  searchPageNumbers(data.page, data.totalPages).forEach((item) => {
+    if (item === "...") {
+      const ellipsis = document.createElement("span");
+      ellipsis.className = "pager-ellipsis";
+      ellipsis.textContent = "...";
+      searchPager.appendChild(ellipsis);
+      return;
+    }
+    searchPager.appendChild(createPagerButton(String(item), item, false, item === data.page));
+  });
+  searchPager.appendChild(createPagerButton("次へ", data.page + 1, !data.hasNext));
+}
+
+function findRenderedResult(resultId) {
+  if (!resultId) return null;
+  return Array.from(searchResults.querySelectorAll("[data-result-id]"))
+    .find((item) => item.dataset.resultId === String(resultId)) || null;
+}
+
+function scrollToRenderedResult(resultId) {
+  const item = findRenderedResult(resultId);
+  if (item) {
+    item.scrollIntoView({ block: "start" });
+  }
+}
+
+async function loadSearchPage(targetPage, options = {}) {
+  if (searchIsLoading) return;
+  searchIsLoading = true;
+  if (searchPerPageSelect) {
+    searchPerPageSelect.disabled = true;
+  }
+
+  const mode = options.mode || "push";
+  const { params, perPage } = readSearchParams();
+  const requestPerPage = options.perPage || perPage;
+  const requestPage = normalizeSearchPage(targetPage || params.get("page"));
+  params.set("page", String(requestPage));
+  params.set("per_page", String(requestPerPage));
+
+  try {
+    showSearchMessage("検索中...");
+    const res = await fetch(`/api/search.php?${params.toString()}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "検索に失敗しました");
+
+    searchState = {
+      page: data.page,
+      perPage: data.perPage,
+      totalPages: data.totalPages,
+    };
+    syncSearchUrl(params, data, mode);
+    updateSearchSummary(params, data);
+
+    searchResults.textContent = "";
+    if (!data.results.length) {
+      showSearchMessage("結果がありません。");
+    } else {
+      data.results.forEach(data.type === "users" ? renderUser : renderWork);
+    }
+    renderSearchPager(data);
+    if (options.anchorId && data.page > 1 && data.page === requestPage) {
+      scrollToRenderedResult(options.anchorId);
+    }
+  } catch (err) {
+    showSearchMessage(err.message, "profile-error");
+    if (searchPager) searchPager.hidden = true;
+    if (searchCount) searchCount.textContent = "";
+  } finally {
+    searchIsLoading = false;
+    if (searchPerPageSelect) {
+      searchPerPageSelect.disabled = false;
+    }
+  }
+}
+
+async function runSearch() {
+  await window.PrismAuth.ready;
+  const { page } = readSearchParams();
+  await loadSearchPage(page, { mode: "replace" });
+}
+
+if (searchPerPageSelect) {
+  searchPerPageSelect.addEventListener("change", () => {
+    const newPerPage = normalizeSearchPerPage(searchPerPageSelect.value);
+    const firstResult = searchResults.querySelector("[data-result-id]");
+    const anchorId = firstResult ? firstResult.dataset.resultId : "";
+    // 表示件数変更で先頭へ戻ると閲覧位置を失うため、直前の先頭作品を含むページへ移す。
+    // その結果として半端な最終ページへ着地することは、検索中の文脈維持を優先する仕様。
+    const offset = (searchState.page - 1) * searchState.perPage;
+    const nextPage = Math.floor(offset / newPerPage) + 1;
+    loadSearchPage(nextPage, { mode: "push", perPage: newPerPage, anchorId });
+  });
+}
+
+window.addEventListener("popstate", () => {
+  const { page } = readSearchParams();
+  loadSearchPage(page, { mode: "none" });
+});
 
 runSearch();
-
-if (searchLoadMoreButton) {
-  searchLoadMoreButton.addEventListener("click", () => loadSearchPage(page + 1));
-}

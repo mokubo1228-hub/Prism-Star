@@ -8,7 +8,6 @@ bootSession();
 header('Content-Type: application/json; charset=utf-8');
 
 $pdo = getDb();
-const PER_PAGE = 12;
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
@@ -24,11 +23,39 @@ $tag = trim((string)($_GET['tag'] ?? ''));
 $q = preg_replace('/^[#＃]+\s*/u', '', $q);
 $tag = preg_replace('/^[#＃]+\s*/u', '', $tag);
 $currentUserId = (int)($_SESSION['user_id'] ?? 0);
+$allowedPerPage = [10, 30, 50];
+$requestedPerPage = (int)($_GET['per_page'] ?? 30);
+$perPage = in_array($requestedPerPage, $allowedPerPage, true) ? $requestedPerPage : 30;
+$page = max(1, (int)($_GET['page'] ?? 1));
+
+function paginationMeta(int $total, int $page, int $perPage): array
+{
+    $totalPages = max(1, (int)ceil($total / $perPage));
+    $page = min($page, $totalPages);
+    return [
+        'page' => $page,
+        'perPage' => $perPage,
+        'totalPages' => $totalPages,
+        'offset' => ($page - 1) * $perPage,
+        'hasPrev' => $page > 1,
+        'hasNext' => $page < $totalPages,
+    ];
+}
 
 // ユーザー検索：表示名 / GitHub ユーザー名で一致。公開作品数・スター総数は
 // gallery を visibility='public' で JOIN して数えるので、非公開は集計にも漏れない。
 if ($type === 'users') {
     $like = '%' . $q . '%';
+    $countStmt = $pdo->prepare("
+        SELECT COUNT(*)
+        FROM users u
+        WHERE (? = '' OR u.name LIKE ? OR u.github_username LIKE ?)
+    ");
+    $countStmt->execute([$q, $like, $like]);
+    $total = (int)$countStmt->fetchColumn();
+    $meta = paginationMeta($total, $page, $perPage);
+    $offset = $meta['offset'];
+
     $stmt = $pdo->prepare("
         SELECT
             u.id,
@@ -42,7 +69,7 @@ if ($type === 'users') {
         WHERE (? = '' OR u.name LIKE ? OR u.github_username LIKE ?)
         GROUP BY u.id, u.name, u.github_username
         ORDER BY public_work_count DESC, u.created_at DESC
-        LIMIT 30
+        LIMIT {$perPage} OFFSET {$offset}
     ");
     $stmt->execute([$q, $like, $like]);
     $rows = array_map(static function (array $row): array {
@@ -51,7 +78,16 @@ if ($type === 'users') {
         $row['total_stars'] = (int)$row['total_stars'];
         return $row;
     }, $stmt->fetchAll());
-    echo json_encode(['type' => 'users', 'results' => $rows], JSON_UNESCAPED_UNICODE);
+    echo json_encode([
+        'type' => 'users',
+        'results' => $rows,
+        'total' => $total,
+        'page' => $meta['page'],
+        'perPage' => $meta['perPage'],
+        'totalPages' => $meta['totalPages'],
+        'hasPrev' => $meta['hasPrev'],
+        'hasNext' => $meta['hasNext'],
+    ], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -61,12 +97,34 @@ if ($type === 'users') {
 // tag はタグ検索。フロントは入力が # 始まりなら tag に、それ以外は q に振り分ける（[ADR-025]）。
 $like = '%' . $q . '%';
 $tagLike = '%' . $tag . '%';
-// 検索は網羅的に辿る場なので「もっと見る」で段階読み込みする（[ADR-029]）。総件数 COUNT は撃たず、
-// PER_PAGE+1 件取れたら「次がある（hasMore）」と判定して余り1件は捨てる。LIMIT/OFFSET は int 化した
-// 値だけを文字列に埋める＝外部入力を SQL に渡さない（page は最小1にクランプ）。
-$page = max(1, (int)($_GET['page'] ?? 1));
-$offset = ($page - 1) * PER_PAGE;
-$limit = PER_PAGE + 1;
+// 検索結果は番号付きページで現在位置を示すため、結果本体と同じ WHERE で総件数を返す（[ADR-044]）。
+// star/tag の JOIN で行が増え得るので COUNT(DISTINCT g.id) にして、表示件数と結果のズレを防ぐ。
+$countStmt = $pdo->prepare("
+    SELECT COUNT(DISTINCT g.id)
+    FROM gallery g
+    INNER JOIN users u ON u.id = g.user_id
+    WHERE g.visibility = 'public'
+      AND (? = 0 OR g.user_id <> ?)
+      AND (
+        ? = ''
+        OR g.title LIKE ?
+        OR g.description LIKE ?
+      )
+      AND (
+        ? = ''
+        OR EXISTS (
+            SELECT 1
+            FROM gallery_tags gt3
+            INNER JOIN tags t3 ON t3.id = gt3.tag_id
+            WHERE gt3.gallery_id = g.id AND t3.name LIKE ?
+        )
+      )
+");
+$countStmt->execute([$currentUserId, $currentUserId, $q, $like, $like, $tag, $tagLike]);
+$total = (int)$countStmt->fetchColumn();
+$meta = paginationMeta($total, $page, $perPage);
+$offset = $meta['offset'];
+
 $stmt = $pdo->prepare("
     SELECT
         g.id,
@@ -104,14 +162,9 @@ $stmt = $pdo->prepare("
       )
     GROUP BY g.id, g.user_id, u.name, u.avatar_path, g.title, g.src, g.description, g.source, g.source_url, g.created_at
     ORDER BY star_count DESC, g.created_at DESC, g.id DESC
-    LIMIT {$limit} OFFSET {$offset}
+    LIMIT {$perPage} OFFSET {$offset}
 ");
 $stmt->execute([$currentUserId, $currentUserId, $currentUserId, $q, $like, $like, $tag, $tagLike]);
-$rows = $stmt->fetchAll();
-$hasMore = count($rows) > PER_PAGE;
-if ($hasMore) {
-    $rows = array_slice($rows, 0, PER_PAGE);
-}
 $rows = array_map(static function (array $row): array {
     $row['id'] = (int)$row['id'];
     $row['user_id'] = (int)$row['user_id'];
@@ -120,6 +173,15 @@ $rows = array_map(static function (array $row): array {
     $row['author_avatar'] = avatarUrl($row['author_avatar']);
     $row['tags'] = $row['tags'] === null || $row['tags'] === '' ? [] : explode(',', $row['tags']);
     return $row;
-}, $rows);
+}, $stmt->fetchAll());
 
-echo json_encode(['type' => 'works', 'results' => $rows, 'hasMore' => $hasMore, 'page' => $page], JSON_UNESCAPED_UNICODE);
+echo json_encode([
+    'type' => 'works',
+    'results' => $rows,
+    'total' => $total,
+    'page' => $meta['page'],
+    'perPage' => $meta['perPage'],
+    'totalPages' => $meta['totalPages'],
+    'hasPrev' => $meta['hasPrev'],
+    'hasNext' => $meta['hasNext'],
+], JSON_UNESCAPED_UNICODE);
