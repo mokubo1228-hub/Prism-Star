@@ -79,6 +79,7 @@
   margin: 0 20px 10px;
 }
 
+/* おすすめ/人気はキュレーション枠なので1枚を大きく見せる。横スクロール前提の .rank-row 限定で、検索やプロフィールの .gallery-grid へ波及させない。 */
 .rank-row {
   --gallery-icon-w: 230px;
   --gallery-icon-h: 172px;
@@ -863,6 +864,7 @@
     --cols: 4;
   }
 
+  /* 検索は網羅・情報量優先。10/30/50件が5列で割り切れるよう、幅トークンは据え置きで検索結果だけカードを縮める。 */
   .search-results {
     --gallery-icon-w: 196px;
     --gallery-icon-h: 147px;

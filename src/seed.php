@@ -16,6 +16,7 @@ function pick(array $items, int $index): string
 
 function dateFromIndex(int $index): string
 {
+    // バルク生成作品は顔になる作品1〜24より古く置き、新着トップ5をダミーで埋めない。固定基点なので実行時刻にも依存しない。
     $day = intdiv($index, 12);
     $hour = 8 + ($index % 10);
     $minute = ($index * 7) % 60;
@@ -122,6 +123,7 @@ try {
     $motifs = ['窓辺', '路地', '水面', '駅前', '庭', '屋上', '机上', '海岸', '森の奥', '市場', '階段', '橋', '部屋', '雲間', '影'];
     $moods = ['静かな', '淡い', '透明な', '深い', 'やわらかな', '鮮やかな', '遠い', '穏やかな', '冷たい', '暖かな'];
     $forms = ['スケッチ', '習作', '構成', '小景', '断片', '連作', '色面', '記録', 'ドローイング', 'レイヤー'];
+    // テーマ語と副タグ語を分け、同一作品内のタグ重複と「抽象」のような突出タグを seed 生成時点で避ける。
     $secondaryTags = ['透明感', '静けさ', 'リズム', '層', '反射', '温度', '距離', '質感', '線', '面', '陰影', '余韻', '粒子', '流れ', '対比', '調和', '奥行き', '気配', '視線', '時間'];
 
     $initialWorkCounts = array_fill_keys(array_keys($users), 0);
@@ -158,6 +160,7 @@ try {
         $tagBlock = intdiv($i - 1, count($themes));
         $tagSecondIndex = (($i - 1) * 7 + $tagBlock) % count($secondaryTags);
         $tagSecond = $secondaryTags[$tagSecondIndex];
+        // 副タグ20語の半周ずらしで tag2/tag3 を必ず別語にしつつ、検索ページング検証に必要なタグ分布を均す。
         $tagThird = $secondaryTags[($tagSecondIndex + 10) % count($secondaryTags)];
         $tags = [$theme, $tagSecond, $tagThird];
         $work = [
@@ -176,6 +179,7 @@ try {
     }
 
     // 旧検索検証 fixture は UI に見えるとテスト臭が強いため、新しい自然名の大量 seed に置き換える。
+    // FK の ON DELETE CASCADE で関連タグ/スターも掃除され、置換後の再実行では no-op になる。
     $pdo->prepare("DELETE FROM gallery WHERE title LIKE ?")->execute(['検索検証 %']);
 
     $selectWork = $pdo->prepare("SELECT id FROM gallery WHERE title = ? LIMIT 1");
@@ -234,7 +238,7 @@ try {
         }
     };
 
-    // 人気レーンは「スターが集まった作品」が明確に見える必要があるため、上位だけ強めに傾斜させる。
+    // 人気レーンは「スターが集まった作品」が明確に見える必要があるため、上位だけ強めに傾斜させる。INSERT IGNORE 前提なので再実行で増えない。
     $starTargets = [
         '作品24' => 36,
         '作品23' => 34,
