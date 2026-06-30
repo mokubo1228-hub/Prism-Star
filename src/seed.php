@@ -9,6 +9,26 @@ require_once __DIR__ . '/db.php';
 $pdo = getDb();
 $pdo->beginTransaction();
 
+function pick(array $items, int $index): string
+{
+    return $items[$index % count($items)];
+}
+
+function dateFromIndex(int $index): string
+{
+    $day = intdiv($index, 12);
+    $hour = 8 + ($index % 10);
+    $minute = ($index * 7) % 60;
+    return date('Y-m-d H:i:s', strtotime("2023-01-01 +{$day} days {$hour} hours {$minute} minutes"));
+}
+
+function imageUrl(int $index): string
+{
+    $widths = [300, 320, 340, 360, 380, 400];
+    $heights = [200, 220, 240, 260, 280];
+    return 'https://placehold.jp/' . pick($widths, $index) . 'x' . pick($heights, intdiv($index, 2)) . '.png';
+}
+
 try {
     $hash = password_hash('password123', PASSWORD_DEFAULT);
     $users = [
@@ -26,6 +46,32 @@ try {
         'user12@example.com' => ['name' => 'Toma', 'username' => 'toma', 'github' => null],
         'user13@example.com' => ['name' => 'Mei', 'username' => 'mei', 'github' => null],
         'user14@example.com' => ['name' => 'Itsuki', 'username' => 'itsuki', 'github' => null],
+        'user15@example.com' => ['name' => 'Hina', 'username' => 'hina', 'github' => null],
+        'user16@example.com' => ['name' => 'Yuna', 'username' => 'yuna', 'github' => null],
+        'user17@example.com' => ['name' => 'Minato', 'username' => 'minato', 'github' => null],
+        'user18@example.com' => ['name' => 'Shion', 'username' => 'shion', 'github' => null],
+        'user19@example.com' => ['name' => 'Ayaka', 'username' => 'ayaka', 'github' => null],
+        'user20@example.com' => ['name' => 'Nao', 'username' => 'nao', 'github' => null],
+        'user21@example.com' => ['name' => 'Koharu', 'username' => 'koharu', 'github' => null],
+        'user22@example.com' => ['name' => 'Hayate', 'username' => 'hayate', 'github' => null],
+        'user23@example.com' => ['name' => 'Rin', 'username' => 'rin', 'github' => null],
+        'user24@example.com' => ['name' => 'Yuto', 'username' => 'yuto', 'github' => null],
+        'user25@example.com' => ['name' => 'Sena', 'username' => 'sena', 'github' => null],
+        'user26@example.com' => ['name' => 'Noa', 'username' => 'noa', 'github' => null],
+        'user27@example.com' => ['name' => 'Hinata', 'username' => 'hinata', 'github' => null],
+        'user28@example.com' => ['name' => 'Kaede', 'username' => 'kaede', 'github' => null],
+        'user29@example.com' => ['name' => 'Ema', 'username' => 'ema', 'github' => null],
+        'user30@example.com' => ['name' => 'Nagi', 'username' => 'nagi', 'github' => null],
+        'user31@example.com' => ['name' => 'Rio', 'username' => 'rio', 'github' => null],
+        'user32@example.com' => ['name' => 'Yuina', 'username' => 'yuina', 'github' => null],
+        'user33@example.com' => ['name' => 'Taiga', 'username' => 'taiga', 'github' => null],
+        'user34@example.com' => ['name' => 'Maki', 'username' => 'maki', 'github' => null],
+        'user35@example.com' => ['name' => 'Rina', 'username' => 'rina', 'github' => null],
+        'user36@example.com' => ['name' => 'Sou', 'username' => 'sou', 'github' => null],
+        'user37@example.com' => ['name' => 'Fuka', 'username' => 'fuka', 'github' => null],
+        'user38@example.com' => ['name' => 'Asahi', 'username' => 'asahi', 'github' => null],
+        'user39@example.com' => ['name' => 'Chika', 'username' => 'chika', 'github' => null],
+        'user40@example.com' => ['name' => 'Keito', 'username' => 'keito', 'github' => null],
     ];
 
     $selectUser = $pdo->prepare("SELECT id FROM users WHERE email = ?");
@@ -70,41 +116,67 @@ try {
         ['mio@example.com',  '作品22', 'https://placehold.jp/300x260.png', '小さな窓から見える空を描いた作品。室内の静けさと外の広がりを対比させています。', 'public', ['空', '日常']],
         ['aoi@example.com',  '作品23', 'https://placehold.jp/340x220.png', '公園の木漏れ日をテーマにした作品。緑の重なりと白い余白で風景の奥行きを作りました。', 'public', ['風景', '光']],
         ['ren@example.com',  '作品24', 'https://placehold.jp/320x240.png', '夜明け前の雨雲をイメージした抽象作品。青と灰色の層で湿度のある空気を表現しています。', 'public', ['雨', '空', '抽象']],
-        ['aoi@example.com',  '検索検証 雨の都市 01', 'https://placehold.jp/300x200.png', '雨の都市を歩く人影を描いた検索検証用作品。雨と都市のキーワードで複数ページを確認します。', 'public', ['雨', '都市'], '2024-01-01 09:00:00'],
-        ['ren@example.com',  '検索検証 雨の都市 02', 'https://placehold.jp/310x200.png', '雨の都市に反射する看板の光をテーマにした検索検証用作品です。', 'public', ['雨', '都市', '光'], '2024-01-02 09:00:00'],
-        ['mio@example.com',  '検索検証 雨の都市 03', 'https://placehold.jp/320x210.png', '都市の路地に降る雨を、淡い色面で構成した作品です。', 'public', ['雨', '都市'], '2024-01-03 09:00:00'],
-        ['user05@example.com', '検索検証 雨の都市 04', 'https://placehold.jp/330x210.png', '雨の駅前広場と都市のざわめきを検索確認用に描きました。', 'public', ['雨', '都市', '夜'], '2024-01-04 09:00:00'],
-        ['user06@example.com', '検索検証 雨の都市 05', 'https://placehold.jp/340x220.png', '都市の窓に残る雨粒をモチーフにした検索検証用の一枚です。', 'public', ['雨', '都市', '日常'], '2024-01-05 09:00:00'],
-        ['user07@example.com', '検索検証 雨の都市 06', 'https://placehold.jp/350x220.png', '雨の歩道橋から見下ろす都市の線を描いた作品です。', 'public', ['雨', '都市'], '2024-01-06 09:00:00'],
-        ['user08@example.com', '検索検証 雨の都市 07', 'https://placehold.jp/360x230.png', '都市の夕暮れに降る雨を、青い影と橙色の光で表現しました。', 'public', ['雨', '都市', '光'], '2024-01-07 09:00:00'],
-        ['user09@example.com', '検索検証 雨の都市 08', 'https://placehold.jp/370x230.png', '雨上がりの都市公園を題材にした検索検証用作品です。', 'public', ['雨', '都市', '風景'], '2024-01-08 09:00:00'],
-        ['user10@example.com', '検索検証 雨の都市 09', 'https://placehold.jp/380x240.png', '夜の都市に落ちる雨と反射光を、幾何学的な構図で描きました。', 'public', ['雨', '都市', '夜'], '2024-01-09 09:00:00'],
-        ['user11@example.com', '検索検証 雨の都市 10', 'https://placehold.jp/390x240.png', '雨の都市を横切る電車の窓明かりをテーマにした作品です。', 'public', ['雨', '都市'], '2024-01-10 09:00:00'],
-        ['user12@example.com', '検索検証 雨の都市 11', 'https://placehold.jp/300x210.png', '都市のビル群に降る細い雨を、線の重なりで表現しました。', 'public', ['雨', '都市', '抽象'], '2024-01-11 09:00:00'],
-        ['user13@example.com', '検索検証 雨の都市 12', 'https://placehold.jp/310x220.png', '雨の交差点と都市の信号を検索確認用に描いた作品です。', 'public', ['雨', '都市'], '2024-01-12 09:00:00'],
-        ['user14@example.com', '検索検証 雨の都市 13', 'https://placehold.jp/320x230.png', '都市の屋上から見る雨雲をテーマにした検索検証用作品です。', 'public', ['雨', '都市', '空'], '2024-01-13 09:00:00'],
-        ['aoi@example.com',  '検索検証 雨の抽象 14', 'https://placehold.jp/330x240.png', '雨の音を抽象的な線と点で表現した検索検証用作品です。', 'public', ['雨', '抽象'], '2024-01-14 09:00:00'],
-        ['ren@example.com',  '検索検証 雨の抽象 15', 'https://placehold.jp/340x250.png', '雨が水面に広がる様子を抽象化し、検索結果の件数確認に使います。', 'public', ['雨', '抽象'], '2024-01-15 09:00:00'],
-        ['mio@example.com',  '検索検証 雨の抽象 16', 'https://placehold.jp/350x260.png', '雨のリズムを色の反復で描いた抽象作品です。', 'public', ['雨', '抽象'], '2024-01-16 09:00:00'],
-        ['user05@example.com', '検索検証 雨の空 17', 'https://placehold.jp/360x240.png', '雨雲の切れ間から見える空を描き、雨と空の検索確認に使います。', 'public', ['雨', '空'], '2024-01-17 09:00:00'],
-        ['user06@example.com', '検索検証 雨の空 18', 'https://placehold.jp/370x240.png', '雨上がりの空に残る光をテーマにした作品です。', 'public', ['雨', '空', '光'], '2024-01-18 09:00:00'],
-        ['user07@example.com', '検索検証 雨の空 19', 'https://placehold.jp/380x250.png', '空から落ちる雨を、縦の線と淡い青で表現しました。', 'public', ['雨', '空'], '2024-01-19 09:00:00'],
-        ['user08@example.com', '検索検証 都市の抽象 20', 'https://placehold.jp/390x250.png', '都市のビルの形を抽象化した検索検証用作品です。', 'public', ['都市', '抽象'], '2024-01-20 09:00:00'],
-        ['user09@example.com', '検索検証 都市の抽象 21', 'https://placehold.jp/300x240.png', '都市の移動と光を抽象的な面で構成しました。', 'public', ['都市', '抽象', '光'], '2024-01-21 09:00:00'],
-        ['user10@example.com', '検索検証 都市の抽象 22', 'https://placehold.jp/310x240.png', '都市の地図を抽象模様として描いた検索確認用作品です。', 'public', ['都市', '抽象'], '2024-01-22 09:00:00'],
-        ['user11@example.com', '検索検証 都市の空 23', 'https://placehold.jp/320x250.png', '都市の狭い路地から見える空を描いた作品です。', 'public', ['都市', '空'], '2024-01-23 09:00:00'],
-        ['user12@example.com', '検索検証 都市の空 24', 'https://placehold.jp/330x250.png', '都市の高架越しに広がる空をテーマにしています。', 'public', ['都市', '空'], '2024-01-24 09:00:00'],
-        ['user13@example.com', '検索検証 都市の夜 25', 'https://placehold.jp/340x260.png', '夜の都市と雨上がりの路面を描いた検索検証用作品です。', 'public', ['都市', '夜'], '2024-01-25 09:00:00'],
-        ['user14@example.com', '検索検証 都市の花 26', 'https://placehold.jp/350x260.png', '都市の隙間に咲く花を題材にした検索検証用作品です。', 'public', ['都市', '花'], '2024-01-26 09:00:00'],
-        ['aoi@example.com',  '検索検証 雨の花 27', 'https://placehold.jp/360x260.png', '雨に濡れた花を中心に、検索語の分布確認用として制作した作品です。', 'public', ['雨', '花'], '2024-01-27 09:00:00'],
-        ['ren@example.com',  '検索検証 抽象の空 28', 'https://placehold.jp/370x260.png', '空の色を抽象的に分解した検索検証用作品です。', 'public', ['抽象', '空'], '2024-01-28 09:00:00'],
-        ['mio@example.com',  '検索検証 雨の日常 29', 'https://placehold.jp/380x260.png', '雨の日常を静かな室内の視点で描いた作品です。', 'public', ['雨', '日常'], '2024-01-29 09:00:00'],
-        ['user05@example.com', '検索検証 都市の日常 30', 'https://placehold.jp/390x260.png', '都市の日常と雨上がりの空気を検索確認用に描きました。', 'public', ['都市', '日常'], '2024-01-30 09:00:00'],
-        ['demo@example.com', '検索検証 非公開 雨 31', 'https://placehold.jp/300x200.png', '非公開作品が検索結果に出ないことを確認するための雨の作品です。', 'private', ['雨', '検証'], '2024-01-31 09:00:00'],
-        ['aoi@example.com',  '検索検証 非公開 都市 32', 'https://placehold.jp/310x200.png', '非公開作品が検索件数に混ざらないことを確認する都市の作品です。', 'private', ['都市', '検証'], '2024-02-01 09:00:00'],
-        ['ren@example.com',  '検索検証 非公開 抽象 33', 'https://placehold.jp/320x200.png', '非公開の抽象作品が検索に出ないことを確認するための fixture です。', 'private', ['抽象', '検証'], '2024-02-02 09:00:00'],
-        ['mio@example.com',  '検索検証 非公開 空 34', 'https://placehold.jp/330x200.png', '非公開の空の作品が検索結果に含まれないことを確認します。', 'private', ['空', '検証'], '2024-02-03 09:00:00'],
     ];
+
+    $themes = ['雨', '都市', '空', '抽象', '光', '夜', '花', '風景', '海', '森', '静物', '記憶', '余白', '輪郭', '水', '朝', '季節', '風', '幻想', '日常'];
+    $motifs = ['窓辺', '路地', '水面', '駅前', '庭', '屋上', '机上', '海岸', '森の奥', '市場', '階段', '橋', '部屋', '雲間', '影'];
+    $moods = ['静かな', '淡い', '透明な', '深い', 'やわらかな', '鮮やかな', '遠い', '穏やかな', '冷たい', '暖かな'];
+    $forms = ['スケッチ', '習作', '構成', '小景', '断片', '連作', '色面', '記録', 'ドローイング', 'レイヤー'];
+    $secondaryTags = ['透明感', '静けさ', 'リズム', '層', '反射', '温度', '距離', '質感', '線', '面', '陰影', '余韻', '粒子', '流れ', '対比', '調和', '奥行き', '気配', '視線', '時間'];
+
+    $initialWorkCounts = array_fill_keys(array_keys($users), 0);
+    foreach ($works as $work) {
+        $initialWorkCounts[$work[0]]++;
+    }
+
+    $authorPool = [];
+    $userEmails = array_keys($users);
+    $assignedWorkCounts = array_fill_keys($userEmails, 0);
+    for ($round = 1; $round <= 14; $round++) {
+        foreach ($userEmails as $index => $email) {
+            $target = $index < 30 ? 14 : 13;
+            if (($initialWorkCounts[$email] ?? 0) + $assignedWorkCounts[$email] < $target) {
+                $authorPool[] = $email;
+                $assignedWorkCounts[$email]++;
+            }
+        }
+    }
+
+    $bulkPublicTarget = 482;
+    $bulkPrivateTarget = 44;
+    $bulkTotal = $bulkPublicTarget + $bulkPrivateTarget;
+    $publicBulkTitles = [];
+
+    for ($i = 1; $i <= $bulkTotal; $i++) {
+        $theme = pick($themes, $i - 1);
+        $motif = pick($motifs, $i + intdiv($i, 3));
+        $mood = pick($moods, $i + intdiv($i, 5));
+        $form = pick($forms, $i + intdiv($i, 7));
+        $title = "{$theme}の{$motif} {$form} " . sprintf('%03d', $i);
+        $description = "{$mood}{$theme}を{$motif}の気配と重ね、{$form}としてまとめた作品です。色の間合いと視線の流れで、発見の余白が残るように構成しています。";
+        $visibility = $i <= $bulkPrivateTarget ? 'private' : 'public';
+        $tagBlock = intdiv($i - 1, count($themes));
+        $tagSecondIndex = (($i - 1) * 7 + $tagBlock) % count($secondaryTags);
+        $tagSecond = $secondaryTags[$tagSecondIndex];
+        $tagThird = $secondaryTags[($tagSecondIndex + 10) % count($secondaryTags)];
+        $tags = [$theme, $tagSecond, $tagThird];
+        $work = [
+            $authorPool[$i - 1],
+            $title,
+            imageUrl($i),
+            $description,
+            $visibility,
+            array_slice($tags, 0, 3),
+            dateFromIndex($i),
+        ];
+        $works[] = $work;
+        if ($visibility === 'public') {
+            $publicBulkTitles[] = $title;
+        }
+    }
+
+    // 旧検索検証 fixture は UI に見えるとテスト臭が強いため、新しい自然名の大量 seed に置き換える。
+    $pdo->prepare("DELETE FROM gallery WHERE title LIKE ?")->execute(['検索検証 %']);
 
     $selectWork = $pdo->prepare("SELECT id FROM gallery WHERE title = ? LIMIT 1");
     $insertWork = $pdo->prepare("INSERT INTO gallery (user_id, title, src, description, visibility, created_at) VALUES (?, ?, ?, ?, ?, COALESCE(?, CURRENT_TIMESTAMP))");
@@ -144,46 +216,57 @@ try {
         }
     }
 
-    // 人気ランキングを「人気順に見える」ようにするための星の作り込み（[ADR-029]）。星が無いと全作品が
-    // 同点で順位が出ないため、上位ほど多く付くよう降順で配分する。星は作者以外のユーザーから付け（自然）、
-    // INSERT IGNORE＋UNIQUE(user_id,gallery_id) で何度流しても増えない（冪等）。
-    $starTargets = [
-        '作品24' => 13,
-        '作品23' => 12,
-        '作品21' => 11,
-        '作品18' => 10,
-        '作品20' => 8,
-        '作品22' => 7,
-        '作品19' => 6,
-        '作品15' => 5,
-        '作品14' => 4,
-        '作品12' => 3,
-        '作品10' => 2,
-        '作品2'  => 1,
-    ];
     $insertStar = $pdo->prepare("INSERT IGNORE INTO stars (user_id, gallery_id) VALUES (?, ?)");
-    $starFixtureCount = 0;
-    foreach ($starTargets as $title => $targetCount) {
+    $addStars = static function (string $title, int $targetCount, int $offset) use ($users, $userIds, $workIds, $workAuthors, $insertStar): void {
         if (!isset($workIds[$title], $workAuthors[$title])) {
-            continue;
+            return;
         }
 
+        $emails = array_keys($users);
         $given = 0;
-        foreach ($users as $email => $_user) {
+        for ($i = 0; $i < count($emails) * 2 && $given < $targetCount; $i++) {
+            $email = $emails[($i + $offset) % count($emails)];
             if ($email === $workAuthors[$title]) {
                 continue;
             }
             $insertStar->execute([$userIds[$email], $workIds[$title]]);
             $given++;
-            if ($given >= $targetCount) {
-                break;
-            }
         }
-        $starFixtureCount += $given;
+    };
+
+    // 人気レーンは「スターが集まった作品」が明確に見える必要があるため、上位だけ強めに傾斜させる。
+    $starTargets = [
+        '作品24' => 36,
+        '作品23' => 34,
+        '作品21' => 32,
+        '作品18' => 30,
+        '作品20' => 28,
+        '作品22' => 26,
+        '作品19' => 24,
+        '作品15' => 22,
+        '作品14' => 20,
+        '作品12' => 18,
+        '作品10' => 16,
+        '作品2'  => 14,
+    ];
+    foreach ($starTargets as $title => $targetCount) {
+        $addStars($title, $targetCount, $targetCount);
     }
 
+    foreach (array_slice($publicBulkTitles, 0, 90) as $index => $title) {
+        $addStars($title, max(1, 8 - intdiv($index, 15)), $index + 5);
+    }
+
+    $counts = [
+        'users' => (int)$pdo->query("SELECT COUNT(*) FROM users")->fetchColumn(),
+        'works' => (int)$pdo->query("SELECT COUNT(*) FROM gallery")->fetchColumn(),
+        'public' => (int)$pdo->query("SELECT COUNT(*) FROM gallery WHERE visibility = 'public'")->fetchColumn(),
+        'private' => (int)$pdo->query("SELECT COUNT(*) FROM gallery WHERE visibility = 'private'")->fetchColumn(),
+        'stars' => (int)$pdo->query("SELECT COUNT(*) FROM stars")->fetchColumn(),
+    ];
+
     $pdo->commit();
-    echo "v2 fixtureを投入しました: users=" . count($users) . " works=" . count($works) . " stars=" . $starFixtureCount . "（全員 password123）\n";
+    echo "v3 fixtureを投入しました: users={$counts['users']} works={$counts['works']} public={$counts['public']} private={$counts['private']} stars={$counts['stars']}（全員 password123）\n";
 } catch (Throwable $e) {
     $pdo->rollBack();
     throw $e;
