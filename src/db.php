@@ -6,7 +6,7 @@ function getDb(): PDO
 
     if ($pdo === null) {
         $host = getenv('DB_HOST') ?: 'db';
-        $name = getenv('DB_NAME') ?: 'okubo_gallery';
+        $name = getenv('DB_NAME') ?: 'prismstar';
         $user = getenv('DB_USER') ?: 'app_user';
         $pass = getenv('DB_PASS') ?: '';
 

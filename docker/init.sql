@@ -1,4 +1,4 @@
-USE okubo_gallery;
+USE prismstar;
 
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,

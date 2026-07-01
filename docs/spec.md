@@ -60,7 +60,7 @@ GitHub の star とサイトのお気に入りが地続きになり、GitHub 連
 ┌─────────────────────────┐     ┌─────────────────────────┐
 │ app                     │     │ db                      │
 │  php:8.2-apache (build) │     │  mysql:8.0              │
-│  docroot: public/       │────▶│  DB: okubo_gallery      │
+│  docroot: public/       │────▶│  DB: prismstar          │
 │  :80 → host :8080       │ PDO │  :3306 → host :3306     │
 │  volumes: public/, src/ │     │  volume: db_data        │
 │  env: DB_HOST=db 他     │     │  healthcheck: ping      │
