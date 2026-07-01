@@ -10,9 +10,13 @@
 
 ## スクリーンショット
 
-| おすすめ（新着・人気） | 作品詳細 | 公開プロフィール |
-|---|---|---|
-| _（スクショ追加予定）_ | _（スクショ追加予定）_ | _（スクショ追加予定）_ |
+| おすすめ（新着・人気ランキング） | 作品詳細（スター・タグ・作者） |
+|:---:|:---:|
+| [![おすすめ：新着と人気の2軸ランキング](docs/images/screenshot-recommend.png)](docs/images/screenshot-recommend.png) | [![作品詳細：スター・タグ・作者リンク](docs/images/screenshot-detail.png)](docs/images/screenshot-detail.png) |
+| **公開プロフィール（作品・獲得スター・GitHub 連携）** | **検索（総件数・表示件数切替・番号付きページング）** |
+| [![公開プロフィール：その人の作品と獲得スター](docs/images/screenshot-profile.png)](docs/images/screenshot-profile.png) | [![検索結果：総件数・表示件数・番号付きページング](docs/images/screenshot-search.png)](docs/images/screenshot-search.png) |
+
+> ※ サムネイルは説明用のプレースホルダ画像（placehold.jp）。詳細は下記「デモ / プレースホルダについて」。
 
 ## デモ / プレースホルダについて
 
