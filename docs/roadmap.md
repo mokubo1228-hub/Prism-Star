@@ -13,7 +13,7 @@
 ---
 
 ## Phase 0 — ベースライン確認 ✅
-- `develop` を作業ベースに切替、Docker 環境を起動、API / ログイン / 投稿の疎通確認。
+- 作業ベースを整え、Docker 環境を起動、API / ログイン / 投稿の疎通確認。
 - 結果：`app(:8080)` + `db(MySQL)` healthy、seed 投入、主要 API 疎通 OK。
 
 ## Phase 1 — 既存機能の仕上げ ✅
