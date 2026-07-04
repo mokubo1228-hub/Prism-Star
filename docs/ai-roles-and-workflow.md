@@ -136,7 +136,7 @@ git diff --check                                              # 余分な空白 
 - `docs/spec/requirements-v2.md`: **v2 要件定義**（動線・画面・データモデル差分・API 差分・可視性ルール）。
 - `docs/roadmap.md`: **実装計画**（フェーズ分割と進捗状態）。
 - `docs/adr/decisions.md`: **意思決定ログ**（ADR-lite。背景 / 決定 / 理由 / 代替案）。
-- handoff（各フェーズの Codex 向け実装指示）: **公開 repo には含めない内部の作業doc**。Codex へは人間が渡す（§5 の handoff contract に従う）。
+- handoff（各フェーズの Codex 向け実装指示）: 人間が Codex へ渡す（§5 の handoff contract に従う）。
 - `README.md`: セットアップと使い方（Docker 起動・デモユーザー）。
 
 ---
@@ -144,13 +144,13 @@ git diff --check                                              # 余分な空白 
 ## 7. ドキュメント運用（実装計画・意思決定の固定）
 
 本プロジェクトは **AI 駆動開発のポートフォリオ**であり、「何を・なぜ作るか、どこで良し悪しを判断し、何を受け入れたか」が
-辿れること自体が成果物価値である（主役は**人間が持つ判断と責任**。raw な handoff ログではなく ADR / spec / roadmap に残す）。そのため、計画と決定を会話で流さず docs に固定する。
+辿れること自体が成果物価値である（主役は**人間が持つ判断と責任**。ADR / spec / roadmap に残す）。そのため、計画と決定を会話で流さず docs に固定する。
 
-- **実装計画**は `docs/roadmap.md`（フェーズと状態）に固定する。各フェーズの Codex 向け handoff は公開 repo に出さない内部の作業docとして別に持つ。
+- **実装計画**は `docs/roadmap.md`（フェーズと状態）に固定する。各フェーズの Codex 向け handoff は別途用意する。
 - **重要な意思決定**は `docs/adr/decisions.md` に `背景 / 決定 / 理由 / 代替案` の形で追記する（ADR-lite）。
 - **更新タイミング**：
   - 新しいフェーズに着手する前に `roadmap.md` の状態を更新する。
   - 方針が分岐する判断（技術選定・スコープ・データモデル・公開可否など）をしたら `docs/adr/decisions.md` に ADR を1件追加する。
-  - フェーズを Codex に渡すときは handoff を新規作成する（公開 repo に出さない内部の作業doc）。
+  - フェーズを Codex に渡すときは handoff を新規作成する。
 - これらは **docs-only** なので Claude Code が GO なしに書いてよい（コード変更・git mutate は対象外）。
 - 毎回の些末なログ（Codex の生出力、長大な検証ログ、一時メモ）は固定しない。残すのは計画・決定・handoff・受入結果。

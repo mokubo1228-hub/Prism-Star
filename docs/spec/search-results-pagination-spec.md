@@ -3,7 +3,7 @@
 対象: Claude Code review 用の仕様ドラフト。
 目的: 既存の検索機能を追加機能ではなく「検索画面としての完成度向上」として改修する。
 
-この文書はまだ Codex 実装 handoff ではない。Claude Code が内容を確認し、必要なら ADR / roadmap / handoff に分解する。
+この文書は User による仕様ドラフト（要件の出所）。内容を確認のうえ、必要なら ADR / roadmap に落とす。
 
 ## 背景
 

@@ -186,4 +186,3 @@ docs/              adr / spec / design / assets / roadmap / roles（公開の設
 
 `Phase 0〜7 ✅（ベースライン → 既存機能の仕上げ → リブランド → 発信者オンボーディング → GitHub連携 → スター → 検索/発見 → 個人系IA・回遊）`。以降の発展は `docs/roadmap.md`「今後の発展」。
 
-各フェーズの実装は原則 Codex に handoff（非公開の作業doc）で渡す。

@@ -25,7 +25,7 @@ broad design / 方針検討には使わない。
 
 ## Write Rules
 
-- 成果物はプロジェクト直下に作る。公開の設計doc は `docs/`（`adr/`・`spec/` 等）に置く。handoff は公開 repo に出さない内部の作業doc（人間が Codex へ渡す）。
+- 成果物はプロジェクト直下に作る。公開の設計doc は `docs/`（`adr/`・`spec/` 等）に置く。handoff（実装指示）は人間が Codex へ渡す。
 - **`git add .` は使わない。** 必要なファイルだけ明示 stage する。
 - secret（DB パスワード、GitHub token）をコミットしない。`db_data/` は `.gitignore` 済み。
 - `.gitignore` を勝手に変えない。

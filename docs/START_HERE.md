@@ -15,7 +15,6 @@
 - **意思決定と理由**（ADR-001〜047）：`docs/adr/decisions.md`
 - **AI 開発の役割・フロー**（User / Claude Code / Codex の3者）：`docs/ai-roles-and-workflow.md`
 - **実装者（Codex）向け repo 規則**：`AGENTS.md`
-- **各フェーズの Codex 実装指示（handoff）**：公開 repo に出さない内部の作業doc（人間が Codex へ渡す）
 - **使い方 / 起動**：`README.md`
 
 ## 現在地（2026-07-04 時点）
@@ -28,7 +27,7 @@
   - **個人系IA**：マイページ分割／お気に入り／プロフィール（bio・アバター）／`@username`／作品詳細の「戻る」を直前画面へ。
   - **その他**：GitHub 取り込みの `gallery` 永続化、seed を ~500 公開作品 / ~40 ユーザーに増量、作品カード UI 統一、安全不変条件＋検索契約の統合テスト（PHPUnit）。
 - **意思決定は ADR-001〜047**（`docs/adr/decisions.md`）。作業は基本 commit 済み。
-- **AI 運用**：ChatGPT 無し。`User ⇄ Claude Code → Codex`。実装は Codex へ handoff（handoff は非公開の内部作業doc・人間が渡す）、Claude Code は設計・整理・review のみ（コードを直接書かない）。commit / push は User が区切りで判断。
+- **AI 運用**：ChatGPT 無し。`User ⇄ Claude Code → Codex`。実装は Codex へ handoff で渡し、Claude Code は設計・整理・review のみ（コードを直接書かない）。commit / push は User が区切りで判断。
 
 ## 起動（詳細は README.md）
 ```bash

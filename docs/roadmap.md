@@ -2,7 +2,6 @@
 
 このファイルは PrismStar（通称 Prism）の **実装計画（フェーズ分割と進捗状態）** を固定する。
 
-- 各フェーズの Codex 向け実装指示（handoff）：公開 repo に出さない内部の作業doc
 - 重要な意思決定と理由：`docs/adr/decisions.md`
 - 技術仕様（v1 現状）：`docs/spec/spec.md`
 - v2 の要件・動線：`docs/spec/requirements-v2.md`
