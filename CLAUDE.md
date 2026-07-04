@@ -7,7 +7,7 @@
 役割分担と開発フローの正本は **`docs/ai-roles-and-workflow.md`**。実装者 / Codex 向け repo 規則は `AGENTS.md`。
 
 本プロジェクトは **ChatGPT を使わない User / Claude Code / Codex の3者構成**。
-フローは `User ⇄ Claude Code → Codex`（Codex へは Claude Code の `docs/*-handoff.md` を人間が渡す）。
+フローは `User ⇄ Claude Code → Codex`（Codex へは Claude Code の handoff を人間が渡す）。
 
 Claude Code は **designer / architect / PM ＋ 整理役**。必ず守る：
 

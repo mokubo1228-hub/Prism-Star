@@ -9,7 +9,7 @@
 ## 構成の前提
 
 本プロジェクトは **ChatGPT を使わない User / Claude Code / Codex の3者構成**。
-Codex は実装者として、Claude Code の handoff docs（`docs/*-handoff.md`）を入口に作業する。
+Codex は実装者として、Claude Code の handoff docs（人間が渡す）を入口に作業する。
 broad design / 方針検討には使わない。
 
 ## Repository Scope
@@ -21,11 +21,11 @@ broad design / 方針検討には使わない。
   - `public/` … Apache ドキュメントルート（`*.html` / `Style/` / `Script/` / `api/*.php`）
   - `src/` … PHP 共通処理（`db.php`, `seed.php`）
   - `docker/` … `Dockerfile`, `init.sql`
-  - `docs/` … 設計・handoff docs
+  - `docs/` … 公開の設計doc（`adr/` 意思決定・`spec/` 仕様・`highlights` / `roadmap`）
 
 ## Write Rules
 
-- 成果物はプロジェクト直下に作る。設計・handoff は `docs/` に置く。
+- 成果物はプロジェクト直下に作る。公開の設計doc は `docs/`（`adr/`・`spec/` 等）に置く。handoff は公開 repo に出さない内部の作業doc（人間が Codex へ渡す）。
 - **`git add .` は使わない。** 必要なファイルだけ明示 stage する。
 - secret（DB パスワード、GitHub token）をコミットしない。`db_data/` は `.gitignore` 済み。
 - `.gitignore` を勝手に変えない。
@@ -64,7 +64,7 @@ Codex への入力は常に Claude Code の handoff docs を人間が渡す。
 ## 実装依頼の標準テンプレート（Codex 向け）
 
 ```text
-作業ブランチは develop。まず docs/ai-roles-and-workflow.md, docs/spec.md, README.md を読む。
+作業ブランチは develop。まず docs/ai-roles-and-workflow.md, docs/spec/spec.md, README.md を読む。
 
 指定の phase だけを実装する。scope を広げない。隣接 future phase を実装しない。
 commit / tag / push はしない。

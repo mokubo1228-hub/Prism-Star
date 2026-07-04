@@ -19,11 +19,8 @@ db_data/
 vendor/
 .phpunit.cache/
 
-# 個人作業メモ（repo に出さない・運用側で管理）
-開発者メモ.md
-ポートフォリオ化-手順書.md
-公開前タスク.md
-ポートフォリオレビュー.md
+# 非公開の裏方（メモ・ハンドオフ・構成計画）はフォルダごと repo に出さない
+/private/
 
 # ユーザーアップロード: 実体はコミットしない（.htaccess の security 設定だけ追跡）
 public/uploads/*

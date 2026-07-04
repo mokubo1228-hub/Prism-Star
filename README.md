@@ -14,9 +14,9 @@
 
 | おすすめ（新着・人気ランキング） | 作品詳細（スター・タグ・作者） |
 |:---:|:---:|
-| [![おすすめ：新着と人気の2軸ランキング](docs/images/screenshot-recommend.png)](docs/images/screenshot-recommend.png) | [![作品詳細：スター・タグ・作者リンク](docs/images/screenshot-detail.png)](docs/images/screenshot-detail.png) |
+| [![おすすめ：新着と人気の2軸ランキング](docs/assets/screenshot-recommend.png)](docs/assets/screenshot-recommend.png) | [![作品詳細：スター・タグ・作者リンク](docs/assets/screenshot-detail.png)](docs/assets/screenshot-detail.png) |
 | **公開プロフィール（作品・獲得スター・GitHub 連携）** | **検索（総件数・表示件数切替・番号付きページング）** |
-| [![公開プロフィール：その人の作品と獲得スター](docs/images/screenshot-profile.png)](docs/images/screenshot-profile.png) | [![検索結果：総件数・表示件数・番号付きページング](docs/images/screenshot-search.png)](docs/images/screenshot-search.png) |
+| [![公開プロフィール：その人の作品と獲得スター](docs/assets/screenshot-profile.png)](docs/assets/screenshot-profile.png) | [![検索結果：総件数・表示件数・番号付きページング](docs/assets/screenshot-search.png)](docs/assets/screenshot-search.png) |
 
 > ※ サムネイルは説明用のプレースホルダ画像（placehold.jp）。詳細は下記「デモ / プレースホルダについて」。
 
@@ -40,13 +40,13 @@
 - **認証** — 登録は **double opt-in**（メール確認）、パスワード再設定（メールトークン）、CSRF / セッション堅牢化。
 - **レスポンシブ** — CSS 変数＋メディアクエリで 1〜複数列のグリッド。
 
-画面・動線の詳細は [docs/requirements-v2.md](docs/requirements-v2.md)。
+画面・動線の詳細は [docs/spec/requirements-v2.md](docs/spec/requirements-v2.md)。
 
 ---
 
 ## 技術的なみどころ
 
-ポートフォリオとして見てほしい所。判断の背景・**却下した代替案**まで [docs/decisions.md](docs/decisions.md)（ADR）に残してある。
+ポートフォリオとして見てほしい所。判断の背景・**却下した代替案**まで [docs/adr/decisions.md](docs/adr/decisions.md)（ADR）に残してある。
 
 - **GitHub token をサーバ側に隠す（＋SSRF対策）** — フロント直叩き（token がソースに露出 / 未認証 60 req/h）を却下し、PHP proxy 経由（env 秘匿 / 認証付き 5000 req/h）に。username を `^[A-Za-z0-9-]+$` に制限して SSRF を断つ。"なぜ安全か" を比較・却下理由ごと記録（ADR-003 / ADR-011）。
 - **安全を「中央化」で効かせる** — CSRF トークンは fetch ラッパが状態変更系へ自動付与、セッション開始も共通化。**後から足した API も追加コードなしで保護**される（ADR-026 / ADR-028）。
@@ -115,8 +115,8 @@ docker compose down -v   # データも含めて完全削除
 ## ドキュメント
 
 - **[docs/highlights.md](docs/highlights.md)** — 設計のこだわり・判断軸・技術選定（読みどころの索引）
-- **[docs/decisions.md](docs/decisions.md)** — 意思決定ログ（ADR：背景 / 決定 / 理由 / 代替案）
-- **[docs/spec.md](docs/spec.md)** — 技術仕様（構成 / データモデル / API / セキュリティ）
-- **[docs/requirements-v2.md](docs/requirements-v2.md)** — 要件・動線
+- **[docs/adr/decisions.md](docs/adr/decisions.md)** — 意思決定ログ（ADR：背景 / 決定 / 理由 / 代替案）
+- **[docs/spec/spec.md](docs/spec/spec.md)** — 技術仕様（構成 / データモデル / API / セキュリティ）
+- **[docs/spec/requirements-v2.md](docs/spec/requirements-v2.md)** — 要件・動線
 - **[docs/ai-roles-and-workflow.md](docs/ai-roles-and-workflow.md)** — 開発の役割分担とワークフロー
 </content>

@@ -9,13 +9,13 @@
 
 ## どこに何があるか
 - **読みどころ**（こだわり・判断軸・技術選定の理由）：`docs/highlights.md`
-- **技術仕様**（スタック/構成/データモデル/API/要件）：`docs/spec.md`
-- **v2 の要件・動線**（マイページ/公開非公開/作成編集/タグ/検索）：`docs/requirements-v2.md`
+- **技術仕様**（スタック/構成/データモデル/API/要件）：`docs/spec/spec.md`
+- **v2 の要件・動線**（マイページ/公開非公開/作成編集/タグ/検索）：`docs/spec/requirements-v2.md`
 - **実装計画と進捗**：`docs/roadmap.md`
-- **意思決定と理由**（ADR-001〜017）：`docs/decisions.md`
+- **意思決定と理由**（ADR-001〜017）：`docs/adr/decisions.md`
 - **AI 開発の役割・フロー**（User / Claude Code / Codex の3者）：`docs/ai-roles-and-workflow.md`
 - **実装者（Codex）向け repo 規則**：`AGENTS.md`
-- **各フェーズの Codex 実装指示**：`docs/phase-*-handoff.md`
+- **各フェーズの Codex 実装指示（handoff）**：公開 repo に出さない内部の作業doc（人間が Codex へ渡す）
 - **使い方 / 起動**：`README.md`
 
 ## 現在地（2026-06-23 時点）
@@ -44,10 +44,10 @@ docker compose exec app php /var/www/html/src/migrate.php  # 冪等
 - **A. デザイン方針を固める**（レイアウト要改善・推奨）：
   Claude Code が design 方針を1枚化（虹色ブランド／配色トークン／グリッド・カード／ヘッダー／余白・タイポ／レスポンシブ）＝"ターゲット" → 実装ツールを選ぶ（視覚ツール＝Antigravity/Claudeでスクショ反復、または Codex＋目視QA）。
 - **B. Phase 7（公開/非公開）**：
-  `docs/phase-7-handoff.md` を書く → Codex 実装 → review。その後 8 マイページ → 9 画像アップロード → 10 タグ → 11 検索（`docs/requirements-v2.md`）。
+  Phase 7 の handoff を書く → Codex 実装 → review。その後 8 マイページ → 9 画像アップロード → 10 タグ → 11 検索（`docs/spec/requirements-v2.md`）。
 
 いつでも（User の区切りで）：**未コミットの所有モデル修正**をコミット。
 
-その先：ページネーション、GitHub 取り込み作品の永続化（[ADR-016](decisions.md)）、登録の堅牢化、`[マイページ]` リンク（Phase 8 で有効化）。
+その先：ページネーション、GitHub 取り込み作品の永続化（[ADR-016](adr/decisions.md)）、登録の堅牢化、`[マイページ]` リンク（Phase 8 で有効化）。
 
 > 細かな作業メモ（既知の粗・ドキュメント不備など）は repo に置かず、運用側（Claude Code のメモリ）で管理する。
