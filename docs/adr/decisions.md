@@ -58,7 +58,7 @@
 
 ## ADR-007 実装計画と意思決定を docs に固定する ✅
 - **背景**：設計判断や実装の段取りを会話だけで進めると、後から「なぜそうしたか」を辿れず、再開・引き継ぎのたびに根拠が失われる。
-- **決定**：実装計画は `docs/roadmap.md`（フェーズ）＋ `docs/phase-*-handoff.md`（Codex 向け）、技術仕様は `docs/spec.md`、意思決定は本ファイル `docs/decisions.md` に固定する。
+- **決定**：実装計画は `docs/roadmap.md`（フェーズ）＋ Codex 向け handoff（非公開の作業doc）、技術仕様は `docs/spec/spec.md`、意思決定は本ファイル `docs/adr/decisions.md` に固定する。
 - **理由**：「何を・なぜ・どう作ったか」と「設計と実装をどう分担したか（役割分担・handoff）」を追跡可能にし、判断の説明責任を果たす。再開・レビュー・引き継ぎが容易になる。
 - **代替案**：会話だけで進める → 後から辿れず、判断の根拠が失われるため却下。
 
@@ -67,14 +67,14 @@
 - **決定**：オープンな新規登録 ＋ ユーザーごとのプロフィール / 個人ギャラリー ＋ 全員の新着フィードを備える。
 - **理由**：観る人と作る人の境界をなくす。既存 `gallery.user_id` が作品を人に紐付け済みで土台がある。Phase 3 を「ただの登録」から「**発信者オンボーディング**」へ格上げする。
 - **代替案**：オーナー1人だけが投稿する個人サイト → 「全員が発信者」の狙いに反するため却下。
-- **関連**：`docs/roadmap.md` Phase 3、`docs/spec.md` §4–§7。
+- **関連**：`docs/roadmap.md` Phase 3、`docs/spec/spec.md` §4–§7。
 
 ## ADR-009 評価は「スター(⭐)」を共通通貨にする ✅
 - **背景**：お気に入り / 評価の仕組みをどう持つか。GitHub はリポジトリを **star** で評価する。
 - **決定**：サイトのお気に入りを **スター(⭐)** とし、手動投稿作品も取り込んだ GitHub リポジトリも**同じ star 単位**で評価する。プロフィールに獲得スター総数を表示（"スターを集める"）。
 - **理由**：名称（PrismStar）とコンセプトに直結。GitHub star とサイト star が地続きになり、GitHub 連携が"取ってつけ"でなく中心に溶ける。発信に「評価の循環」が加わる。
 - **代替案**：like / ❤ など独自指標 → GitHub と単位が割れて統合感が薄れるため却下。
-- **関連**：`docs/spec.md` §4（`stars` テーブル）/ §5（`stars.php`）、`docs/roadmap.md` Phase 5。
+- **関連**：`docs/spec/spec.md` §4（`stars` テーブル）/ §5（`stars.php`）、`docs/roadmap.md` Phase 5。
 
 ## ADR-010 段階的に完成させる（コンセプト全体を先に通し、機能を重ねる）✅
 - **背景**：各機能を個別に作り込むより、まずコンセプト全体を一度"動く形"にして検証したい（User 方針）。
@@ -91,7 +91,7 @@
 - **理由**：本当の不変条件は「**token の値がブラウザに到達しない**」こと。PHP は server-side 実行なのでこれは満たされている。検査を正しく定義すれば小細工は不要で、コードは読みやすく保てる。"検査を欺く" 形を残すと、将来「なぜ分割？」という混乱と、検査自体への不信を生む。
 - **代替案**：文字列分割を維持（難読化・誤解の元）→ 却下。検査を緩めるだけでコードは分割のまま（半端）→ 却下。
 - **状態**：✅ 実施済み（Phase 5）。`github.php` の文字列分割を撤去し素直な表記に戻した。token 漏れ検査は配信資産（`--include=*.js --include=*.html --include=*.css`）に限定。
-- **関連**：`docs/phase-4-handoff.md` の検証コマンド、`docs/spec.md` §8（safety invariants の検証）。
+- **関連**：`docs/spec/spec.md` §8（safety invariants の検証）。
 
 ## ADR-012 ページを PHP 化し header/footer をサーバ側 partial で共通化 ✅（実装は Phase 6）
 - **背景**：「PHP 8.2」採用なのに、ページは静的 `.html` で header/footer が全8ページに**コピペ**（DRY 違反＝ヘッダー/フッター共通化の課題）。PHP は API 層だけで、サーバ側テンプレートを活かせていない。
@@ -102,18 +102,18 @@
   - JS で header/footer を動的挿入 → クライアント依存・初期表示で崩れうる・堅牢性で劣るため却下（nav 生成は既存どおり JS でよいが、骨格はサーバ側に）。
   - 静的 `.html` のまま放置 → DRY 違反が残り「PHP プロジェクト」として弱い。却下。
 - **影響**：7ページの拡張子変更 ＋ 内部リンク `.html → .php` の波及更新（`profile.js` の `repo.html_url` は**対象外**）。
-- **状態**：方針確定。実装は Phase 6（`docs/phase-6-handoff.md`）。
+- **状態**：方針確定。実装は Phase 6。
 
 ---
 
-> ここから先は **v2**（マイページ・公開非公開・作品作成/編集・タグ・検索）の意思決定。要件の全体像は `docs/requirements-v2.md`。
+> ここから先は **v2**（マイページ・公開非公開・作品作成/編集・タグ・検索）の意思決定。要件の全体像は `docs/spec/requirements-v2.md`。
 
 ## ADR-013 マイページ（管理画面）を公開プロフィール（ユーザーページ）と別ページにする ✅（実装は Phase 8）
 - **背景**：v1 の `profile.php` は「他人も見る公開ページ」と「本人の管理操作」が同居しかけていた。v2 で編集・公開/非公開・削除など管理操作が増える。
 - **決定**：本人専用の**マイページ（管理画面）**を新設し、他人が見る**ユーザーページ（公開プロフィール）**と分離する。管理操作（新規作成・編集・削除・公開切替・GitHub 設定）はマイページに集約。
 - **理由**：公開表示と管理の責務が分かれ、非公開作品や管理ボタンを公開ページに出さずに済む（漏洩防止）。「管理画面」という明確な機能面ができ操作の見通しが良い。
 - **代替案**：1ページに統合し本人のときだけ管理 UI を出す → 公開表示と管理が混在し、条件分岐と漏洩リスクが増えるため却下。
-- **関連**：`docs/requirements-v2.md`、`docs/roadmap.md` Phase 8。
+- **関連**：`docs/spec/requirements-v2.md`、`docs/roadmap.md` Phase 8。
 
 ## ADR-014 作品の可視性は「公開 / 非公開」の2状態 ✅（実装は Phase 7）
 - **背景**：作品に下書き / 公開 / 限定公開など複数状態を持たせるか検討した。
@@ -121,7 +121,7 @@
 - **理由**：「下書き」と「非公開」は実質同じ（どちらも本人のみ閲覧）で別状態にする意味がない。公開/非公開だけで作成中・取り下げ・限定保管の全ユースケースを満たせ、状態が少なくクエリ・UI が単純。
 - **代替案**：下書き / 公開 / **限定公開**（URL を知る人のみ）の3状態 → 限定公開（URL 共有）の要件が現状なく、実装・UI が増えるだけのため却下。要件が出たら ADR で再検討。
 - **影響**：一覧・検索・ユーザーページの全 SELECT に公開フィルタ、詳細は所有者判定。**非公開を所有者以外に返さない**ことが safety invariant。
-- **関連**：`docs/requirements-v2.md` §5、Phase 7。
+- **関連**：`docs/spec/requirements-v2.md` §5、Phase 7。
 
 ## ADR-015 作品画像はアップロード対応（サーバ保存）✅（実装は Phase 9）
 - **背景**：v1 は画像を外部 URL でのみ受け付ける。だが「**全員が発信者（非エンジニアも）**」が核で、URL 入力を要求する UX は致命的。
@@ -129,21 +129,21 @@
 - **理由**：非エンジニアが普通に発信できる導線はコンセプトの核であり、単なる polish ではない。
 - **代替案**：URL のみ維持 → 非エンジニアを実質排除し「全員が発信者」に反するため却下（ただし段階的に Phase 9 で）。
 - **影響（safety invariant 追加）**：MIME/拡張子/サイズ検証、ファイル名はサーバ生成、保存先固定、実行可能ファイル拒否（パストラバーサル防止）。
-- **関連**：`docs/requirements-v2.md` §8、Phase 9。
+- **関連**：`docs/spec/requirements-v2.md` §8、Phase 9。
 
 ## ADR-016 GitHub リポジトリは作品テーブルに永続化しない（v2 スコープ）✅
 - **背景**：v2 で検索・可視性・マイページ管理を入れるにあたり、GitHub 取り込み repo をサイト作品（`gallery`）として永続化するか。
 - **決定**：**永続化しない**。GitHub repo は従来どおりプロフィール/マイページの**表示レイヤー**（サーバ側 proxy で都度取得）に留め、検索・可視性・編集の対象は**サイト内作品とユーザー**に限定する。
 - **理由**：永続化は同期・重複処理・source 種別・OG 画像取得など実装が一気に重くなる。v2 の主軸（管理・可視性・検索）を先に通すほうが価値が高い（ADR-010 段階的）。スター統合（ADR-009）は表示レイヤーのままでも維持できる。
 - **代替案**：repo を `gallery` に取り込み第一級作品にする → スコープ肥大のため今回は却下。今後の発展として残す。
-- **関連**：`docs/requirements-v2.md` §9、`docs/roadmap.md` 今後の発展。
+- **関連**：`docs/spec/requirements-v2.md` §9、`docs/roadmap.md` 今後の発展。
 
 ## ADR-017 タグは正規化テーブル（多対多）で持つ ✅（実装は Phase 10）
 - **背景**：検索を「ワード＋タグ」で行うため作品にタグを付与する。保持方法（カンマ区切り文字列 vs 正規化テーブル）を検討。
 - **決定**：`tags`（マスタ）＋ `gallery_tags`（中間）の**多対多**で正規化して持つ。
 - **理由**：表記揺れ防止・件数集計・タグページ等への発展がしやすく、リレーショナル設計として素直。DB 設計を明示できる。
 - **代替案**：`gallery.tags` にカンマ区切り文字列 → 実装は最小だが集計・正規化・拡張に弱く検索も曖昧になるため却下。
-- **関連**：`docs/requirements-v2.md` §4、Phase 10。
+- **関連**：`docs/spec/requirements-v2.md` §4、Phase 10。
 
 ## ADR-018 登録はメール確認先行（double opt-in）にし、ローカルは MailHog で確認メールを成立させる ✅（実装は Phase 12）
 - **背景**：v1 の登録は email+password+name を即 INSERT・即ログイン（単段）。メール所有を検証しておらず、タイポ／捨てアド／**他人のメールでの登録**を許す。一般的な production の登録は「メール確認先行」。
@@ -151,7 +151,7 @@
 - **理由**：メール所有の検証・捨てアド/タイポ抑止・他人のメールでの登録防止という標準的な利点。MailHog なら外部アカウント無しで**本物の送信フローをローカル完結**でき、demo が壊れない（reviewer が一通り体験できる）。
 - **代替案**：(a) 単段のまま＋ADRで意図記録 → 標準フローを示せない。(b) メール送信せず dev は確認URLを画面/ログに出すモック → 実装は最小だが「メールが届く」体験が無くスタブ感。(c) 本番 provider（SendGrid 等）→ 外部アカウント＋秘密管理が増え localhost demo には過剰。→ 標準フローを demo で成立させられる **MailHog** を採用。
 - **影響（safety invariant 追加）**：確認 token は 256bit 乱数・**DB には hash 保存**・**単回使用**・**期限切れ**（既定 24h 目安）。**enumeration 対策**＝メール存在の有無に関わらず同一応答（**送信失敗時もエラーで存在を漏らさず、サーバログに留め neutral を返す**）。本登録（④）で email 一意制約を最終チェック（登録 TOCTOU をここで吸収）。保留登録は `pending_registrations`（`email` / `token_hash` / `expires_at`）。SMTP 接続情報は `.env`（token と同様サーバ側秘匿）。
-- **関連**：`docs/requirements-v2.md` §3・§4・§7.2、`docs/roadmap.md` Phase 12（独立トラック）。
+- **関連**：`docs/spec/requirements-v2.md` §3・§4・§7.2、`docs/roadmap.md` Phase 12（独立トラック）。
 
 ## ADR-019 未登録はゲート型回遊（teaser ＋ 登録/ログイン モーダル）にする ✅（実装は認証動線トラック＋Phase 7・8）
 - **背景**：v1〜直近は「閲覧は自由・操作だけログイン」（§7）で、公開作品は未ログインでも詳細まで閲覧できた。v2 の主役がスタート＝おすすめ feed になるにあたり、未登録体験を再設計した。
@@ -159,14 +159,14 @@
 - **理由**：PrismStar は登録ユーザーが作品を投稿し ⭐ で評価し合う参加型のサービスで、未登録ユーザーに期待するのは閲覧そのものより登録への移行。そこでスタート画面では作品のサムネイルとタイトル（teaser）まで見せて内容を伝え、作品詳細や検索結果など"深い"閲覧はログイン後に限定する。全部を開放すると登録の動機が薄れるため、見せる範囲を teaser に絞って登録の節目を作る、という判断。
 - **代替案**：(a) オープン/発見優先（公開詳細・シェアリンクを未ログインに開放）＝ SEO・共有・発見性には強いが、参加への動機づけが弱く匿名閲覧で止まりやすい。(b) 中間（詳細とシェアは開き、検索・ユーザーページ等の回遊だけゲート）＝ 折衷案。→ 未登録から登録への移行を主目的に置くため**全面ゲート**を採用。発見性（公開リンクの限定開放など）は、必要になれば後で再検討する。
 - **影響**：旧 §7「閲覧は自由／作品詳細はログイン必須にしない」を破棄して上書き。未ログインの"深さ"アクセスを全てモーダルで遮断。
-- **関連**：`docs/requirements-v2.md` §2・§3・§7、`docs/roadmap.md`。
+- **関連**：`docs/spec/requirements-v2.md` §2・§3・§7、`docs/roadmap.md`。
 
 ## ADR-020 seed は複数ユーザー×公開/非公開のテスト fixture（プレースホルダ作品は削除しない）✅（実装は Phase 7）
 - **背景**：初期の seed 作品（作品1〜15・placehold.jp）は JS 学習期のプレースホルダで、見た目から削除も検討した。
 - **決定**：**削除しない**。seed を**複数ユーザー（demo/Aoi/Ren/Mio）に紐づくテスト fixture**として位置づけ、Phase 7 で各ユーザーに**公開＋非公開を混在**させる。これで所有モデル・検索の自分除外・非公開の遮断という safety invariant を実データで検証できる。
 - **理由**：seed が要るのは見た目のためではなく、複数ユーザーにまたがる状態を再現してテストするため。§5/§8 の不変条件（非公開を所有者以外に返さない／編集・削除は所有者のみ／検索は自分の作品を除外）は、複数ユーザーが公開・非公開の作品をそれぞれ持つ状態がないと確認できない。空 seed や単一ユーザーではこれらの経路を踏めないので、demo/Aoi/Ren/Mio に公開・非公開を混在させた seed を fixture として残す。
 - **代替案**：(a) 全削除→空 seed ＝ デモ/おすすめ feed が空になり機能検証もできず却下。(b) 見栄え優先で少数の装飾作品に差し替え ＝ テスト網羅性が下がる。見た目磨きは機能と独立した別軸として任意で後回し。
-- **関連**：`docs/requirements-v2.md` §4・§5・§8、`docs/roadmap.md` Phase 7。
+- **関連**：`docs/spec/requirements-v2.md` §4・§5・§8、`docs/roadmap.md` Phase 7。
 
 ## ADR-021 パスワードリセットを実装する（メールトークン方式・MailHog 基盤を再利用）✅（実装は password-reset handoff）
 - **背景**：login.php に「パスワードをお忘れの場合」リンクがあるが `href="#"` の飾りで未実装だった。ポートフォリオとして出す以上、認証の基本機能（登録・ログイン・**再設定**）が揃っていないのは外せず、`href="#"` の死にリンクを残すのも不可。実装しないなら理由を docs に残す必要があるが、これは基本機能なので実装する。
@@ -174,7 +174,7 @@
 - **理由**：認証ライフサイクルを一通り揃えるのは基本要件。token＋MailHog の送信基盤（[ADR-018](decisions.md)）が既にあり、登録フローのパターンをそのまま流用できるので追加コストが小さい。
 - **代替案**：(a) リンクを撤去して未実装のまま → 認証の基本機能が欠ける。(b)「準備中」表示 → 作りかけに見える。→ 基盤がある以上、実装が妥当。
 - **影響（safety invariant 追加）**：reset token は 256bit・**sha256 hash 保存・単回・期限（1h）**。enumeration 対策＝メール存在の有無で応答を変えない。リセット完了で当該 token 行を削除。
-- **関連**：`docs/password-reset-handoff.md`、[ADR-018](decisions.md)、`docs/roadmap.md`。
+- **関連**：[ADR-018](decisions.md)、`docs/roadmap.md`。
 
 ## ADR-022 静的アセット（JS/CSS）に cache-busting を入れる ✅（実装は cache-busting handoff）
 - **背景**：v2 で JS をほぼ全面書き換えた。配信は `ETag`/`Last-Modified` のみで `Cache-Control` が無く、旧サイトを開いたことのあるブラウザが古い JS をキャッシュから実行して壊れる事象が実際に出た（`register.js` が旧版のまま動き、存在しない要素の `.value` で submit が落ちて「何も出ない」になった）。
@@ -182,7 +182,7 @@
 - **理由**：内容を書き換えても URL が同じだと、ブラウザはヒューリスティックにキャッシュを使い続け、再訪問ユーザーが壊れる。URL を変えるのが最も確実なキャッシュ無効化。
 - **代替案**：(a) `Cache-Control` だけ付ける → 既にキャッシュ済みのクライアントには効きにくい。(b) 何もしない → 再訪問で壊れる（今回実際に発生）。→ バージョンクエリ＋`Cache-Control` を採用。
 - **実装メモ**：`asset()`（`public/includes/asset.php`）が `filemtime()` 由来の `?v=…` を返し、`head.php`（共通 CSS＋`$pageStyles`）・`footer.php`（`common.js`）・各ページの `<script>` が経由する。`Cache-Control` は Docker の Apache に `mod_headers` が無く付与できなかったため handoff の fallback どおり見送り、**cache-busting は version クエリ単独で成立**させた（内容が変われば `filemtime` が変わり URL が変わるので、再取得は保証される）。`mod_headers` を有効化できたら immutable な長期キャッシュを足す余地はある。
-- **関連**：`docs/cache-busting-handoff.md`、`docs/roadmap.md`。
+- **関連**：`docs/roadmap.md`。
 
 ## ADR-023 認証導線（パスワード再設定・新規登録）はログインが現れる全箇所で揃える ✅
 - **背景**：未ログインで作品詳細などに進むと出る**ゲートのモーダル**には「新規登録」リンクはあったが、**パスワード再設定の動線が無く** login.php と不一致だった。
@@ -202,7 +202,7 @@
 - **代替案**：(a) 表示レイヤーのまま（[ADR-016]）→ 看板機能が外部リンク止まりで却下。(b) 別テーブル `projects` を新設 → ⭐/検索/タグ/可視性の仕組みを二重実装することになり、`gallery` に source 列を足す方が既存資産を再利用できて素直。(c) client が送る repo データを保存 → 任意 URL/画像を保存・描画され得るため却下、サーバ確定にする。
 - **影響**：`gallery` に2列＋UNIQUE 追加（冪等 migration）。`github.php` の取得を `src/github_client.php` に切り出し（外形は不変）。`gallery.php` に `action=import-github`、mypage に取り込みパネル、詳細/カードに GitHub 印。**既存の手動作品の挙動は不変**。
 - **編集の扱い**：取り込み作品の title/説明/画像は **import が唯一の writer**。PATCH は github 作品では **visibility とタグだけ**反映し、client 由来の repo メタ情報を保存しない（メタ注入を防ぎ、GitHub を正とする）。UI も揃え、`work-edit` では github 作品の title/説明/画像を**読み取り専用**にして「GitHub 由来は取り込みで更新」と明示する（サーバが黙って無視する状態＝紛らわしい UI を残さない）。
-- **関連**：`docs/github-import-handoff.md`、[ADR-016](decisions.md)、`docs/roadmap.md`（次の本命）。
+- **関連**：[ADR-016](decisions.md)、`docs/roadmap.md`（次の本命）。
 
 ## ADR-025 検索の入口をヘッダーの検索バーに一本化（対象プルダウン＋ # でタグ）✅（実装・review 済）
 - **背景**：`search.php` が独自の検索フォーム（キーワード／タグ／種別）を持ち、**全ページ常設のヘッダー検索**（キーワードのみ）と二重になっていた。1つの画面に検索入力が2つあり、どちらで検索するか紛らわしい。
@@ -218,7 +218,7 @@
   - **キーワードとタグの役割被り**：当初 `q` がタイトル/説明だけでなくタグにも LIKE していたため、`#`（タグ）と普通の語（キーワード）が実質同じ結果になり `#` が半分無意味だった。`q` を**タイトル/説明のみ**に絞って役割を分離（タグは `#`→`tag` 一本）。検証は「タグにあるが題名/説明に無い語」（例：`風景` が `q=0/tag=2`）で q が拾わないことを確認。
   - **SQL のパラメータずれ**：`q` 分岐からタグの `EXISTS` を外す際、対応するバインド値（`$like`）も1個減らさないと placeholder と引数の数がずれる。クエリと `execute()` をセットで直した。
   - **ヘッダー select の見切れ**：flex 内で `min-width:0` だと「キーワード」が潰れて切れた。`flex:0 0 auto`（内容幅・縮めない）で解消。
-- **関連**：`docs/search-consolidation-handoff.md`、[ADR-019](decisions.md)（検索バー常設・ゲート）、`public/includes/header.php`、`public/script/common.js`、`public/search.php`。
+- **関連**：[ADR-019](decisions.md)（検索バー常設・ゲート）、`public/includes/header.php`、`public/script/common.js`、`public/search.php`。
 
 ## ADR-026 セッション堅牢化＋CSRF 対策 ✅（優先トラック①）
 - **背景**：マルチユーザーで状態変更 API（投稿/編集/削除・スター・GitHub 取り込み・ログイン/登録/再設定）があるのに、**CSRF 防御が無く、セッション Cookie の属性（SameSite/HttpOnly/Secure）も未設定**だった。`session_start()` は各 API（auth/gallery/users/stars/search）に素で散在。
@@ -229,7 +229,7 @@
 - **理由**：**SameSite=Lax だけで cross-site CSRF をほぼ封殺**でき安い。その上でトークンを足して明示的な二重防御にする（レビュアーが必ず見る所で、効果に対し低コスト）。フロントは**ラッパで中央化**し、状態変更 fetch 14 箇所を個別改修せず漏れなくカバーする。正規フローは透過で**挙動不変**。
 - **代替案**：(a) 何もしない→却下。(b) SameSite だけ→最低限だが、トークンまで入れて明示する方が堅く示せる。(c) 各 fetch を個別にトークン付与→付け忘れが出るのでラッパで中央化。
 - **影響**：`src/session.php` 新規、`api/{auth,gallery,users,stars,search,contact}.php` が `session.php` 経由＋状態変更ブランチで `requireCsrf()`、`head.php` に session boot＋meta、`common.js` に fetch ラッパ。挙動は変えない（トークンは透過的に付く）。`session_regenerate_id` 後もトークンは保持。
-- **関連**：`docs/security-hardening-handoff.md`、`src/session.php`、`public/includes/head.php`、`public/script/common.js`、`docs/roadmap.md`（優先トラック①）。
+- **関連**：`src/session.php`、`public/includes/head.php`、`public/script/common.js`、`docs/roadmap.md`（優先トラック①）。
 
 ## ADR-027 発見系（おすすめ・検索）は自分の作品を除外／詳細は閲覧専用・編集はマイページ ✅
 - **背景**：検索は既に自分の作品を除外していた（[ADR-025]）のに、**おすすめ（一覧）はログイン中も自分の公開作品を出していた**。発見の場に自作が混じるのは不整合。あわせて作品詳細に所有者用「編集」リンクがあり、編集導線がマイページと詳細の2か所に散っていた。
@@ -254,7 +254,7 @@
   - **部分更新の設計**：`name` と `github_username` を `array_key_exists` で**独立更新**にした。`$data['x'] ?? ''` だと「フィールド未送信」と「空文字で送信」を区別できず、片方のフォームを保存しただけでもう片方を消しかねない。「**送られたキーだけ更新**」にして取りこぼし・誤消去を防いだ。
   - **②の CSRF はタダだった**：①（[ADR-026](decisions.md)）でセッション開始と `requireCsrf` を共通化済みだったので、新 action `change-password` も auth.php の POST 共通 `requireCsrf` で**自動的に CSRF 対象**になり、fetch ラッパが token を付ける。②側に CSRF 用のコードは一切書いていない＝**基盤を中央化した恩恵**。
   - **資格情報変更後のセッション**：パスワード更新後に `session_regenerate_id(true)`（固定化対策・古い ID の無効化）。
-- **関連**：`docs/account-settings-handoff.md`、[ADR-013](decisions.md)、[ADR-021](decisions.md)、[ADR-026](decisions.md)（CSRF）、`public/api/{users,auth}.php`、`public/mypage.php`。
+- **関連**：[ADR-013](decisions.md)、[ADR-021](decisions.md)、[ADR-026](decisions.md)（CSRF）、`public/api/{users,auth}.php`、`public/mypage.php`。
 
 ## ADR-029 発見系の役割分担：検索は「もっと見る」ページング／おすすめは新着・人気の2軸ランキング型トップ ✅（優先トラック③）
 > **更新（2026-06-30）**：本ADRの**検索（works/users）側の「もっと見る」**は [ADR-044](decisions.md) で**番号付きページング＋総件数＋表示数切替**に置き換えた。当時「本規模では過剰」として番号ページ／`COUNT` を却下したが、検証用 seed の増量で対象件数が増え、検索が網羅ブラウズの実面になったため前提を見直した（規模変更による決定更新）。**おすすめ＝新着・人気の2軸ランキング**は引き続き本ADRのまま有効。
@@ -281,7 +281,7 @@
   - **ログイン催促はトップでは既存挙動**：未ログインのトップ（teaser）で作品/詳細をクリックすると `requireAuth` がログインを促す。ランキング化でもこの gated-link 挙動を**維持するだけ**（新規ロジックを足さない）。
   - **`LIMIT/OFFSET` の int 化（検索）**：`page=1 UNION SELECT` 等を渡しても `(int)` で無害化、負値は最小1にクランプ。SQL に外部文字列を連結しない。
   - **レスポンス形の波及**：素の `/api/gallery.php`（おすすめ）を消費するのは `gallery-list.js` のみ（`?id`/`?mine`/`?action` は別 branch、プロフィールは `users.php` 経由）。検索の `results` も既存キーを維持。形変更の影響は両フロントに閉じる。
-- **関連**：`docs/pagination-handoff.md`、[ADR-027](decisions.md)（自分除外）、[ADR-025](decisions.md)（検索条件）、[ADR-009](decisions.md)（スター＝共通通貨）、[ADR-020](decisions.md)（seed の公開/非公開ミックス）、`public/api/{gallery,search}.php`、`public/script/{gallery-list,search}.js`、`public/style/gallery-list.css`、`src/seed.php`、`docs/roadmap.md`（優先トラック③）。
+- **関連**：[ADR-027](decisions.md)（自分除外）、[ADR-025](decisions.md)（検索条件）、[ADR-009](decisions.md)（スター＝共通通貨）、[ADR-020](decisions.md)（seed の公開/非公開ミックス）、`public/api/{gallery,search}.php`、`public/script/{gallery-list,search}.js`、`public/style/gallery-list.css`、`src/seed.php`、`docs/roadmap.md`（優先トラック③）。
 
 ## ADR-030 マイページを「作品管理」と「設定」の2ページに分離 ✅（実装・コミット済）
 - **背景**：マイページ（管理画面・[ADR-013](decisions.md)）が成長の過程で**性質の違う3関心を1ページに縦積み**するようになった：(1) コンテンツ管理（作品一覧・新規作成・編集/削除/公開切替）、(2) アカウント認証情報（表示名・パスワード変更＝[ADR-028](decisions.md)）、(3) GitHub 連携（username 設定＋リポジトリ取り込み＝[ADR-024](decisions.md)）。`mypage.js` も単一 `initMypage()` ＋ グローバル変数9個でこの3関心が密結合し、レイアウトも単一カラム（`.gallery-back` `max-width:1180px`）にフォーム・取り込み・作品リストが雑多に並んで**中央が窮屈**（ユーザー指摘）。1画面が「自分の作品をどうにかする」と「自分のアカウントをどうにかする」を兼ねていて、操作モデルがぼやけていた。
@@ -305,7 +305,7 @@
   - **CSRF はタダ**：状態変更系は [ADR-026](decisions.md) の fetch ラッパ＋`requireCsrf` で自動的に効く。ページを分けても `settings.js` の各 POST に CSRF コードは書かない（`mypage.js:253` の方針を踏襲）。
   - **設定ページも要 `requireAuth`**：認証情報を編集するので、ページが分かれても本人ログイン必須を必ず通す（未ログインはゲート/リダイレクト）。
   - **移設漏れ・二重定義の検査**：`grep accountNameForm` が `mypage.{php,js}` 側で空になることを完了条件に含める（旧要素の取りこぼし・id 重複を防ぐ）。
-- **関連**：`docs/mypage-split-handoff.md`、[ADR-013](decisions.md)（マイページ＝管理画面）、[ADR-028](decisions.md)（アカウント設定）、[ADR-024](decisions.md)（GitHub 取り込み）、[ADR-026](decisions.md)（CSRF）、`public/{mypage,settings}.php`、`public/script/{mypage,settings}.js`、`public/style/gallery-list.css`、`docs/roadmap.md`。
+- **関連**：[ADR-013](decisions.md)（マイページ＝管理画面）、[ADR-028](decisions.md)（アカウント設定）、[ADR-024](decisions.md)（GitHub 取り込み）、[ADR-026](decisions.md)（CSRF）、`public/{mypage,settings}.php`、`public/script/{mypage,settings}.js`、`public/style/gallery-list.css`、`docs/roadmap.md`。
 
 > ※ 入口（ナビ配置）の方針は、個人系ページの拡張（お気に入り・プロフィール拡充）に伴い [ADR-031](decisions.md) で更新する（「設定をマイページのサブページにする」→「個人系をハンバーガーに集約」）。
 
@@ -319,7 +319,7 @@
   - **プロフィール自己リンクは id が動的**：`navItems` は静的配列なので「自分の id」を直接書けない。`applyAuthState(status)`（ログイン状態確定時）で当該リンクの href を `profile.php?id=${status.user.id}` に書き換える（純フロント・`profile.js` を触らない）。未ログイン時は個人系項目ごと非表示。
   - **[ADR-030](decisions.md) との整合**：ADR-030 は2ページ時点で「設定＝サブページ・ナビ非追加」と決めたが、個人系が4面に増えたため**入口をハンバーガーに集約する方が一貫**する。サブページ用の in-page リンク（mypage→settings 等）は補助として残す。
   - **格を混ぜない**：個人系（要ログイン）とグローバル（公開）を区切りで分ける。auth 項目には `data-require-auth` が付く（`bindAuthLinks` がゲート）ので、未ログインのクリックはログイン催促になる。
-- **関連**：`docs/personal-area-handoff.md`、[ADR-030](decisions.md)（マイページ分割・ナビ判断を本 ADR で更新）、[ADR-032](decisions.md)（お気に入り）、[ADR-013](decisions.md)（マイページ＝管理画面）、[ADR-019](decisions.md)（ゲート型）、`public/script/common.js`、`public/includes/header.php`、`docs/roadmap.md`。
+- **関連**：[ADR-030](decisions.md)（マイページ分割・ナビ判断を本 ADR で更新）、[ADR-032](decisions.md)（お気に入り）、[ADR-013](decisions.md)（マイページ＝管理画面）、[ADR-019](decisions.md)（ゲート型）、`public/script/common.js`、`public/includes/header.php`、`docs/roadmap.md`。
 
 ## ADR-032 お気に入り作品（自分がスターした作品の一覧）✅（実装・コミット済）
 - **背景**：スター（⭐＝[ADR-009](decisions.md)・Phase 5）は**付与/解除はできるが「自分がスターした作品を見返す場所」が無い**＝評価の片側だけ実装した状態だった。`stars` テーブルはあるが、一覧取得の口が無い（`stars.php` は POST/DELETE のトグルのみ、`gallery.php` の `?mine=1` は自作限定）。「スターできるのに本棚が無い」のは基本機能の穴（死にUI放置をしない方針）。
@@ -332,7 +332,7 @@
   - **並び**：スターした新しい順（`stars.created_at DESC` を tiebreak に `g.id`）。`baseSelectSql` は集計用に `LEFT JOIN stars s`（カウント）を既に持つので、**絞り込みは別エイリアス**（`INNER JOIN stars s2 ON s2.gallery_id=g.id AND s2.user_id=?`）か `EXISTS` で行い、`GROUP BY` と衝突させない。
   - **自分除外を入れない**：発見系（[ADR-027](decisions.md)）と違い、お気に入りは自作も対象。「自分に薦めない」はここには効かせない。
   - **解除の即時反映**（任意）：一覧でスターを外したらカードを消す／グレーアウトは UX 余地。最小実装は再読込で消える。
-- **関連**：`docs/personal-area-handoff.md`、[ADR-009](decisions.md)（スター＝共通通貨）、Phase 5（スター機能）、[ADR-027](decisions.md)（自分除外＝発見系のみ）、[ADR-031](decisions.md)（入口）、`public/api/gallery.php`、`public/{favorites.php,script/favorites.js}`。
+- **関連**：[ADR-009](decisions.md)（スター＝共通通貨）、Phase 5（スター機能）、[ADR-027](decisions.md)（自分除外＝発見系のみ）、[ADR-031](decisions.md)（入口）、`public/api/gallery.php`、`public/{favorites.php,script/favorites.js}`。
 
 ## ADR-033 プロフィール拡充①：自己紹介(bio) ＋ 表示名をプロフィールへ移設 ✅（実装・コミット済）
 - **背景**：ユーザーの分節は「**作品＝マイページ／人となり＝プロフィール**」。だが現状 `profile.php` は表示名・獲得スター・公開作品・GitHub リポの**公開表示だけ**で、**自己紹介(bio)が無く**「人となり」が薄い。さらに表示名の*編集*は [ADR-028](decisions.md)/[ADR-030](decisions.md) で**設定**側に置かれているが、表示名は資格情報ではなく**公開の顔**なので、分節に従えばプロフィール側が筋。
@@ -365,7 +365,7 @@
   - **検証はサーバ側必須**：形式・予約語・一意は `users.php` POST で必ず検証（クライアント検証は補助）。更新対象は常にセッション `user_id`。
   - **`?u=` と `?id=` 併存**：どちらでも引けるが、`username` 未設定（移行直後）には `?id=` フォールバック。
   - **enumeration 非対象**：username は元来公開情報なので、存在の有無を隠す neutral 応答は不要（パスワード/メールと性質が違う）。
-- **関連**：`docs/username-handle-handoff.md`、[ADR-018](decisions.md)（double opt-in・採番箇所）、[ADR-033](decisions.md)（プロフィール拡充）、roadmap「今後の発展（username/slug 昇格）」、`docker/init.sql`、`src/migrate.php`、`src/username.php`（新規・共有ヘルパー）、`public/api/{auth,users}.php`、`public/profile.{php,js}`、`src/seed.php`。
+- **関連**：[ADR-018](decisions.md)（double opt-in・採番箇所）、[ADR-033](decisions.md)（プロフィール拡充）、roadmap「今後の発展（username/slug 昇格）」、`docker/init.sql`、`src/migrate.php`、`src/username.php`（新規・共有ヘルパー）、`public/api/{auth,users}.php`、`public/profile.{php,js}`、`src/seed.php`。
 
 ## ADR-035 作品詳細の「戻る」は固定リンクでなく直前の画面に返す ✅（実装・コミット済）
 - **背景**：作品詳細（`gallery-detail.php`）の「戻る」が **`gallery-list.php`（おすすめ）へハードコード**（テンプレート `:29` とエラー時 `gallery-detail.js` の `showError` の2箇所）。だが詳細へは **おすすめ／検索／プロフィール／お気に入り／マイページの5箇所**から来る。検索結果から作品を開いて「戻る」を押すと**おすすめに飛ばされ、検索条件（`?q=`/`?tag=`）やスクロール位置を失う**（ユーザー指摘）。
@@ -381,7 +381,7 @@
   - **detail→detail を辿った場合**：作者プロフィール→作品→詳細のように辿ると、戻るは「直前＝プロフィール」に返る（履歴どおりで正しい）。
   - **委譲で2箇所をまとめる**：戻るリンクはテンプレート clone と `showError` の innerHTML の双方に出るので、`document` への委譲 click（`a.back-menu`）1本で両方を拾う（再 wiring 不要）。`common.js` の `bindAuthLinks`（`data-require-auth`）とはセレクタが別で衝突しない。
   - **安全**：外部 URL へは飛ばさない（`history.back()` か固定 href のみ）＝open-redirect を作らない。戻るは GET 遷移で CSRF 無関係。
-- **関連**：`docs/detail-back-handoff.md`、[ADR-029](decisions.md)（おすすめ/検索の役割分担）、[ADR-019](decisions.md)（ゲート型回遊）、`public/gallery-detail.php`、`public/script/gallery-detail.js`。
+- **関連**：[ADR-029](decisions.md)（おすすめ/検索の役割分担）、[ADR-019](decisions.md)（ゲート型回遊）、`public/gallery-detail.php`、`public/script/gallery-detail.js`。
 
 ## ADR-036 回遊性の仕上げ：作品タグをクリックでタグ検索／戻る動線を共通化 ✅（実装・コミット済）
 - **背景**：テストで2つの回遊の穴に気づいた（ユーザー指摘）。① **作品のタグが全画面で `textContent`（ただの文字列）描画**で、`search.php?tag=` の経路（ヘッダー検索が使用＝[ADR-025](decisions.md)）があるのに**クリックしてもタグ検索に飛ばない**（gallery-list / search / profile / favorites / detail / mypage の6箇所）。② **公開プロフィール（`profile.php`）に「戻る」が無い**ため、ユーザー検索や作者名クリックで profile に入ると**ブラウザの戻るしか手段がない**（作品詳細には [ADR-035](decisions.md) で履歴ベースの戻るを入れた）。
@@ -397,7 +397,7 @@
   - **二重バインド回避**：`back-menu` を common.js に移すとき gallery-detail.js 側のハンドラは必ず消す（同一クリックで2回 history.back() しない）。
   - **安全**：tag の href は `encodeURIComponent`、リンク文字は `textContent`（XSS なし）。back-menu の挙動は [ADR-035](decisions.md) のまま（open-redirect なし）＝置き場所を common.js に移すだけ。
   - **ゲート**：tag リンク先 `search.php` は自前で `requireAuth`。未ログイン teaser からのクリックも遷移先で促せる（work-link と同方針）。
-- **関連**：`docs/discovery-polish-handoff.md`、[ADR-035](decisions.md)（戻る）、[ADR-025](decisions.md)（`?tag=` 検索）、[ADR-017](decisions.md)（タグ）、[ADR-019](decisions.md)（ゲート型）、`public/script/common.js` ほか描画各所、`public/profile.php`。
+- **関連**：[ADR-035](decisions.md)（戻る）、[ADR-025](decisions.md)（`?tag=` 検索）、[ADR-017](decisions.md)（タグ）、[ADR-019](decisions.md)（ゲート型）、`public/script/common.js` ほか描画各所、`public/profile.php`。
 
 ## ADR-037 アカウント削除（退会）を実装する ✅（実装・コミット済）
 - **背景**：認証ライフサイクルは登録（double opt-in・[ADR-018](decisions.md)）/ ログイン / パスワード再設定（[ADR-021](decisions.md)）/ 設定まで揃っているのに、**自分のアカウントを消す手段（退会）が無い**。マルチユーザー＝発信者プラットフォームで「自分のデータを消せない」のは基本機能の穴（[ADR-013](decisions.md) マイページ＝自分の管理面）。退会導線が無いためユーザー検索にも残り続ける。
@@ -406,7 +406,7 @@
 - **代替案・却下理由**：(a) 論理削除（`is_deleted` フラグ）→ 検索/集計の除外条件が全体に波及し、「消した」体験が中途半端。物理削除＋cascade が綺麗。(b) 確認を「DELETE と入力」方式 → パスワード再入力で十分・既存の設定 UX と一貫。(c) 退会を出さず ADR で正当化のみ → 基本機能なので実装が妥当（User 判断で実装）。
 - **影響**：`public/api/auth.php`（`delete-account`）、`public/settings.php`（danger zone）、`public/script/settings.js`、CSS。スキーマ不変。
 - **安全**：削除は session の `user_id` のみ・`password_verify` 再確認・トランザクション・成功後 session 破棄。
-- **関連**：`docs/account-deletion-handoff.md`、[ADR-018](decisions.md)（登録 double opt-in）、[ADR-021](decisions.md)（パスワード再設定）、[ADR-013](decisions.md)（マイページ）、`docker/init.sql`（FK cascade）。
+- **関連**：[ADR-018](decisions.md)（登録 double opt-in）、[ADR-021](decisions.md)（パスワード再設定）、[ADR-013](decisions.md)（マイページ）、`docker/init.sql`（FK cascade）。
 
 ## ADR-038 ページ幅を4トークンに集約し、レイアウトの不整合を解消する ✅（実装済）
 - **背景**：コンテンツ幅がページごとにバラバラ（1180 / 60% / clamp / 500 / 450 / 820 / policy の 60〜90% と6種以上、px と % が混在）で、ページ遷移のたびに中央の表示幅がガタつく。各ページが歴史的に独自の幅を持ち、設計トークンが無かったのが原因。加えて作品作成/編集（`work-edit`）が認証カード（`login-box`）を間借りして狭く、戻る系リンクの色や header の並びにも不整合があった。
@@ -422,7 +422,7 @@
 - **理由**：長文・グリッド・フォームで読みやすい/使いやすい幅は異なる（measure）。実機確認で policy は 640=細すぎ・1180=読めない → **760 が最適**と確定。トークン化で幅を1箇所管理し、ad-hoc な幅の再発を防ぐ。種類が違うときだけ幅が変わる＝「意味のある変化」にすることで遷移時の違和感を消す。
 - **代替案・却下理由**：(a) 現状維持（バラバラ）→ 遷移時のガタつき・`work-edit` の窮屈さが残る。(b) 全ページ同一幅 → グリッドが狭く・フォームが間延びで両立しない。(c) `work-edit` に専用幅(820)を足す → 幅の種類が増えるだけ。トークン体系へ集約する方が一貫。
 - **影響**：`public/style/body.css`（`:root` トークン）、`gallery-list / gallery-detail / login-main / form-main / modal / header / policy` の各 CSS が `var(--w-*)` を参照、`public/work-edit.php`（2カラム化・**JS 依存の id / label[for] / name は維持**）、`public/form.php`（コンテンツ内ロゴ重複削除）、`public/includes/header.php`（並び替え）。挙動・API・スキーマは不変（見た目のみ）。
-- **関連**：`docs/page-shell-consistency-handoff.md`、`docs/page-width-tokens-handoff.md`、[ADR-019](decisions.md)（ゲートモーダル）、[ADR-013](decisions.md)（マイページ）。
+- **関連**：[ADR-019](decisions.md)（ゲートモーダル）、[ADR-013](decisions.md)（マイページ）。
 
 ## ADR-039 ブランチ運用を `main` 一本化する（`develop` を廃止）✅
 - **背景**：[ADR-001](decisions.md) では「`main` が古く `develop` が大幅先行」だったため develop を実質の本体として運用してきた。現在は両者の差が**数コミットのみ**（ff 可能）でその前提は解消。本プロジェクトは個人開発であり、`develop`（統合ブランチ）を挟む運用は単独作業ではオーバーヘッドで、default が古く見える原因にもなる。
@@ -434,7 +434,7 @@
 - **状態**：✅ 採用（`main` 一本化）。
 
 ## ADR-040 作品カードと詳細ページの表示密度を User 直接判断で調整 ✅
-- **背景**：`docs/work-card-redesign-handoff.md` / `docs/work-card-layout-handoff.md` で作品カードの標準構造を定義した後、実機表示を見ながら User が直接 Codex に細かな見た目の判断を出した。途中案として「カード幅を半分に区切り、左半分にアイコン・右半分に作者名/タグ」「左余白にアイコン、中央にテキスト」などを試したが、見た目が弱く採用しなかった。作品詳細も、行ごとの区切り線を一度入れたが、硬く見えたため線を減らした。
+- **背景**：作品カードの標準構造を handoff で定義した後、実機表示を見ながら User が直接 Codex に細かな見た目の判断を出した。途中案として「カード幅を半分に区切り、左半分にアイコン・右半分に作者名/タグ」「左余白にアイコン、中央にテキスト」などを試したが、見た目が弱く採用しなかった。作品詳細も、行ごとの区切り線を一度入れたが、硬く見えたため線を減らした。
 - **決定**：
   - **作品カード**：サムネを少し大きめにし、画像下は **作品名（中央）→ アイコン＋作者名（中央寄せで横並び）→ タグ（中央）** の3段にする。アイコンは作者名の文字サイズに近い小さめ（18px 前後）にし、作者名/タグが長い・多い場合はカード幅内で `...` 省略する。
   - **検索/おすすめ/お気に入り**：作者アイコン・作者名・タグの見え方を揃える。検索で見られる他人の作品は公開作品に限定されるため、作品カードや検索結果に `公開/非公開` の種別表示は出さない。
@@ -449,7 +449,7 @@
   - `公開` ラベルを残す → 検索/おすすめから見られる作品は公開に決まっており、冗長なので却下。
   - `公開日` として表示する → 現状は公開状態の変更日時を管理していない。`created_at` を使うため「作成日」が正確。
 - **影響**：主に `public/style/gallery-list.css`、`public/style/gallery-detail.css`、`public/script/gallery-detail.js`、検索/カード描画まわり。API の公開/非公開フィルタ、非公開作品を所有者以外へ返さない safety invariant、スターのクリック動線は不変。
-- **関連**：`docs/work-card-redesign-handoff.md`、`docs/work-card-layout-handoff.md`、[ADR-027](decisions.md)（発見系は他人の公開作品）、[ADR-029](decisions.md)（おすすめ/検索の役割分担）、[ADR-036](decisions.md)（タグ回遊）。
+- **関連**：[ADR-027](decisions.md)（発見系は他人の公開作品）、[ADR-029](decisions.md)（おすすめ/検索の役割分担）、[ADR-036](decisions.md)（タグ回遊）。
 
 ## ADR-041 ヘッダー右上を「アカウントトリガー」1枠に集約 ✅
 - **背景**：機能が増え、ヘッダー右上に `ログイン/新規登録/マイページ/ログアウト` のボタン群と `≡`（ハンバーガー）が並び、ドロワーには `作品管理/お気に入り/設定…` のナビが入っていた。`マイページ`（トップバー）とドロワーの `作品管理` が同じ `mypage.php` への二重入口になっていた。pixiv の「丸アイコンがメニュー起動を兼ねる」を参照に整理。
@@ -457,7 +457,7 @@
 - **理由**：トップバーが `ブランド｜検索｜◯` の3点に整理され、特にモバイルで認証ボタンが1行を占有する重さが消える。アバター＝「自分のメニュー」という記号で操作モデルが明確になる。ゲストのナビ導線はロゴ（ホーム）＋検索＋フッターでカバー（フッターに既存）。
 - **代替案・却下理由**：(a) ゲストもアバター式に統一 → ゲストは自分のアイコンが無く「メニュー」と読みにくく発見性が落ちる。ログインボタンを残す方が良い。(b) `≡` を残す → トップバーが煩雑なまま。(c) ドロワーを account 専用に絞る → 今回は変更最小で全ナビ残し。
 - **影響**：`public/includes/header.php`、`public/style/header.css`、`public/script/common.js`（既存の auth トグルに乗せる）、`public/image/default-avatar.svg`。ドロワー開閉 JS・`data-auth-nav`・`.auth-action-logout`・フッターナビ・CSRF・`requireAuth` 動線は不変。
-- **関連**：`docs/header-account-trigger-handoff.md`、[ADR-019](decisions.md)（認証ゲートモーダル）、[ADR-030](decisions.md)（作品＝マイページ／人となり＝プロフィール）。
+- **関連**：[ADR-019](decisions.md)（認証ゲートモーダル）、[ADR-030](decisions.md)（作品＝マイページ／人となり＝プロフィール）。
 
 ## ADR-042 ユーザーアイコン（アバター）機能を入れる・呼称は「アイコン」に統一 ✅
 - **背景**：ヘッダーをアバタートリガーにした流れで「アイコン」概念が入ったが、当初は未設定フォールバックの人型画像を出すだけで、自分で設定したアイコンが無く、プロフィールや作品の作者欄にも無かった。「全員が発信者」の場として、各ユーザーが自分のアイコンを持てるべき。
@@ -466,7 +466,7 @@
 - **代替案・却下理由**：(a) 表示のみ（全員デフォルト）→ 全員同じで無意味。(b) 検証を各所に複製 → ドリフトの元。共通化が安全。(c) id 由来の色違いイニシャル等の生成アイコン → 今回は対象外（"Shine in every color." と相性は良いので将来案）。(d) **コード/DB も `icon` に全置換して UI と一致させる** → `icon` はUIグリフを指す語でプロフィール画像には曖昧、かつ標準（avatar）から外れる。横断リネーム（DB列マイグレーション・JS/HTML の id 結合・CSS クラス結合）のコスト/リスクに見合わないため却下。表示語と識別子を分けるのが正しい（上記）。
 - **影響**：`users.avatar_path`（冪等 ALTER）、`src/upload.php`、`public/api/users.php`（`action=avatar`／`avatar-remove`）、`auth.php?status`・`users.php`・`gallery.php`（詳細）の avatar URL 返却、`profile`/`gallery-detail`/ヘッダー/カードの表示。更新対象は**常にセッション本人**（client の id を信用しない）。
 - **バグ修正（同時）**：作者アイコン `<img class="author-avatar">` が `<figure class="detail-img">` 内にネストし、メイン画像用の `.detail-img img { width:100% }`（詳細度が高い）に上書きされてアイコンが全幅に巨大化していた。`.detail-img > img`（直下の img のみ）に限定して解消。
-- **関連**：`docs/user-avatar-handoff.md`、[ADR-015](decisions.md)（画像アップロードの安全弁）、[ADR-030](decisions.md)（プロフィール）。
+- **関連**：[ADR-015](decisions.md)（画像アップロードの安全弁）、[ADR-030](decisions.md)（プロフィール）。
 
 ## ADR-043 フッターを「プロダクト・ファースト」の3ブロックに ✅
 - **背景**：フッターが `© Miz Kingdom / Developer：Miz Kingdom / Mail` に**全アプリナビ（おすすめ〜Privacy Policy）**と SNS（X/GitHub/LinkedIn が各サービスのトップに向くダミー）を同列に並べ、会社/開発者情報ファーストで事務的・雑多だった。アプリナビはヘッダードロワーと重複。コピーライトに `Miz..Kingdom` の誤記、年も固定 `2025`。
@@ -477,7 +477,7 @@
 - **関連**：[ADR-006](decisions.md)（PrismStar 命名）、[ADR-026](decisions.md)/[ADR-028](decisions.md)（安全の中央化）。
 
 ## ADR-044 検索結果を「もっと見る」から番号付きページングへ（総件数・表示数切替つき）✅（規模拡大で ADR-029 の検索側を更新）
-> **更新（2026-06-30・実装レビュー後）**：実機レビューを受けて2点を整理。**(1) 表示件数変更時はアンカー優先を正式仕様にする**。URL 直打ち・初期表示・リロード・通常のページ番号クリックで `page=1` を開いた場合は、API の定義どおり検索順の先頭から最大 `perPage` 件を返す。一方、表示件数変更時は先頭へ戻ると閲覧文脈を失うため、直前の先頭作品を含むページへ移動する。したがって、アンカーを含むページが最終ページ相当になり表示件数未満へ着地することは許容する。これは API の `page=1` が少ないバグではなく、閲覧位置維持を優先した結果。**(2) 検索結果グリッドを5列に**＝表示件数 `10/30/50` は「5で割り切れる」前提なので5列なら 2/6/10 行の長方形に揃う（CLAUDE.md「1〜5列」とも整合）。幅トークン `--w-wide`（[ADR-038]・最大1180px）は据え置き、検索結果だけカードを約196pxに縮めて収める。**おすすめ（トップ）はカードを大きく見せるキュレーション枠、検索は網羅・情報量優先で小さめ5列という [ADR-029] の役割分担を視覚にも延長したもの（＝表示が違うのは意図）**。詳細は `docs/search-results-pagination-handoff.md` の「追補」。
+> **更新（2026-06-30・実装レビュー後）**：実機レビューを受けて2点を整理。**(1) 表示件数変更時はアンカー優先を正式仕様にする**。URL 直打ち・初期表示・リロード・通常のページ番号クリックで `page=1` を開いた場合は、API の定義どおり検索順の先頭から最大 `perPage` 件を返す。一方、表示件数変更時は先頭へ戻ると閲覧文脈を失うため、直前の先頭作品を含むページへ移動する。したがって、アンカーを含むページが最終ページ相当になり表示件数未満へ着地することは許容する。これは API の `page=1` が少ないバグではなく、閲覧位置維持を優先した結果。**(2) 検索結果グリッドを5列に**＝表示件数 `10/30/50` は「5で割り切れる」前提なので5列なら 2/6/10 行の長方形に揃う（CLAUDE.md「1〜5列」とも整合）。幅トークン `--w-wide`（[ADR-038]・最大1180px）は据え置き、検索結果だけカードを約196pxに縮めて収める。**おすすめ（トップ）はカードを大きく見せるキュレーション枠、検索は網羅・情報量優先で小さめ5列という [ADR-029] の役割分担を視覚にも延長したもの（＝表示が違うのは意図）**。詳細は実装時の追補（handoff）に従う。
 - **背景**：[ADR-029](decisions.md) は検索（works）を「もっと見る」段階読み込みにし、番号付きページ／cursor／`COUNT` を「**本規模では過剰**」として却下していた。その判断は*当時の規模*（作品1〜24・star も薄い）を前提にしたもの。今回、検索ページングと総件数表示を実機検証できるよう seed を増量し（公開作品 +30 目安）、検索が「網羅的に目的の対象を探す」実用面になった。User の違和感＝「もっと見る」はタイムライン的で、検索結果に**現在位置・結果規模（総件数）・URL 共有／復元・戻りやすさ**が足りない。検索結果は流し見る場ではなく探す場なので、2ページ目へ行く／前へ戻る／同じ検索状態を URL で開く、ができる方が自然。
 - **決定**：検索（`search.php`・works/users 両方）を**番号付きページング**に置き換える。
   1. **ページ操作**：「前へ／次へ」＋（余裕があれば）ページ番号。`page` は 1 始まりで URL に残し、リロード／ブラウザバック／URL 共有で同じ検索状態を復元。`page` 不正値は 1、最終ページ超過は API が実際の最終ページに丸める。空検索（全件ブラウズ）も同じ仕様。
@@ -505,7 +505,7 @@
   - **`COUNT(DISTINCT g.id)` 必須**：star/tag の LEFT JOIN・EXISTS で行がファンアウトするため、行数 `COUNT(*)` ではなく `DISTINCT g.id`。
   - **位置維持は optional**：①〜③で検索画面としての価値は出るので、④は後続に切れる（handoff も本体／optional を分離）。
   - **コメント機能は別スコープ**：今回の検索改修には含めない（新規 DB/API/UI/削除・通報設計が必要）。Roadmap の今後の発展で管理。
-- **関連**：`docs/search-results-pagination-handoff.md`（Codex 実装 handoff）、`docs/search-results-pagination-spec.md`（User の仕様ドラフト＝出所）、[ADR-029](decisions.md)（検索側を本ADRで更新／おすすめ2軸は維持）、[ADR-025](decisions.md)（検索条件）、[ADR-027](decisions.md)（自分除外）、[ADR-020](decisions.md)（seed の公開/非公開ミックス）、`public/api/search.php`、`public/script/search.js`、`public/search.php`、`src/seed.php`。
+- **関連**：`docs/spec/search-results-pagination-spec.md`（User の仕様ドラフト＝出所）、[ADR-029](decisions.md)（検索側を本ADRで更新／おすすめ2軸は維持）、[ADR-025](decisions.md)（検索条件）、[ADR-027](decisions.md)（自分除外）、[ADR-020](decisions.md)（seed の公開/非公開ミックス）、`public/api/search.php`、`public/script/search.js`、`public/search.php`、`src/seed.php`。
 
 ## ADR-045 デモ用データセットを ~500公開作品・~40ユーザーのプログラム生成に（自然名・タグ均一・冪等）✅
 - **背景**：[ADR-044](decisions.md) で検証用に seed を +30 したが、works=58 では検索が1〜2ページで終わり「探す画面」「賑わったプラットフォーム」の実感が出ない。検索のページング・総件数・タグ別件数・人気ランキングを**実データで見せる**には規模が要る。
@@ -526,7 +526,7 @@
   - **乱数生成** → seed の冪等・再現性が崩れる（決め打ちで固定する）。
   - **全タグを1プールから2〜3個** → タイトルと一致させたいテーマ語が混ざる／分布制御が難しい。テーマ＋disjoint副タグの方が自然かつ均一。
 - **影響**：`src/seed.php` のみ。**スキーマ・API・並び順・アプリ挙動は不変**（増やすのは seed データだけ）。FK `ON DELETE CASCADE`（`gallery_tags`/`stars`）で旧 fixture の `DELETE` は孤児を残さない。
-- **関連**：`docs/seed-dummy-data-handoff.md`、[ADR-044](decisions.md)（この量を要求した検索ページング）、[ADR-029](decisions.md)（トップ新着 top5 / star 傾斜）、[ADR-020](decisions.md)（公開/非公開ミックス）、`src/seed.php`。
+- **関連**：[ADR-044](decisions.md)（この量を要求した検索ページング）、[ADR-029](decisions.md)（トップ新着 top5 / star 傾斜）、[ADR-020](decisions.md)（公開/非公開ミックス）、`src/seed.php`。
 
 ## ADR-046 閲覧もログイン前提（メンバー制）／未ログインのトップはティーザー ✅
 - **背景**：作品詳細（`gallery-detail.php`）と公開プロフィール（`profile.php`）は未ログインだとログインモーダルを出し、中身を見せない。一方でトップのおすすめ（`gallery-list.php`）は未ログインでも一覧が見える。「"公開"プロフィールなのにログインが要る」ように読め、公開CMS的な発想では不整合に見える指摘があった。
