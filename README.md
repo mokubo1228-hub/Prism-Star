@@ -55,7 +55,7 @@
 - **「動くものを作り直さない」** — PHP + MySQL + Docker の動く資産を本体に選び、流行りで作り直さず伸ばした（ADR-001 / ADR-002）。
 - **意思決定を ADR で残す** — 「何を・なぜ・何を却下したか」を固定し、**設計（handoff）と実装を分けて**進める開発フロー。
 
-> 設計のこだわり・判断軸の全体像は **[docs/highlights.md](docs/highlights.md)**。
+> 設計のこだわり・判断軸の全体像は **[docs/design/highlights.md](docs/design/highlights.md)**。
 
 ---
 
@@ -110,11 +110,11 @@ docker compose down -v   # データも含めて完全削除
 - **バックエンド**: PHP 8.2 (Apache) / MySQL 8.0（プリペアドステートメント前提）
 - **開発環境**: Docker Compose（`app` + `db` の2コンテナ）
 
-「なぜ採った / なぜ他を採らなかった」は [docs/highlights.md](docs/highlights.md)（技術スタックと選定理由）に併記。
+「なぜ採った / なぜ他を採らなかった」は [docs/design/highlights.md](docs/design/highlights.md)（技術スタックと選定理由）に併記。
 
 ## ドキュメント
 
-- **[docs/highlights.md](docs/highlights.md)** — 設計のこだわり・判断軸・技術選定（読みどころの索引）
+- **[docs/design/highlights.md](docs/design/highlights.md)** — 設計のこだわり・判断軸・技術選定（読みどころの索引）
 - **[docs/adr/decisions.md](docs/adr/decisions.md)** — 意思決定ログ（ADR：背景 / 決定 / 理由 / 代替案）
 - **[docs/spec/spec.md](docs/spec/spec.md)** — 技術仕様（構成 / データモデル / API / セキュリティ）
 - **[docs/spec/requirements-v2.md](docs/spec/requirements-v2.md)** — 要件・動線

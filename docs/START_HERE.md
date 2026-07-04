@@ -8,7 +8,7 @@
 ---
 
 ## どこに何があるか
-- **読みどころ**（こだわり・判断軸・技術選定の理由）：`docs/highlights.md`
+- **読みどころ**（こだわり・判断軸・技術選定の理由）：`docs/design/highlights.md`
 - **技術仕様**（スタック/構成/データモデル/API/要件）：`docs/spec/spec.md`
 - **v2 の要件・動線**（マイページ/公開非公開/作成編集/タグ/検索）：`docs/spec/requirements-v2.md`
 - **実装計画と進捗**：`docs/roadmap.md`
