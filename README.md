@@ -119,4 +119,9 @@ docker compose down -v   # データも含めて完全削除
 - **[docs/spec/spec.md](docs/spec/spec.md)** — 技術仕様（構成 / データモデル / API / セキュリティ）
 - **[docs/spec/requirements-v2.md](docs/spec/requirements-v2.md)** — 要件・動線
 - **[docs/ai-roles-and-workflow.md](docs/ai-roles-and-workflow.md)** — 開発の役割分担とワークフロー
-</content>
+
+---
+
+## 公開範囲 / License
+
+© 2026 mokubo1228-hub. ポートフォリオ閲覧用に一時公開しています。再利用・複製・改変の許諾はありません（All rights reserved）。
