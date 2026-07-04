@@ -16,7 +16,7 @@ broad design / 方針検討には使わない。
 
 作業ルートはこのリポジトリ（`prismstar/`）のルート。
 
-- 作業ブランチは **`develop`**（`main` は古い。本体は develop）。
+- 作業ブランチは **`main`**（公開・リモート・履歴とも main が本体）。
 - 主なディレクトリ：
   - `public/` … Apache ドキュメントルート（`*.html` / `Style/` / `Script/` / `api/*.php`）
   - `src/` … PHP 共通処理（`db.php`, `seed.php`）
@@ -64,7 +64,7 @@ Codex への入力は常に Claude Code の handoff docs を人間が渡す。
 ## 実装依頼の標準テンプレート（Codex 向け）
 
 ```text
-作業ブランチは develop。まず docs/ai-roles-and-workflow.md, docs/spec/spec.md, README.md を読む。
+作業ブランチは main。まず docs/ai-roles-and-workflow.md, docs/spec/spec.md, README.md を読む。
 
 指定の phase だけを実装する。scope を広げない。隣接 future phase を実装しない。
 commit / tag / push はしない。

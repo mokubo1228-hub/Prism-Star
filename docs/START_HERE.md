@@ -12,20 +12,23 @@
 - **技術仕様**（スタック/構成/データモデル/API/要件）：`docs/spec/spec.md`
 - **v2 の要件・動線**（マイページ/公開非公開/作成編集/タグ/検索）：`docs/spec/requirements-v2.md`
 - **実装計画と進捗**：`docs/roadmap.md`
-- **意思決定と理由**（ADR-001〜017）：`docs/adr/decisions.md`
+- **意思決定と理由**（ADR-001〜047）：`docs/adr/decisions.md`
 - **AI 開発の役割・フロー**（User / Claude Code / Codex の3者）：`docs/ai-roles-and-workflow.md`
 - **実装者（Codex）向け repo 規則**：`AGENTS.md`
 - **各フェーズの Codex 実装指示（handoff）**：公開 repo に出さない内部の作業doc（人間が Codex へ渡す）
 - **使い方 / 起動**：`README.md`
 
-## 現在地（2026-06-23 時点）
-- 作業ブランチは **`develop`**。技術：HTML / CSS / Vanilla JS ＋ PHP 8.2(Apache) ＋ MySQL 8.0 ＋ Docker Compose。
-- **完了・コミット済**：
-  - **v1（Phase 0–5）**：認証 / 既存機能仕上げ / PrismStar リブランド / 発信者オンボーディング（登録・プロフィール・新着）/ GitHub 連携（サーバ側 token・SSRF対策）/ スター ⭐。
-  - **Phase 6**：PHP 部品化（`.html`→`.php`、header/footer/head を `public/includes/*.php` に共通化）。
-  - **認証動線 UX**：ヘッダーにログイン/新規登録/ログアウト・「みんなの作品」見出し・未ログイン⭐でログイン誘導。
-- **完了・未コミット**：所有モデル修正 ＝ 公開詳細から削除ボタン撤去（管理はマイページへ）＋ `seed.php` 複数ユーザー化（demo/Aoi/Ren/Mio・全員 password123）。未コミット＝ `gallery-detail.php` / `gallery-detail.js` / `src/seed.php` / `docs/highlights.md`。
-- **AI 運用**：ChatGPT 無し。`User ⇄ Claude Code → Codex`。**実装は Codex へ handoff、Claude Code は設計・整理・review のみ（コードを直接書かない）**。commit / push は User が区切りで判断。
+## 現在地（2026-07-04 時点）
+- 本体ブランチは **`main`**（公開・履歴とも main）。技術：HTML / CSS / Vanilla JS ＋ PHP 8.2(Apache) ＋ MySQL 8.0 ＋ Docker Compose。
+- **PrismStar として公開済み** — 元「Okubo Gallery（大久保の館）」からの継続開発。DB 名も `prismstar` に統一。
+- **機能はひと通り完成**（v1 ＋ v2 ＋ 堅牢性 ＋ 個人系IA ＋ 発見系）：
+  - **v1（Phase 0–5）**：認証 / 既存機能仕上げ / リブランド / 発信者オンボーディング / GitHub 連携（サーバ側 token・SSRF対策）/ スター ⭐ / PHP 部品化。
+  - **v2**：公開・非公開／マイページ・作品作成編集／画像アップロード／タグ／検索／登録 double opt-in／パスワード再設定／ゲート型回遊（メンバー制・ADR-046）／cache-busting。
+  - **堅牢性 ①②③**：CSRF・セッション Cookie ／ アカウント設定（表示名・パスワード）／ 発見系の役割分担（検索＝番号付きページング＋総件数・表示件数切替／おすすめ＝新着・人気の2軸ランキング）。
+  - **個人系IA**：マイページ分割／お気に入り／プロフィール（bio・アバター）／`@username`／作品詳細の「戻る」を直前画面へ。
+  - **その他**：GitHub 取り込みの `gallery` 永続化、seed を ~500 公開作品 / ~40 ユーザーに増量、作品カード UI 統一、安全不変条件＋検索契約の統合テスト（PHPUnit）。
+- **意思決定は ADR-001〜047**（`docs/adr/decisions.md`）。作業は基本 commit 済み。
+- **AI 運用**：ChatGPT 無し。`User ⇄ Claude Code → Codex`。実装は Codex へ handoff（handoff は非公開の内部作業doc・人間が渡す）、Claude Code は設計・整理・review のみ（コードを直接書かない）。commit / push は User が区切りで判断。
 
 ## 起動（詳細は README.md）
 ```bash
@@ -38,16 +41,12 @@ docker compose exec app php /var/www/html/src/migrate.php  # 冪等
 ※ **Docker 等プロセスの起動は User の許可を取ってから**（`docs/ai-roles-and-workflow.md` §3 共通）。
 
 ## 次にやること
-次セッションは **START_HERE ＋ メモリ** を読んでから、最初の一手を1つ選ぶ。
-※ どちらも最初は **Claude Code が spec/handoff を書く（実装はしない）**。
+機能はひと通り完成。以降は **polish と「今後の発展」バックログ**（`docs/roadmap.md` 末尾）から、User の区切りで一つずつ。機能価値を優先し、視覚調整で手を止めない方針。
 
-- **A. デザイン方針を固める**（レイアウト要改善・推奨）：
-  Claude Code が design 方針を1枚化（虹色ブランド／配色トークン／グリッド・カード／ヘッダー／余白・タイポ／レスポンシブ）＝"ターゲット" → 実装ツールを選ぶ（視覚ツール＝Antigravity/Claudeでスクショ反復、または Codex＋目視QA）。
-- **B. Phase 7（公開/非公開）**：
-  Phase 7 の handoff を書く → Codex 実装 → review。その後 8 マイページ → 9 画像アップロード → 10 タグ → 11 検索（`docs/spec/requirements-v2.md`）。
+- **視覚 polish**：虹色ブランド表現（ロゴ・配色トークン）、レスポンシブ細部。
+- **今後の発展**：タグ予測（`#` 入力中の候補表示）、pretty URL（`/@handle` の Apache rewrite）、検索の微調整。
+- **小残務**：気づいた粗は運用側メモに控え、区切りで一括で当てる。
 
-いつでも（User の区切りで）：**未コミットの所有モデル修正**をコミット。
-
-その先：ページネーション、GitHub 取り込み作品の永続化（[ADR-016](adr/decisions.md)）、登録の堅牢化、`[マイページ]` リンク（Phase 8 で有効化）。
+実装が要るものは Claude Code が handoff 化 → Codex 実装 → review の順（Claude Code はコードを直接書かない）。
 
 > 細かな作業メモ（既知の粗・ドキュメント不備など）は repo に置かず、運用側（Claude Code のメモリ）で管理する。
