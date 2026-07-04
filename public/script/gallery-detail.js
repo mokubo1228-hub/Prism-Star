@@ -43,7 +43,7 @@ async function loadDetail() {
 
     const authorLink = clone.querySelector(".detail-author a");
     const authorAvatar = clone.querySelector(".author-avatar");
-    authorAvatar.src = work.author_avatar || "Image/default-avatar.svg";
+    authorAvatar.src = work.author_avatar || "image/default-avatar.svg";
     authorLink.href = `profile.php?id=${work.user_id}`;
     authorLink.textContent = work.author || "Unknown";
 

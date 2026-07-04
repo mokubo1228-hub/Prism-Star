@@ -33,7 +33,7 @@ include __DIR__ . '/includes/head.php';
                   <a class="author-link" href="profile.php?id={USER_ID}">by {AUTHOR}</a>
                   <p class="tag-list"></p>
                 </div>
-                <img class="card-avatar" src="Image/default-avatar.svg" alt="">
+                <img class="card-avatar" src="image/default-avatar.svg" alt="">
               </div>
             </div>
           </article>
@@ -43,6 +43,6 @@ include __DIR__ . '/includes/head.php';
   </main>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
-  <script src="<?= htmlspecialchars(asset('Script/favorites.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+  <script src="<?= htmlspecialchars(asset('script/favorites.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </body>
 </html>

@@ -42,7 +42,7 @@ function showProfileAvatarMessage(message, isError = false) {
 }
 
 function updateAvatarImages(avatar) {
-  const src = avatar || "Image/default-avatar.svg";
+  const src = avatar || "image/default-avatar.svg";
   if (profileAvatar) profileAvatar.src = src;
   const headerAvatar = document.querySelector(".header-avatar img");
   if (headerAvatar) headerAvatar.src = src;

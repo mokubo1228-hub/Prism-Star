@@ -160,7 +160,7 @@ function applyAuthState(status) {
   if (guestActions) guestActions.hidden = loggedIn;
   if (mypageLink) mypageLink.hidden = !loggedIn;
   if (headerAvatar) {
-    headerAvatar.src = loggedIn && status.user?.avatar ? status.user.avatar : "Image/default-avatar.svg";
+    headerAvatar.src = loggedIn && status.user?.avatar ? status.user.avatar : "image/default-avatar.svg";
   }
   if (logoutButton) {
     logoutButton.hidden = !loggedIn;

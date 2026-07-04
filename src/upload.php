@@ -1,6 +1,6 @@
 <?php
 
-const DEFAULT_AVATAR_PATH = 'Image/default-avatar.svg';
+const DEFAULT_AVATAR_PATH = 'image/default-avatar.svg';
 
 function uploadError(string $message, int $status): void
 {

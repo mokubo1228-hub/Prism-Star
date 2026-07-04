@@ -139,7 +139,7 @@ function renderWork(work) {
 
   const avatar = document.createElement("img");
   avatar.className = "card-avatar";
-  avatar.src = work.author_avatar || "Image/default-avatar.svg";
+  avatar.src = work.author_avatar || "image/default-avatar.svg";
   avatar.alt = "";
 
   metaText.append(author, tags);

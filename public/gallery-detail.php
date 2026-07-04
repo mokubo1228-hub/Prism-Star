@@ -20,7 +20,7 @@ include __DIR__ . '/includes/head.php';
             <span class="star-count">0</span>
           </button>
         </div>
-        <p class="detail-author"><img class="author-avatar" src="Image/default-avatar.svg" alt=""><a href="profile.php?id={USER_ID}">{AUTHOR}</a></p>
+        <p class="detail-author"><img class="author-avatar" src="image/default-avatar.svg" alt=""><a href="profile.php?id={USER_ID}">{AUTHOR}</a></p>
         <p class="detail-meta"></p>
         <section>
           <p class="detail-txt">{DESC}</p>
@@ -31,6 +31,6 @@ include __DIR__ . '/includes/head.php';
   </main>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
-  <script src="<?= htmlspecialchars(asset('Script/gallery-detail.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+  <script src="<?= htmlspecialchars(asset('script/gallery-detail.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </body>
 </html>

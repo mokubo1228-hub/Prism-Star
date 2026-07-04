@@ -48,6 +48,6 @@ include __DIR__ . '/includes/head.php';
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
 
-  <script src="<?= htmlspecialchars(asset('Script/form.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+  <script src="<?= htmlspecialchars(asset('script/form.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </body>
 </html>

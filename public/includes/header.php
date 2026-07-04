@@ -38,7 +38,7 @@
           <a class="auth-action auth-action-login" href="login.php">ログイン</a>
         </div>
         <button id="hamburger" class="header-avatar" type="button" aria-label="メニュー" aria-expanded="false" data-auth-nav hidden>
-          <img src="Image/default-avatar.svg" alt="" width="44" height="44">
+          <img src="image/default-avatar.svg" alt="" width="44" height="44">
         </button>
       </div>
     </div>

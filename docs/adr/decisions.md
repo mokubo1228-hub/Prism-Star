@@ -95,7 +95,7 @@
 
 ## ADR-012 ページを PHP 化し header/footer をサーバ側 partial で共通化 ✅（実装は Phase 6）
 - **背景**：「PHP 8.2」採用なのに、ページは静的 `.html` で header/footer が全8ページに**コピペ**（DRY 違反＝ヘッダー/フッター共通化の課題）。PHP は API 層だけで、サーバ側テンプレートを活かせていない。
-- **決定**：静的 `.html` ページを `.php` に変え、header/footer（と head）を `public/includes/*.php` の **partial に1箇所化**して各ページが `include` する。**挙動は変えない構造リファクタ**。`base.html` はなごりとして `.html` のまま残す。
+- **決定**：静的 `.html` ページを `.php` に変え、header/footer（と head）を `public/includes/*.php` の **partial に1箇所化**して各ページが `include` する。**挙動は変えない構造リファクタ**。`base.html` はなごりとして `.html` のまま残した（後の公開整備で、未参照の死にファイルのため削除）。
 - **理由**：コピペ重複を解消し、ヘッダー/フッターを1箇所で管理できる。サーバ側テンプレート（`include`）という PHP らしい実装になる。
 - **代替案**：
   - `.html` のまま Apache に PHP 処理させる → 非標準・不自然で却下。

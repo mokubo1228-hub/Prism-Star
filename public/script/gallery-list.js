@@ -54,7 +54,7 @@ function renderItem(item, target, rank) {
   }
 
   const avatar = clone.querySelector(".card-avatar");
-  avatar.src = item.author_avatar || "Image/default-avatar.svg";
+  avatar.src = item.author_avatar || "image/default-avatar.svg";
 
   const starButton = clone.querySelector(".star-button");
   updateStarButton(starButton, item.star_count || 0, Boolean(item.starred));

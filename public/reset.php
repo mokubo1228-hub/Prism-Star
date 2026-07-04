@@ -47,6 +47,6 @@ include __DIR__ . '/includes/head.php';
   </main>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
-  <script src="<?= htmlspecialchars(asset('Script/reset.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+  <script src="<?= htmlspecialchars(asset('script/reset.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 </body>
 </html>
