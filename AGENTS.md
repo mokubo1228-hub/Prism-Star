@@ -18,7 +18,7 @@ broad design / 方針検討には使わない。
 
 - 作業ブランチは **`main`**（公開・リモート・履歴とも main が本体）。
 - 主なディレクトリ：
-  - `public/` … Apache ドキュメントルート（`*.html` / `Style/` / `Script/` / `api/*.php`）
+  - `public/` … Apache ドキュメントルート（`*.html` / `style/` / `script/` / `api/*.php`）
   - `src/` … PHP 共通処理（`db.php`, `seed.php`）
   - `docker/` … `Dockerfile`, `init.sql`
   - `docs/` … 公開の設計doc（`adr/` 意思決定・`spec/` 仕様・`design/` 設計意図・`roadmap` 実装計画）

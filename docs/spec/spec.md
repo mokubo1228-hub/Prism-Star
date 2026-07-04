@@ -79,10 +79,10 @@ GitHub の star とサイトのお気に入りが地続きになり、GitHub 連
 public/            Apache ドキュメントルート
   *.php            各ページ（header/footer は includes/ の partial で共通化）
   includes/        head / header / footer / asset の partial
-  Style/           ページ別 CSS + sanitize.css（リセット）
-  Script/          common.js（共通）/ ページ別 JS
+  style/           ページ別 CSS + sanitize.css（リセット）
+  script/          common.js（共通）/ ページ別 JS
   api/             gallery / auth / contact / github / stars / users / search
-  Image/ uploads/  SNSアイコン / アップロード画像（.htaccess で実行抑止）
+  image/ uploads/  SNSアイコン / アップロード画像（.htaccess で実行抑止）
 src/               db.php / seed.php / migrate.php / session.php / username.php / upload.php（画像アップロード共通検証） / github_client.php
 docker/            Dockerfile / init.sql
 docs/              spec / roadmap / decisions / roles / handoff

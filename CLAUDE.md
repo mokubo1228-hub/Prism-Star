@@ -60,9 +60,9 @@ safety invariants（壊さない不変条件）と検証コマンドは正本 §
 public/          … Apache ドキュメントルート
   api/           … PHP API（gallery, auth, contact, github, stars, users, search）
   includes/      … head/header/footer/asset の partial（共通化）
-  Script/        … JS（common.js で共通ナビ生成）
-  Style/         … CSS（ページごとに分割、sanitize.css でリセット）
-  Image/         … SNSアイコン・デフォルトアバター画像
+  script/        … JS（common.js で共通ナビ生成）
+  style/         … CSS（ページごとに分割、sanitize.css でリセット）
+  image/         … SNSアイコン・デフォルトアバター画像
 src/             … PHP共通処理（db, seed, migrate, session, username, upload, github_client）
 docker/          … Docker設定（Dockerfile, init.sql）
 ```

@@ -38,9 +38,9 @@ User の判断:
 対象:
 
 - `public/search.php`
-- `public/Script/search.js`
+- `public/script/search.js`
 - `public/api/search.php`
-- `public/Style/gallery-list.css`
+- `public/style/gallery-list.css`
 - `src/seed.php`
 
 対象外:
@@ -275,7 +275,7 @@ docs-only では実行不要。実装時の想定:
 ```sh
 docker compose ps
 docker compose exec -T app php -l public/api/search.php
-node --check public/Script/search.js
+node --check public/script/search.js
 docker compose exec -T app php /var/www/html/src/seed.php
 curl -s "http://localhost:8080/api/search.php?q=雨&page=1&per_page=10" | head -c 500; echo
 curl -s "http://localhost:8080/api/search.php?tag=抽象&page=2&per_page=10" | head -c 500; echo
